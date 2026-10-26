@@ -352,20 +352,6 @@ function PortfolioApp() {
                 item.label
               )
             )
-          ),
-          h(
-            "li",
-            null,
-            h(
-              "button",
-              {
-                type: "button",
-                className: "nav-journey-pill",
-                onClick: () => openJourneyExperience()
-              },
-              h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-              h("span", null, "4-Month Journey")
-            )
           )
         ),
 
@@ -451,17 +437,6 @@ function PortfolioApp() {
                     },
                     item.label
                   )
-                ),
-                h(
-                  "button",
-                  {
-                    type: "button",
-                    className: "btn-pill-yellow",
-                    style: { justifyContent: "space-between", marginTop: "0.4rem" },
-                    onClick: () => openJourneyExperience()
-                  },
-                  h("span", null, "Explore 4-Month FlyRank AI Journey"),
-                  h("span", { className: "btn-trailing-circle" }, "→")
                 )
               )
             )
