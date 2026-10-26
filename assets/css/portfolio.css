@@ -2365,6 +2365,255 @@ body {
   text-overflow: ellipsis;
 }
 
+/* ==========================================================================
+   7-BOT SQUADRON SIMULTANEOUS CREDENTIAL DELIVERY (#certifications)
+   ========================================================================== */
+
+.cert-squad-stage-inner {
+  overflow: hidden;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+.cert-squadron-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+
+@media (max-width: 860px) {
+  .cert-squadron-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cert-squad-slot {
+  position: relative;
+  border-radius: 18px;
+  min-width: 0;
+}
+
+.cert-squad-slot.is-squad-inbound {
+  background: radial-gradient(circle at 50% 45%, rgba(225, 29, 72, 0.06) 0%, transparent 72%);
+  outline: 1px dashed rgba(225, 29, 72, 0.28);
+  outline-offset: 2px;
+}
+
+.cert-squad-carrier-unit {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+}
+
+.cert-bot-carrier-rig {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  padding: 0.45rem 0.85rem 0.55rem;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.95) 100%);
+  color: #FFFFFF;
+  border-radius: 16px 16px 0 0;
+  border: 1px solid rgba(15, 23, 42, 0.9);
+  border-bottom: none;
+}
+
+.cert-squad-carrier-unit.is-carrying-flight .cert-bot-carrier-rig {
+  box-shadow: 0 -6px 20px -4px rgba(225, 29, 72, 0.35);
+  border-color: rgba(225, 29, 72, 0.55);
+}
+
+.cert-bot-carrier-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.cert-bot-avatar-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(225, 29, 72, 0.38);
+  flex-shrink: 0;
+}
+
+.cert-bot-unit-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.cert-bot-callsign {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #FFFFFF;
+}
+
+.cert-bot-flight-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #FDA4AF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cert-squad-carrier-unit.is-docked-standby .cert-bot-flight-label {
+  color: #94A3B8;
+}
+
+.cert-bot-beam-badge {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.52rem;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.cert-bot-beam-badge.beam-active {
+  background: rgba(225, 29, 72, 0.24);
+  color: #FFE4E6;
+  border: 1px solid rgba(225, 29, 72, 0.6);
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.4);
+}
+
+.cert-bot-beam-badge.beam-locked {
+  background: rgba(16, 185, 129, 0.18);
+  color: #A7F3D0;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+/* Glowing crimson tractor-beam tethers connecting each Bot F-01 unit to its certificate card */
+.cert-bot-tractor-tethers {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: -2px;
+  height: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+
+.cert-bot-tractor-tethers.is-tether-active {
+  opacity: 1;
+}
+
+.cert-bot-tractor-tethers .tether-line {
+  width: 34%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #E11D48, #FB7185);
+  box-shadow: 0 0 8px #E11D48;
+}
+
+.cert-bot-tractor-tethers .tether-right {
+  background: linear-gradient(90deg, #FB7185, #E11D48, transparent);
+}
+
+.cert-bot-tractor-tethers .tether-core-glow {
+  width: 24%;
+  height: 3px;
+  border-radius: 999px;
+  background: #E11D48;
+  box-shadow: 0 0 12px #E11D48;
+}
+
+.squad-delivered-cert-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 0.75rem;
+  padding: 1.05rem 1.15rem;
+  border-radius: 0 0 16px 16px;
+  border-top: 2px solid rgba(225, 29, 72, 0.32);
+  flex: 1;
+  background: #FFFFFF;
+}
+
+.squad-cert-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.squad-cert-issuer-line {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.squad-cert-issuer {
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: var(--accent-red);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.squad-cert-period {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.squad-cert-title {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-top: 0.15rem;
+}
+
+.squad-cert-desc {
+  font-size: 0.82rem;
+  line-height: 1.52;
+  color: var(--text-secondary);
+}
+
+.squad-cert-actions-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 480px) {
+  .cert-bot-carrier-rig {
+    padding: 0.4rem 0.65rem;
+    flex-wrap: wrap;
+  }
+  .squad-delivered-cert-card {
+    padding: 0.85rem;
+  }
+}
+
 .cert-wall-stage-inner {
   padding: 1.75rem;
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);

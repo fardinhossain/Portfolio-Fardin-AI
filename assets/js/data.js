@@ -410,8 +410,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Fluency: Framework & Foundations",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/01_AI_Fluency_Framework_Foundations.png",
-    fallbackImage: "certs/01.png",
+    image: "/Anthropic_Certificates_Images/01_AI_Fluency_Framework_Foundations.png",
+    fallbackImage: "/certs/01.png",
     learned:
       "The 4D framework — Delegation, Description, Discernment, Diligence — and calibrated trust instead of all-or-nothing AI trust."
   },
@@ -420,8 +420,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Claude 101",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/02_Claude_101.png",
-    fallbackImage: "certs/02.png",
+    image: "/Anthropic_Certificates_Images/02_Claude_101.png",
+    fallbackImage: "/certs/02.png",
     learned:
       "Prompting fundamentals: give context and constraints, then iterate conversationally instead of expecting perfection first try."
   },
@@ -430,8 +430,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Introduction to Claude Cowork",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/03_Introduction_to_Claude_Cowork.png",
-    fallbackImage: "certs/03.png",
+    image: "/Anthropic_Certificates_Images/03_Introduction_to_Claude_Cowork.png",
+    fallbackImage: "/certs/03.png",
     learned:
       "Agentic workspace mode: delegate multi-step, file-based tasks to Claude and review what it did."
   },
@@ -440,8 +440,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Capabilities and Limitations",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/04_AI_Capabilities_and_Limitations.png",
-    fallbackImage: "certs/04.png",
+    image: "/Anthropic_Certificates_Images/04_AI_Capabilities_and_Limitations.png",
+    fallbackImage: "/certs/04.png",
     learned:
       "How LLMs really work, why they hallucinate, and why specific facts in outputs must always be verified."
   },
@@ -450,8 +450,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Fluency for Students",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/05_AI_Fluency_for_Students.png",
-    fallbackImage: "certs/05.png",
+    image: "/Anthropic_Certificates_Images/05_AI_Fluency_for_Students.png",
+    fallbackImage: "/certs/05.png",
     learned:
       "AI as a learning partner, not a substitute — real learning is proven when you can explain it to someone else."
   },
@@ -460,8 +460,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Fluency for Small Businesses",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/06_AI_Fluency_for_Small_Businesses.png",
-    fallbackImage: "certs/06.png",
+    image: "/Anthropic_Certificates_Images/06_AI_Fluency_for_Small_Businesses.png",
+    fallbackImage: "/certs/06.png",
     learned:
       "The 4Ds for business: keep your voice in drafts, keep a human reviewing, never paste raw client data into prompts."
   },
@@ -470,8 +470,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Fluency for Educators",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/07_AI_Fluency_for_Educators.png",
-    fallbackImage: "certs/07.png",
+    image: "/Anthropic_Certificates_Images/07_AI_Fluency_for_Educators.png",
+    fallbackImage: "/certs/07.png",
     learned:
       "The 4Ds for teaching: objectives-first assessments, and transparency about classroom AI use."
   },
@@ -480,8 +480,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Teaching AI Fluency",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/08_Teaching_AI_Fluency.png",
-    fallbackImage: "certs/08.png",
+    image: "/Anthropic_Certificates_Images/08_Teaching_AI_Fluency.png",
+    fallbackImage: "/certs/08.png",
     learned:
       "Teaching the loops — linear, focused, loop-based — and assessing process, not just the final product."
   },
@@ -490,8 +490,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Fluency for Nonprofits",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/09_AI_Fluency_for_Nonprofits.png",
-    fallbackImage: "certs/09.png",
+    image: "/Anthropic_Certificates_Images/09_AI_Fluency_for_Nonprofits.png",
+    fallbackImage: "/certs/09.png",
     learned:
       "Ask 'should AI do this?' before 'can it?' — pilot on known answers, then scale, mission first."
   },
@@ -500,8 +500,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "AI Fluency for Builders",
     category: "ai-fluency",
     categoryLabel: "AI Fluency",
-    image: "Anthropic_Certificates_Images/10_AI_Fluency_for_Builders.png",
-    fallbackImage: "certs/10.png",
+    image: "/Anthropic_Certificates_Images/10_AI_Fluency_for_Builders.png",
+    fallbackImage: "/certs/10.png",
     learned:
       "The builder's toolkit, the Five Lenses for reviewing AI output, and acceptance tests before prompting."
   },
@@ -510,8 +510,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Claude Code 101",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/11_Claude_Code_101.png",
-    fallbackImage: "certs/11.png",
+    image: "/Anthropic_Certificates_Images/11_Claude_Code_101.png",
+    fallbackImage: "/certs/11.png",
     learned:
       "Terminal-based agentic coding: Claude reads, edits, and runs code in your project under your supervision."
   },
@@ -520,8 +520,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Claude Code in Action",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/12_Claude_Code_in_Action.png",
-    fallbackImage: "certs/12.png",
+    image: "/Anthropic_Certificates_Images/12_Claude_Code_in_Action.png",
+    fallbackImage: "/certs/12.png",
     learned:
       "Planning mode, context management, and reliable multi-file workflows on real codebases."
   },
@@ -530,8 +530,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Claude Platform 101",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/13_Claude_Platform_101.png",
-    fallbackImage: "certs/13.png",
+    image: "/Anthropic_Certificates_Images/13_Claude_Platform_101.png",
+    fallbackImage: "/certs/13.png",
     learned:
       "The Console, API basics, and how models, API, and tools fit together."
   },
@@ -540,8 +540,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Building with the Claude API",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/14_Building_with_the_Claude_API.png",
-    fallbackImage: "certs/14.png",
+    image: "/Anthropic_Certificates_Images/14_Building_with_the_Claude_API.png",
+    fallbackImage: "/certs/14.png",
     learned:
       "Evals before prompt tuning, structured outputs, tool use, and RAG — the production discipline."
   },
@@ -550,8 +550,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Introduction to Model Context Protocol",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/15_Introduction_to_Model_Context_Protocol.png",
-    fallbackImage: "certs/15.png",
+    image: "/Anthropic_Certificates_Images/15_Introduction_to_Model_Context_Protocol.png",
+    fallbackImage: "/certs/15.png",
     learned:
       "MCP primitives — tools, resources, prompts — and building servers with the Python SDK."
   },
@@ -560,8 +560,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Model Context Protocol: Advanced Topics",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/16_Model_Context_Protocol_Advanced_Topics.png",
-    fallbackImage: "certs/16.png",
+    image: "/Anthropic_Certificates_Images/16_Model_Context_Protocol_Advanced_Topics.png",
+    fallbackImage: "/certs/16.png",
     learned:
       "Sampling, progress notifications, least-privilege roots, and STDIO vs StreamableHTTP transports."
   },
@@ -570,8 +570,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Introduction to Agent Skills",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/17_Introduction_to_Agent_Skills.png",
-    fallbackImage: "certs/17.png",
+    image: "/Anthropic_Certificates_Images/17_Introduction_to_Agent_Skills.png",
+    fallbackImage: "/certs/17.png",
     learned:
       "Reusable SKILL.md instructions with triggerable descriptions, so you stop repeating yourself."
   },
@@ -580,8 +580,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Introduction to Subagents",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/18_Introduction_to_Subagents.png",
-    fallbackImage: "certs/18.png",
+    image: "/Anthropic_Certificates_Images/18_Introduction_to_Subagents.png",
+    fallbackImage: "/certs/18.png",
     learned:
       "Specialized agents with their own context, orchestrated in parallel under one coordinator."
   },
@@ -590,8 +590,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Claude with Amazon Bedrock",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/19_Claude_with_Amazon_Bedrock.png",
-    fallbackImage: "certs/19.png",
+    image: "/Anthropic_Certificates_Images/19_Claude_with_Amazon_Bedrock.png",
+    fallbackImage: "/certs/19.png",
     learned:
       "Claude through Bedrock's Converse API — same Claude, inside AWS IAM and VPC controls."
   },
@@ -600,8 +600,8 @@ export const ANTHROPIC_CERTIFICATES = [
     title: "Claude with Google Cloud's Vertex AI",
     category: "ml-backend",
     categoryLabel: "ML & Backend",
-    image: "Anthropic_Certificates_Images/20_Claude_with_Google_Clouds_Vertex_AI.png",
-    fallbackImage: "certs/20.png",
+    image: "/Anthropic_Certificates_Images/20_Claude_with_Google_Clouds_Vertex_AI.png",
+    fallbackImage: "/certs/20.png",
     learned:
       "Claude through Vertex AI — unified billing, IAM, and data residency in your GCP region."
   }

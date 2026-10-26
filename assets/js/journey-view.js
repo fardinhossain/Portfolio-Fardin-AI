@@ -54,7 +54,7 @@ function CountUpValue({ target, decimals = 0, prefix = "", suffix = "" }) {
   return h("span", null, `${prefix}${formatted}${suffix}`);
 }
 
-export function FlyRankJourneyView({ onBackHome, initialSection }) {
+export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertModal }) {
   const [topN, setTopN] = useState(6);
   const [activeMonthId, setActiveMonthId] = useState("july");
   const [expandedMonths, setExpandedMonths] = useState({
@@ -67,6 +67,7 @@ export function FlyRankJourneyView({ onBackHome, initialSection }) {
   });
   const [flippedCerts, setFlippedCerts] = useState({});
   const [flipAll, setFlipAll] = useState(false);
+  const [certWallFilter, setCertWallFilter] = useState("all");
   const [certQuery, setCertQuery] = useState("");
   const [copiedUrl, setCopiedUrl] = useState(false);
 
@@ -131,13 +132,15 @@ export function FlyRankJourneyView({ onBackHome, initialSection }) {
 
   const filteredCerts = useMemo(() => {
     const q = certQuery.trim().toLowerCase();
-    if (!q) return ANTHROPIC_CERTIFICATES;
-    return ANTHROPIC_CERTIFICATES.filter(
-      (c) =>
+    return ANTHROPIC_CERTIFICATES.filter((c) => {
+      const matchesCat = certWallFilter === "all" || c.category === certWallFilter;
+      const matchesQuery =
+        !q ||
         c.title.toLowerCase().includes(q) ||
-        c.learned.toLowerCase().includes(q)
-    );
-  }, [certQuery]);
+        c.learned.toLowerCase().includes(q);
+      return matchesCat && matchesQuery;
+    });
+  }, [certWallFilter, certQuery]);
 
   const copyShareUrl = () => {
     const shareUrl = `${window.location.origin}/experience/flyrank-ai`;
@@ -857,160 +860,244 @@ export function FlyRankJourneyView({ onBackHome, initialSection }) {
         )
       ),
 
-      // 5. CERTIFICATE WALL — 20/20 ANTHROPIC ACADEMY
+      // 5. CERTIFICATE WALL — 20/20 ANTHROPIC ACADEMY (REAL SCANS & KEY TAKEAWAYS)
       h(
         "section",
         { className: "section-block", id: "journey-certificates" },
         h(
           "div",
-          { className: "section-header-bar" },
+          { id: "anthropic-cert-wall", className: "bezel-outer" },
           h(
             "div",
-            { className: "section-title-group" },
-            h("span", { className: "section-red-bar" }),
+            { className: "bezel-inner cert-wall-stage-inner" },
+            // Wall Header & Filter Chips (All / AI Fluency / ML & Backend + Search & Flip All)
             h(
-              "h2",
-              { className: "section-heading" },
-              "Certificate Wall — 20/20 Anthropic Academy",
-              h("span", { className: "red-dot" })
-            )
-          ),
-          h(
-            "div",
-            { style: { display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" } },
-            h("input", {
-              type: "search",
-              placeholder: "Filter 20 courses (e.g. MCP, Claude Code)...",
-              value: certQuery,
-              onChange: (e) => setCertQuery(e.target.value),
-              "aria-label": "Filter Anthropic Academy certificates",
-              style: {
-                padding: "0.45rem 0.9rem",
-                borderRadius: "999px",
-                border: "1px solid var(--border-strong)",
-                fontSize: "0.8rem",
-                fontFamily: "var(--font-sans)",
-                minWidth: "230px"
-              }
-            }),
-            h(
-              "button",
-              {
-                type: "button",
-                className: "project-action-pill",
-                onClick: handleToggleFlipAll
-              },
-              flipAll ? "Show Fronts (20)" : "Flip All 20 Outcomes ↻"
-            )
-          )
-        ),
-        h(
-          "p",
-          { style: { fontSize: "0.9rem", color: "var(--text-muted)", marginBottom: "1.25rem" } },
-          "Hover, tap, or press Enter/Space on any card to flip it: the course name on the front, and what I actually learned on the back. All 20 certificates are uploaded to the FlyRank portal (100% complete, October 2026)."
-        ),
-
-        h(
-          "div",
-          { className: "cert-wall-grid" },
-          filteredCerts.map((cert) => {
-            const isFlipped = !!flippedCerts[cert.index];
-            return h(
               "div",
-              {
-                key: cert.index,
-                className: `flip-card-container ${isFlipped ? "is-flipped" : ""}`,
-                onClick: () => toggleCertFlip(cert.index),
-                onKeyDown: (e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    toggleCertFlip(cert.index);
-                  }
-                },
-                role: "button",
-                tabIndex: 0,
-                "aria-pressed": isFlipped,
-                "aria-label": `Certificate ${cert.index} of 20: ${cert.title}. Press Enter to flip for learning outcome.`
-              },
+              { className: "cert-wall-header-bar" },
               h(
                 "div",
-                { className: "flip-card-inner" },
-                // Front Face
+                null,
                 h(
                   "div",
-                  { className: "flip-card-face flip-front" },
-                  h(
-                    "div",
-                    { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+                  { className: "credentials-strip-eyebrow" },
+                  h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                  "ANTHROPIC ACADEMY · 20/20 VERIFIED CERTIFICATES WALL"
+                ),
+                h(
+                  "h3",
+                  { className: "cert-wall-heading" },
+                  "20/20 Certificate Wall — Real Scans & Key Takeaways"
+                ),
+                h(
+                  "p",
+                  { className: "cert-wall-subtext" },
+                  "Hover or tap any certificate card to flip between the official certificate scan and what I learned in that course."
+                )
+              ),
+              h(
+                "div",
+                {
+                  style: {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-end",
+                    gap: "0.55rem",
+                    flexWrap: "wrap"
+                  }
+                },
+                // Filter Chips: All / AI Fluency / ML & Backend
+                h(
+                  "div",
+                  {
+                    className: "filter-pills-row",
+                    role: "tablist",
+                    "aria-label": "Filter Anthropic Academy certificates"
+                  },
+                  [
+                    { id: "all", label: "All (20)" },
+                    { id: "ai-fluency", label: "AI Fluency (10)" },
+                    { id: "ml-backend", label: "ML & Backend (10)" }
+                  ].map((tab) =>
                     h(
-                      "span",
+                      "button",
                       {
-                        style: {
-                          fontFamily: "var(--font-mono)",
-                          fontSize: "0.7rem",
-                          fontWeight: 700,
-                          color: "var(--accent-red)"
-                        }
+                        key: tab.id,
+                        type: "button",
+                        role: "tab",
+                        "aria-selected": certWallFilter === tab.id,
+                        className: `filter-pill-btn ${certWallFilter === tab.id ? "active" : ""}`,
+                        onClick: () => setCertWallFilter(tab.id)
                       },
-                      `Certificate ${cert.index} / 20`
-                    ),
-                    h("span", { className: "verified-pill" }, "✓ Earned")
-                  ),
-                  h(
-                    "div",
-                    {
-                      style: {
-                        fontWeight: 800,
-                        fontSize: "0.98rem",
-                        color: "var(--text-primary)",
-                        lineHeight: 1.3
-                      }
-                    },
-                    cert.title
-                  ),
-                  h(
-                    "div",
-                    {
-                      style: {
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        fontSize: "0.75rem",
-                        color: "var(--text-muted)"
-                      }
-                    },
-                    h("span", { style: { whiteSpace: "nowrap" } }, "Anthropic Academy"),
-                    h("span", { style: { fontWeight: 700, color: "var(--text-secondary)", whiteSpace: "nowrap" } }, "Flip ↻")
+                      tab.label
+                    )
                   )
                 ),
-                // Back Face
+                // Search & Flip All Controls
                 h(
                   "div",
-                  { className: "flip-card-face flip-back" },
+                  { style: { display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" } },
+                  h("input", {
+                    type: "search",
+                    placeholder: "Search courses (e.g. MCP, Claude Code)...",
+                    value: certQuery,
+                    onChange: (e) => setCertQuery(e.target.value),
+                    "aria-label": "Search Anthropic Academy certificates",
+                    style: {
+                      padding: "0.4rem 0.85rem",
+                      borderRadius: "999px",
+                      border: "1px solid var(--border-strong)",
+                      fontSize: "0.78rem",
+                      fontFamily: "var(--font-sans)",
+                      minWidth: "215px",
+                      background: "#FFFFFF"
+                    }
+                  }),
                   h(
-                    "div",
+                    "button",
                     {
-                      style: {
-                        fontSize: "0.7rem",
-                        fontFamily: "var(--font-mono)",
-                        color: "#FACC15",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                        marginBottom: "0.4rem",
-                        fontWeight: 700
-                      }
+                      type: "button",
+                      className: "project-action-pill",
+                      onClick: handleToggleFlipAll
                     },
-                    `#${cert.index} · What I Learned`
-                  ),
-                  h(
-                    "p",
-                    { style: { fontSize: "0.82rem", lineHeight: 1.5, color: "#F8FAFC" } },
-                    cert.learned
+                    flipAll ? "Show Scans (20)" : "Flip All 20 ↻"
                   )
                 )
               )
-            );
-          })
+            ),
+
+            // 20-Card Animated Real-Image Flip Grid
+            h(
+              "div",
+              { className: "cert-wall-real-grid" },
+              filteredCerts.map((cert) => {
+                const isFlipped = !!flippedCerts[cert.index];
+                const paddedNum = String(cert.index).padStart(2, "0");
+                return h(
+                  motion.div,
+                  {
+                    key: `journey-wall-cert-${certWallFilter}-${cert.index}`,
+                    initial: { opacity: 0, scale: 0.94, y: 10 },
+                    animate: { opacity: 1, scale: 1, y: 0 },
+                    transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+                    className: `flip-card-container real-cert-flip-card ${
+                      isFlipped ? "is-flipped" : ""
+                    }`,
+                    onClick: () => toggleCertFlip(cert.index),
+                    role: "button",
+                    tabIndex: 0,
+                    "aria-pressed": isFlipped,
+                    "aria-label": `Certificate ${paddedNum}: ${cert.title}. Click to flip for takeaway notes.`,
+                    onKeyDown: (e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        toggleCertFlip(cert.index);
+                      }
+                    }
+                  },
+                  h(
+                    "div",
+                    { className: "flip-card-inner" },
+                    // FRONT FACE: Real Certificate Image (lazy-loaded) + Course Title Footer
+                    h(
+                      "div",
+                      { className: "flip-card-face real-cert-front" },
+                      h(
+                        "div",
+                        { className: "real-cert-img-wrap" },
+                        h("img", {
+                          src: cert.image,
+                          alt: `${cert.title} — Anthropic Academy Certificate #${paddedNum}`,
+                          loading: "lazy",
+                          className: "real-cert-img",
+                          onError: (e) => {
+                            if (cert.fallbackImage && !e.currentTarget.dataset.fallbackUsed) {
+                              e.currentTarget.dataset.fallbackUsed = "true";
+                              e.currentTarget.src = cert.fallbackImage;
+                            }
+                          }
+                        }),
+                        h(
+                          "span",
+                          { className: "real-cert-badge-num" },
+                          `#${paddedNum}`
+                        ),
+                        h(
+                          "span",
+                          { className: "real-cert-badge-cat" },
+                          cert.categoryLabel
+                        )
+                      ),
+                      h(
+                        "div",
+                        { className: "real-cert-front-bar" },
+                        h(
+                          "div",
+                          { className: "real-cert-front-title", title: cert.title },
+                          cert.title
+                        ),
+                        h(
+                          "span",
+                          { className: "real-cert-flip-hint" },
+                          "Flip ↻"
+                        )
+                      )
+                    ),
+
+                    // BACK FACE: Course Name, Issuer, and One-Line "What I Learned" Note
+                    h(
+                      "div",
+                      { className: "flip-card-face flip-back real-cert-back" },
+                      h(
+                        "div",
+                        { className: "real-cert-back-top" },
+                        h(
+                          "span",
+                          { className: "real-cert-back-issuer" },
+                          `#${paddedNum} · ANTHROPIC ACADEMY`
+                        ),
+                        h(
+                          "span",
+                          { className: "real-cert-back-track" },
+                          cert.categoryLabel
+                        )
+                      ),
+                      h(
+                        "h4",
+                        { className: "real-cert-back-title" },
+                        cert.title
+                      ),
+                      h(
+                        "p",
+                        { className: "real-cert-back-learned" },
+                        cert.learned
+                      ),
+                      onSelectCertModal &&
+                        h(
+                          "div",
+                          { className: "real-cert-back-actions" },
+                          h(
+                            "button",
+                            {
+                              type: "button",
+                              className: "real-cert-zoom-btn",
+                              onClick: (e) => {
+                                e.stopPropagation();
+                                onSelectCertModal({
+                                  issuer: "Anthropic Academy",
+                                  title: `${cert.title} (#${paddedNum}/20)`,
+                                  certificateImage: cert.image
+                                });
+                              }
+                            },
+                            "Enlarge Certificate ⤢"
+                          )
+                        )
+                    )
+                  )
+                );
+              })
+            )
+          )
         )
       ),
 

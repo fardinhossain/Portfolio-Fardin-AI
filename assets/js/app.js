@@ -350,7 +350,7 @@ function PortfolioApp() {
   const [certWallFilter, setCertWallFilter] = useState("all");
   const [flippedWallCards, setFlippedWallCards] = useState({});
 
-  // Bot F-01 Section Telemetry States (About Profile Scan & Certifications Delivery)
+  // Bot F-01 Section Telemetry States (About Profile Scan & 7-Bot Certifications Squadron Delivery)
   const [aboutBotState, setAboutBotState] = useState({
     active: false,
     chip: "UNIT F-01 · STANDBY",
@@ -358,9 +358,10 @@ function PortfolioApp() {
     runCount: 0
   });
   const [certBotState, setCertBotState] = useState({
+    phase: "waiting",
     active: false,
-    chip: "UNIT F-01 · STANDBY",
-    text: "DELIVERING CREDENTIALS… 20/20 EARNED / ALL MODULES VERIFIED · Click any card to flip",
+    chip: "7× BOT SQUAD · READY",
+    text: "7 BOTS READY FOR SIMULTANEOUS DELIVERY · Scroll or click Replay to deploy 7/7 units together",
     runCount: 0
   });
 
@@ -446,41 +447,45 @@ function PortfolioApp() {
     };
   }, []);
 
-  // Scripted Bot F-01 "Delivers Credentials" sequence for Certifications section
+  // Scripted 7-Bot Squadron "Simultaneous Credential Delivery" sequence for Certifications section
   const triggerCertBotDelivery = useCallback(() => {
     setCertBotState((prev) => ({
+      phase: "delivering",
       active: true,
-      chip: "STEP 1 · DELIVERING CREDENTIALS…",
-      text: "DELIVERING CREDENTIALS… 20/20 EARNED · Syncing 7 verified credentials & 20 Anthropic courses...",
+      chip: "STEP 1 · 7 BOTS ARRIVING TOGETHER",
+      text: "7 BOTS DEPLOYED SIMULTANEOUSLY… Units F-01 to F-07 flying in together carrying all 7 credentials!",
       runCount: prev.runCount + 1
     }));
 
     const t1 = setTimeout(() => {
       setCertBotState((prev) => ({
         ...prev,
+        phase: "delivering",
         active: true,
-        chip: "STEP 2 · 20/20 EARNED",
-        text: "DELIVERING CREDENTIALS… 20/20 EARNED / Loading 10 AI Fluency + 10 ML & Backend certificates..."
+        chip: "STEP 2 · SYNCHRONIZED AERIAL FORMATION",
+        text: "CARRYING ALL 7/7 CREDENTIALS AT ONCE · Tractor beams locked on FlyRank, DataCamp, IBM, mile2 & Anthropic..."
       }));
-    }, 900);
+    }, 750);
 
     const t2 = setTimeout(() => {
       setCertBotState((prev) => ({
         ...prev,
+        phase: "releasing",
         active: true,
-        chip: "STEP 3 · ALL MODULES VERIFIED",
-        text: "ALL MODULES VERIFIED · All 20 real certificate images verified & ready to flip..."
+        chip: "STEP 3 · DROPPING ALL 7 IN PLACE",
+        text: "SIMULTANEOUS TOUCHDOWN · Releasing all 7 tractor beams & locking credentials into the grid..."
       }));
-    }, 1800);
+    }, 1500);
 
     const t3 = setTimeout(() => {
       setCertBotState((prev) => ({
         ...prev,
+        phase: "standby",
         active: false,
-        chip: "UNIT F-01 · STANDBY",
-        text: "DELIVERING CREDENTIALS… 20/20 EARNED / ALL MODULES VERIFIED"
+        chip: "7/7 DELIVERED · SQUAD STANDBY",
+        text: "ALL 7 CREDENTIALS DELIVERED SIMULTANEOUSLY · Units F-01 to F-07 perched on standby"
       }));
-    }, 2700);
+    }, 2250);
 
     return () => {
       clearTimeout(t1);
@@ -789,7 +794,8 @@ function PortfolioApp() {
       view === "journey"
         ? h(FlyRankJourneyView, {
             onBackHome: () => closeJourneyExperience(),
-            initialSection: journeyTargetSection
+            initialSection: journeyTargetSection,
+            onSelectCertModal: setSelectedCertModal
           })
         : h(
             "div",
@@ -1224,7 +1230,8 @@ function PortfolioApp() {
 
             // ================================================================
             // 5. CERTIFICATIONS SECTION (#certifications)
-            // Rebuilt with Bot F-01 Delivery Bar + Compact 7-Row Credentials Strip + 20-Card Real-Image Flip Wall
+            // 7-Bot Squadron Simultaneous Aerial Delivery — All 7 Bots Arrive Together
+            // Carrying All 7 Verified Credentials at the Same Time
             // ================================================================
             h(
               "section",
@@ -1244,27 +1251,23 @@ function PortfolioApp() {
                   )
                 ),
                 h(
-                  "a",
+                  "button",
                   {
-                    href: "#anthropic-cert-wall",
+                    type: "button",
                     className: "project-action-pill",
-                    onClick: (e) => {
-                      e.preventDefault();
-                      const wallEl = document.getElementById("anthropic-cert-wall");
-                      if (wallEl) wallEl.scrollIntoView({ behavior: "smooth" });
-                    }
+                    onClick: () => openJourneyExperience("journey-certificates")
                   },
-                  "20/20 Wall →"
+                  "20/20 Certificate Wall (FlyRank Explore) →"
                 )
               ),
 
-              // Bot F-01 "Delivers Credentials" Telemetry & Control Bar (Exact same Bot F-01 component & bar pattern)
+              // 7-Bot Squadron Simultaneous Delivery Telemetry & Control Bar
               h(
                 "div",
                 {
                   className: "robot-telemetry-bar",
                   role: "region",
-                  "aria-label": "Bot F-01 Credential Delivery Controls"
+                  "aria-label": "7-Bot Squadron Credential Delivery Controls"
                 },
                 h(
                   "div",
@@ -1275,17 +1278,17 @@ function PortfolioApp() {
                       className: `robot-holopad-dock bot-f01-dock-stage ${
                         certBotState.active ? "is-bot-scanning" : "is-bot-docked"
                       }`,
-                      title: "Bot F-01 Credential Delivery Dock"
+                      title: "7-Bot Squadron Command Dock"
                     },
                     h(
                       motion.span,
                       {
                         key: `cert-bot-${certBotState.runCount}`,
-                        initial: { x: -46, y: -8, rotate: -14, opacity: 0.4 },
+                        initial: { x: -46, y: -12, rotate: -14, opacity: 0.3 },
                         animate: certBotState.active
-                          ? { x: [-46, 16, -5, 0], y: [-8, -4, 0, -2], rotate: [-14, 10, -4, 0], opacity: 1 }
+                          ? { x: [-46, 12, -3, 0], y: [-12, -4, 0, -2], rotate: [-14, 8, -3, 0], opacity: 1 }
                           : { x: 0, y: 0, rotate: 0, opacity: 1 },
-                        transition: { duration: 1.4, ease: [0.16, 1, 0.3, 1] },
+                        transition: { duration: 1.45, ease: [0.16, 1, 0.3, 1] },
                         style: { display: "inline-flex", alignItems: "center", justifyContent: "center" }
                       },
                       h(BotF01MascotSvg, { isActive: certBotState.active, size: 36 })
@@ -1295,7 +1298,7 @@ function PortfolioApp() {
                     "span",
                     { className: "robot-unit-badge" },
                     h("span", { className: "robot-unit-led" }),
-                    h("span", null, "BOT F-01")
+                    h("span", null, "7× BOT SQUAD (F-01 — F-07)")
                   ),
                   h(
                     "span",
@@ -1321,20 +1324,30 @@ function PortfolioApp() {
                       type: "button",
                       className: "robot-control-btn primary-replay",
                       onClick: triggerCertBotDelivery,
-                      title: "Replay Bot F-01 credential delivery sequence"
+                      title: "Replay simultaneous 7-bot credential delivery"
                     },
-                    "Replay Delivery ↻"
+                    "Replay 7-Bot Delivery ↻"
+                  ),
+                  h(
+                    "button",
+                    {
+                      type: "button",
+                      className: "robot-control-btn",
+                      onClick: () => openJourneyExperience("journey-certificates"),
+                      title: "Open 20/20 Anthropic Certificate Wall on FlyRank Internship Explore Page"
+                    },
+                    "Explore 20/20 Wall ↗"
                   )
                 )
               ),
 
-              // Part 1: Compact 7-Row "Credentials" Summary Strip Above the Wall
+              // 7-Bot Simultaneous Certificate Delivery Stage (7 Bots Arrive Together with 7 Certificates)
               h(
                 "div",
-                { className: "bezel-outer", style: { marginBottom: "1.75rem" } },
+                { className: "bezel-outer" },
                 h(
                   "div",
-                  { className: "bezel-inner credentials-strip-container" },
+                  { className: "bezel-inner credentials-strip-container cert-squad-stage-inner" },
                   h(
                     "div",
                     { className: "credentials-strip-header" },
@@ -1342,300 +1355,228 @@ function PortfolioApp() {
                       "span",
                       { className: "credentials-strip-eyebrow" },
                       h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                      "PRIMARY INDUSTRY & ACADEMIC CREDENTIALS (7 VERIFIED TRACKS)"
+                      "SYNCHRONIZED 7-BOT AERIAL DELIVERY · 7 VERIFIED CREDENTIALS ARRIVING TOGETHER"
                     ),
                     h(
                       "span",
                       { className: "credentials-strip-hint" },
-                      "Click 👁 to view scan or ↗ to verify"
-                    )
-                  ),
-                  h(
-                    "div",
-                    { className: "credentials-compact-grid" },
-                    VERIFIED_CERTIFICATIONS.map((cert) =>
-                      h(
-                        "div",
-                        { key: cert.id, className: "cert-row-card compact-credential-card" },
-                        h(
-                          "div",
-                          { style: { display: "flex", alignItems: "center", gap: "0.7rem", minWidth: 0 } },
-                          h("div", { className: "cert-issuer-logo" }, cert.logoText),
-                          h(
-                            "div",
-                            { style: { minWidth: 0 } },
-                            h(
-                              "div",
-                              { style: { fontWeight: 800, fontSize: "0.84rem", color: "var(--text-primary)" } },
-                              cert.issuer
-                            ),
-                            h(
-                              "div",
-                              {
-                                className: "compact-credential-title",
-                                title: cert.title
-                              },
-                              cert.title
-                            )
-                          )
-                        ),
-                        h(
-                          "div",
-                          { style: { display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 } },
-                          h(
-                            "span",
-                            {
-                              className:
-                                cert.statusType === "verified"
-                                  ? "verified-pill"
-                                  : "inprogress-pill"
-                            },
-                            cert.statusType === "verified" ? `✓ ${cert.status}` : `⏳ ${cert.status}`
-                          ),
-                          cert.verifyUrl &&
-                            h(
-                              "a",
-                              {
-                                href: cert.verifyUrl,
-                                target: "_blank",
-                                rel: "noopener",
-                                className: "icon-circle-btn",
-                                style: { width: 28, height: 28 },
-                                title: `Verify ${cert.issuer} Credential`
-                              },
-                              h(ExternalArrowIcon, { size: 12 })
-                            ),
-                          cert.certificateImage &&
-                            h(
-                              "button",
-                              {
-                                type: "button",
-                                className: "icon-circle-btn",
-                                style: { width: 28, height: 28 },
-                                title: `View ${cert.title} Certificate Scan`,
-                                onClick: () => setSelectedCertModal(cert)
-                              },
-                              "👁"
-                            ),
-                          cert.openCertWall &&
-                            h(
-                              "a",
-                              {
-                                href: "#anthropic-cert-wall",
-                                className: "icon-circle-btn",
-                                style: { width: 28, height: 28 },
-                                title: "Scroll to 20/20 Certificate Wall below",
-                                onClick: (e) => {
-                                  e.preventDefault();
-                                  const el = document.getElementById("anthropic-cert-wall");
-                                  if (el) el.scrollIntoView({ behavior: "smooth" });
-                                }
-                              },
-                              "↓"
-                            ),
-                          cert.openJourney &&
-                            h(
-                              "button",
-                              {
-                                type: "button",
-                                className: "icon-circle-btn",
-                                style: { width: 28, height: 28 },
-                                title: "Open in Interactive Journey",
-                                onClick: () => openJourneyExperience("journey-timeline")
-                              },
-                              "→"
-                            )
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
-
-              // Part 2: 20/20 Anthropic Academy Real-Image Certificate Flip Wall (#anthropic-cert-wall)
-              h(
-                "div",
-                { id: "anthropic-cert-wall", className: "bezel-outer" },
-                h(
-                  "div",
-                  { className: "bezel-inner cert-wall-stage-inner" },
-                  // Wall Header & Filter Chips (All / AI Fluency / ML & Backend)
-                  h(
-                    "div",
-                    { className: "cert-wall-header-bar" },
-                    h(
-                      "div",
-                      null,
-                      h(
-                        "div",
-                        { className: "credentials-strip-eyebrow" },
-                        h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                        "ANTHROPIC ACADEMY · 20/20 VERIFIED CERTIFICATES WALL"
-                      ),
-                      h(
-                        "h3",
-                        { className: "cert-wall-heading" },
-                        "20/20 Certificate Wall — Real Scans & Key Takeaways"
-                      ),
-                      h(
-                        "p",
-                        { className: "cert-wall-subtext" },
-                        "Hover or tap any certificate card to flip between the official certificate scan and what I learned in that course."
-                      )
-                    ),
-                    // Filter Chips: All / AI Fluency / ML & Backend
-                    h(
-                      "div",
-                      {
-                        className: "filter-pills-row",
-                        role: "tablist",
-                        "aria-label": "Filter Anthropic Academy certificates"
-                      },
-                      [
-                        { id: "all", label: "All (20)" },
-                        { id: "ai-fluency", label: "AI Fluency (10)" },
-                        { id: "ml-backend", label: "ML & Backend (10)" }
-                      ].map((tab) =>
-                        h(
-                          "button",
-                          {
-                            key: tab.id,
-                            type: "button",
-                            role: "tab",
-                            "aria-selected": certWallFilter === tab.id,
-                            className: `filter-pill-btn ${certWallFilter === tab.id ? "active" : ""}`,
-                            onClick: () => setCertWallFilter(tab.id)
-                          },
-                          tab.label
-                        )
-                      )
+                      "Each credential is carried in simultaneously by its dedicated Bot F-01 unit"
                     )
                   ),
 
-                  // 20-Card Animated Flip Grid
                   h(
                     "div",
-                    { className: "cert-wall-real-grid" },
-                    filteredAnthropicCerts.map((cert) => {
-                      const isFlipped = !!flippedWallCards[cert.index];
-                      const paddedNum = String(cert.index).padStart(2, "0");
+                    { className: "cert-squadron-grid" },
+                    VERIFIED_CERTIFICATIONS.map((cert, idx) => {
+                      const unitNum = String(idx + 1).padStart(2, "0");
+                      // 7 distinct simultaneous aerial approach vectors (delay: 0 so ALL 7 arrive at the exact same time!)
+                      const squadVectors = [
+                        { x: -165, y: -135, rotate: -9 },
+                        { x: 165, y: -135, rotate: 9 },
+                        { x: -195, y: -95, rotate: -11 },
+                        { x: 195, y: -95, rotate: 11 },
+                        { x: -150, y: -120, rotate: -8 },
+                        { x: 150, y: -120, rotate: 8 },
+                        { x: 0, y: -155, rotate: -6 }
+                      ];
+                      const vec = squadVectors[idx % squadVectors.length];
+                      const isWaiting = certBotState.phase === "waiting";
+                      const isFlying = certBotState.active;
+                      const isReleasing = certBotState.phase === "releasing";
+
                       return h(
-                        motion.div,
+                        "div",
                         {
-                          key: `anthropic-wall-cert-${certWallFilter}-${cert.index}`,
-                          initial: { opacity: 0, scale: 0.94, y: 10 },
-                          animate: { opacity: 1, scale: 1, y: 0 },
-                          transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] },
-                          className: `flip-card-container real-cert-flip-card ${
-                            isFlipped ? "is-flipped" : ""
-                          }`,
-                          onClick: () => toggleWallCardFlip(cert.index),
-                          role: "button",
-                          tabIndex: 0,
-                          "aria-label": `Certificate ${paddedNum}: ${cert.title}. Click to flip for takeaway notes.`,
-                          onKeyDown: (e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              toggleWallCardFlip(cert.index);
-                            }
-                          }
+                          key: cert.id,
+                          className: `cert-squad-slot ${isFlying ? "is-squad-inbound" : "is-squad-landed"}`
                         },
+                        // Synchronized landing pulse when all 7 bots drop their certificates together
+                        isReleasing &&
+                          h("div", { className: "card-landing-pulse", "aria-hidden": "true" }),
+
+                        // Bot + Certificate Carrier Assembly (All 7 animate simultaneously with delay: 0!)
                         h(
-                          "div",
-                          { className: "flip-card-inner" },
-                          // FRONT FACE: Real Certificate Image (lazy-loaded) + Course Title Footer
+                          motion.div,
+                          {
+                            key: `cert-squad-unit-${certBotState.runCount}-${cert.id}`,
+                            className: `cert-squad-carrier-unit ${
+                              isFlying ? "is-carrying-flight" : "is-docked-standby"
+                            }`,
+                            initial: {
+                              opacity: 0,
+                              x: vec.x,
+                              y: vec.y,
+                              rotate: vec.rotate,
+                              scale: 0.78
+                            },
+                            animate: isWaiting
+                              ? {
+                                  opacity: 0,
+                                  x: vec.x,
+                                  y: vec.y,
+                                  rotate: vec.rotate,
+                                  scale: 0.78
+                                }
+                              : {
+                                  opacity: [0, 1, 1, 1],
+                                  x: [vec.x, vec.x * 0.25, 0, 0],
+                                  y: [vec.y, -16, 5, 0],
+                                  rotate: [vec.rotate, -vec.rotate * 0.25, 0, 0],
+                                  scale: [0.78, 0.96, 1.02, 1]
+                                },
+                            transition: {
+                              duration: 1.55,
+                              delay: 0,
+                              ease: [0.16, 1, 0.3, 1]
+                            }
+                          },
+                          // Top Dedicated Bot Carrier Rig (Bot F-01 .. Bot F-07 + Glowing Tractor-Beam Tethers)
                           h(
                             "div",
-                            { className: "flip-card-face real-cert-front" },
+                            { className: "cert-bot-carrier-rig" },
                             h(
                               "div",
-                              { className: "real-cert-img-wrap" },
-                              h("img", {
-                                src: cert.image,
-                                alt: `${cert.title} — Anthropic Academy Certificate #${paddedNum}`,
-                                loading: "lazy",
-                                className: "real-cert-img",
-                                onError: (e) => {
-                                  if (cert.fallbackImage && !e.currentTarget.dataset.fallbackUsed) {
-                                    e.currentTarget.dataset.fallbackUsed = "true";
-                                    e.currentTarget.src = cert.fallbackImage;
-                                  }
-                                }
-                              }),
+                              { className: "cert-bot-carrier-left" },
                               h(
                                 "span",
-                                { className: "real-cert-badge-num" },
-                                `#${paddedNum}`
+                                { className: "cert-bot-avatar-wrap" },
+                                h(BotF01MascotSvg, { isActive: isFlying, size: 38 })
                               ),
-                              h(
-                                "span",
-                                { className: "real-cert-badge-cat" },
-                                cert.categoryLabel
-                              )
-                            ),
-                            h(
-                              "div",
-                              { className: "real-cert-front-bar" },
                               h(
                                 "div",
-                                { className: "real-cert-front-title", title: cert.title },
-                                cert.title
-                              ),
-                              h(
-                                "span",
-                                { className: "real-cert-flip-hint" },
-                                "Flip ↻"
+                                { className: "cert-bot-unit-info" },
+                                h(
+                                  "span",
+                                  { className: "cert-bot-callsign" },
+                                  h("span", { className: "robot-unit-led" }),
+                                  `BOT F-${unitNum}`
+                                ),
+                                h(
+                                  "span",
+                                  { className: "cert-bot-flight-label" },
+                                  isFlying
+                                    ? `CARRYING CREDENTIAL #${unitNum}…`
+                                    : `UNIT #${unitNum} · DELIVERED & STANDBY`
+                                )
                               )
+                            ),
+                            h(
+                              "span",
+                              {
+                                className: `cert-bot-beam-badge ${
+                                  isFlying ? "beam-active" : "beam-locked"
+                                }`
+                              },
+                              isFlying ? "⚡ TRACTOR BEAM LOCKED" : "✓ DOCKED"
+                            ),
+                            // Visual crimson tractor-beam tether lines connecting the bot to the certificate card
+                            h(
+                              "div",
+                              {
+                                className: `cert-bot-tractor-tethers ${
+                                  isFlying ? "is-tether-active" : ""
+                                }`,
+                                "aria-hidden": "true"
+                              },
+                              h("span", { className: "tether-line tether-left" }),
+                              h("span", { className: "tether-core-glow" }),
+                              h("span", { className: "tether-line tether-right" })
                             )
                           ),
 
-                          // BACK FACE: Course Name, Issuer, and One-Line "What I Learned" Note
+                          // Delivered Certificate Card
                           h(
                             "div",
-                            { className: "flip-card-face flip-back real-cert-back" },
+                            { className: "cert-row-card squad-delivered-cert-card" },
                             h(
                               "div",
-                              { className: "real-cert-back-top" },
+                              { className: "squad-cert-top-row" },
                               h(
-                                "span",
-                                { className: "real-cert-back-issuer" },
-                                `#${paddedNum} · ANTHROPIC ACADEMY`
+                                "div",
+                                { style: { display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0 } },
+                                h("div", { className: "cert-issuer-logo" }, cert.logoText),
+                                h(
+                                  "div",
+                                  { style: { minWidth: 0 } },
+                                  h(
+                                    "div",
+                                    { className: "squad-cert-issuer-line" },
+                                    h("span", { className: "squad-cert-issuer" }, cert.issuer),
+                                    cert.period &&
+                                      h("span", { className: "squad-cert-period" }, `· ${cert.period}`)
+                                  ),
+                                  h(
+                                    "h3",
+                                    { className: "squad-cert-title", title: cert.title },
+                                    cert.title
+                                  )
+                                )
                               ),
                               h(
                                 "span",
-                                { className: "real-cert-back-track" },
-                                cert.categoryLabel
+                                {
+                                  className:
+                                    cert.statusType === "verified"
+                                      ? "verified-pill"
+                                      : "inprogress-pill"
+                                },
+                                cert.statusType === "verified" ? `✓ ${cert.status}` : `⏳ ${cert.status}`
                               )
                             ),
-                            h(
-                              "h4",
-                              { className: "real-cert-back-title" },
-                              cert.title
-                            ),
-                            h(
-                              "p",
-                              { className: "real-cert-back-learned" },
-                              cert.learned
-                            ),
+
+                            cert.description &&
+                              h(
+                                "p",
+                                { className: "squad-cert-desc" },
+                                cert.description
+                              ),
+
+                            // Card Action Footer
                             h(
                               "div",
-                              { className: "real-cert-back-actions" },
-                              h(
-                                "button",
-                                {
-                                  type: "button",
-                                  className: "real-cert-zoom-btn",
-                                  onClick: (e) => {
-                                    e.stopPropagation();
-                                    setSelectedCertModal({
-                                      issuer: "Anthropic Academy",
-                                      title: `${cert.title} (#${paddedNum}/20)`,
-                                      certificateImage: cert.image
-                                    });
-                                  }
-                                },
-                                "Enlarge Certificate ⤢"
-                              )
+                              { className: "squad-cert-actions-row" },
+                              cert.verifyUrl &&
+                                h(
+                                  "a",
+                                  {
+                                    href: cert.verifyUrl,
+                                    target: "_blank",
+                                    rel: "noopener",
+                                    className: "project-action-pill"
+                                  },
+                                  h("span", null, "Verify Credential"),
+                                  h(ExternalArrowIcon, { size: 12 })
+                                ),
+                              cert.certificateImage &&
+                                h(
+                                  "button",
+                                  {
+                                    type: "button",
+                                    className: "project-action-pill",
+                                    onClick: () => setSelectedCertModal(cert)
+                                  },
+                                  "👁 View Certificate Scan"
+                                ),
+                              cert.openCertWall &&
+                                h(
+                                  "button",
+                                  {
+                                    type: "button",
+                                    className: "project-action-pill highlight-yellow",
+                                    onClick: () => openJourneyExperience("journey-certificates")
+                                  },
+                                  "Explore 20/20 Certificate Wall →"
+                                ),
+                              cert.openJourney &&
+                                h(
+                                  "button",
+                                  {
+                                    type: "button",
+                                    className: "project-action-pill",
+                                    onClick: () => openJourneyExperience("journey-timeline")
+                                  },
+                                  "Open in Interactive Journey →"
+                                )
                             )
                           )
                         )
