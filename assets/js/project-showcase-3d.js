@@ -107,7 +107,9 @@ function createMiniCardCanvasTexture() {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.needsUpdate = true;
 
-  function updateProjectCard(project) {
+  const imgCache = new Map();
+
+  function drawCardFrame(project, loadedImg) {
     if (!ctx) return;
     const title = project ? project.title : "AI Module";
     const category = project ? project.shortCategory : "AI / ML";
@@ -123,37 +125,45 @@ function createMiniCardCanvasTexture() {
     ctx.lineWidth = 8;
     ctx.strokeRect(4, 4, 504, 332);
 
-    // Top dark preview window
-    const grad = ctx.createLinearGradient(16, 16, 496, 175);
-    grad.addColorStop(0, "#090D16");
-    grad.addColorStop(1, "#1E293B");
-    ctx.fillStyle = grad;
-    ctx.fillRect(18, 18, 476, 152);
+    // Top preview window (real project screenshot or dark fallback)
+    if (loadedImg && loadedImg.complete && loadedImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(18, 18, 476, 152);
+      ctx.clip();
+      ctx.drawImage(loadedImg, 18, 18, 476, 152);
+      ctx.restore();
+    } else {
+      const grad = ctx.createLinearGradient(16, 16, 496, 175);
+      grad.addColorStop(0, "#090D16");
+      grad.addColorStop(1, "#1E293B");
+      ctx.fillStyle = grad;
+      ctx.fillRect(18, 18, 476, 152);
 
-    // Red/Amber glowing telemetry bars inside preview window
-    ctx.fillStyle = "#E11D48";
-    ctx.fillRect(42, 92, 220, 14);
-    ctx.fillStyle = "#FACC15";
-    ctx.fillRect(42, 118, 165, 12);
-    ctx.fillStyle = "#10B981";
-    ctx.fillRect(42, 140, 260, 10);
+      ctx.fillStyle = "#E11D48";
+      ctx.fillRect(42, 92, 220, 14);
+      ctx.fillStyle = "#FACC15";
+      ctx.fillRect(42, 118, 165, 12);
+      ctx.fillStyle = "#10B981";
+      ctx.fillRect(42, 140, 260, 10);
+    }
 
     // Category pill inside preview window
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillRect(36, 34, 138, 34);
+    ctx.fillRect(32, 30, 144, 32);
     ctx.fillStyle = "#090D16";
-    ctx.font = "bold 18px sans-serif";
-    ctx.fillText(category.toUpperCase(), 48, 57);
+    ctx.font = "bold 17px sans-serif";
+    ctx.fillText(category.toUpperCase(), 42, 52);
 
     // Red live indicator dot
     ctx.beginPath();
-    ctx.arc(458, 50, 10, 0, Math.PI * 2);
+    ctx.arc(462, 46, 9, 0, Math.PI * 2);
     ctx.fillStyle = "#E11D48";
     ctx.fill();
 
     // Project Title on white body
     ctx.fillStyle = "#090D16";
-    ctx.font = "900 30px sans-serif";
+    ctx.font = "900 29px sans-serif";
     const clippedTitle = title.length > 24 ? title.slice(0, 22) + "…" : title;
     ctx.fillText(clippedTitle, 28, 222);
 
@@ -163,7 +173,7 @@ function createMiniCardCanvasTexture() {
 
     // Technology chips row
     let chipX = 28;
-    ctx.font = "bold 17px monospace";
+    ctx.font = "bold 16px monospace";
     for (let i = 0; i < tags.length; i++) {
       const t = tags[i];
       const w = Math.min(145, ctx.measureText(t).width + 26);
@@ -178,6 +188,25 @@ function createMiniCardCanvasTexture() {
     }
 
     texture.needsUpdate = true;
+  }
+
+  function updateProjectCard(project) {
+    if (project && project.image && typeof Image !== "undefined") {
+      if (imgCache.has(project.image)) {
+        drawCardFrame(project, imgCache.get(project.image));
+        return;
+      }
+      drawCardFrame(project, null);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        imgCache.set(project.image, img);
+        drawCardFrame(project, img);
+      };
+      img.src = project.image;
+      return;
+    }
+    drawCardFrame(project, null);
   }
 
   updateProjectCard(null);
@@ -910,7 +939,7 @@ export function RobotScene({
       }
 
       sm.phaseElapsed = 0;
-      sm.phaseDuration = isMobile ? 0.32 : 0.38;
+      sm.phaseDuration = isMobile ? 0.24 : 0.26;
       notifyState(
         ANIMATION_STATES.ENTERING,
         index,
@@ -1034,7 +1063,7 @@ export function RobotScene({
 
         if (u >= 1) {
           sm.phaseElapsed = 0;
-          sm.phaseDuration = isMobile ? 0.24 : 0.28;
+          sm.phaseDuration = isMobile ? 0.16 : 0.18;
           robot.scanBeamGroup.visible = true;
           notifyState(
             ANIMATION_STATES.SCANNING,
@@ -1060,7 +1089,7 @@ export function RobotScene({
           robot.leftEye.scale.set(1, 1, 1);
           robot.rightEye.scale.set(1, 1, 1);
           sm.phaseElapsed = 0;
-          sm.phaseDuration = isMobile ? 0.22 : 0.25;
+          sm.phaseDuration = isMobile ? 0.15 : 0.17;
           robot.cargoPivot.visible = true;
           robot.cargoPivot.scale.setScalar(0.2);
           notifyState(
@@ -1089,7 +1118,7 @@ export function RobotScene({
             sm.vectors.dropHoverPos.set(freshSlot.x, freshSlot.y + 0.65 * baseScale, 0.45);
           }
           sm.phaseElapsed = 0;
-          sm.phaseDuration = isMobile ? 0.36 : 0.44;
+          sm.phaseDuration = isMobile ? 0.26 : 0.31;
           notifyState(
             ANIMATION_STATES.DELIVERING,
             sm.projectIndex,
@@ -1122,7 +1151,7 @@ export function RobotScene({
 
         if (u >= 1) {
           sm.phaseElapsed = 0;
-          sm.phaseDuration = isMobile ? 0.2 : 0.24;
+          sm.phaseDuration = isMobile ? 0.15 : 0.18;
           notifyState(
             ANIMATION_STATES.RELEASING,
             sm.projectIndex,
@@ -1438,155 +1467,166 @@ export function ProjectCard3D({
     {
       ref: (el) => slotRefCallback(project.id, el),
       className: `project-card-slot ${isActiveTarget ? "is-active-delivery-target" : ""}`,
-      onMouseEnter: () => onHoverCard && onHoverCard(project.id),
+      onMouseEnter: () => isDelivered && onHoverCard && onHoverCard(project.id),
       onMouseLeave: handlePointerLeave
     },
     isJustLanded && h("div", { className: "card-landing-pulse", "aria-hidden": "true" }),
-    h(
-      motion.article,
-      {
-        layout: true,
-        initial: isDelivered
-          ? { opacity: 1, scale: 1, y: 0, rotateZ: 0 }
-          : { opacity: 0.42, scale: 0.94, y: -14, rotateZ: dropRotateZ },
-        animate: isDelivered
-          ? {
-              opacity: 1,
-              scale: [0.88, 1.03, 1],
-              y: [-22, 4, 0],
-              rotateZ: [dropRotateZ, index % 2 === 0 ? 0.8 : -0.8, 0]
-            }
-          : {
-              opacity: 0.42,
-              scale: 0.96,
-              y: 0,
-              rotateZ: 0
-            },
-        transition: {
-          duration: 0.52,
-          ease: [0.16, 1, 0.3, 1]
-        },
-        className: `bezel-outer project-card-3d ${
-          !isDelivered ? "is-awaiting-delivery" : ""
-        } ${isRobotInspected ? "is-robot-inspected" : ""}`,
-        onPointerMove: handlePointerMove,
-        onClick: () => onOpenModal(project),
-        style: {
-          transform: `perspective(950px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`
-        }
-      },
-      h(
-        "div",
-        { className: "bezel-inner", style: { display: "flex", flexDirection: "column" } },
-        // Top Preview Window
-        h(
+    !isDelivered
+      ? h(
           "div",
-          { className: "project-preview-window" },
-          h("span", { className: "project-floating-cat" }, project.shortCategory),
-          (project.liveUrl || project.githubUrl) &&
-            h(
-              "a",
-              {
-                href: project.liveUrl || project.githubUrl,
-                target: "_blank",
-                rel: "noopener",
-                className: "project-floating-ext",
-                title: project.liveUrl
-                  ? `Open ${project.title} Live Demo`
-                  : `Open ${project.title} GitHub`,
-                onClick: (e) => e.stopPropagation()
-              },
-              h(ExternalArrowIcon, { size: 14 })
-            ),
-          h(ProjectVisualHeader, { project })
-        ),
-
-        // Card Body
-        h(
-          "div",
-          { className: "project-body" },
+          {
+            className: `project-slot-dropzone ${isActiveTarget ? "is-incoming" : ""}`,
+            "aria-hidden": "true"
+          },
           h(
             "div",
-            null,
-            h("h3", { className: "project-title" }, project.title),
-            h("p", { className: "project-desc" }, project.summary),
+            { className: "dropzone-reticle" },
+            h("span", { className: "dropzone-dot" }),
             h(
-              "div",
-              { className: "project-tags-row" },
-              project.tags.slice(0, 4).map((tag) =>
-                h("span", { key: tag, className: "tech-chip" }, tag)
-              )
+              "span",
+              { className: "dropzone-label" },
+              isActiveTarget
+                ? `BOT F-01 DELIVERING · ${project.title.toUpperCase()}`
+                : `SLOT 0${index + 1} · AWAITING BOT DELIVERY`
             )
-          ),
-
-          // Card Footer Actions (Live Demo, GitHub, View Details / Interactive Journey)
+          )
+        )
+      : h(
+          motion.article,
+          {
+            layout: true,
+            initial: { opacity: 0, scale: 0.84, y: -28, rotateZ: dropRotateZ },
+            animate: {
+              opacity: 1,
+              scale: [0.84, 1.03, 1],
+              y: [-28, 4, 0],
+              rotateZ: [dropRotateZ, index % 2 === 0 ? 0.8 : -0.8, 0]
+            },
+            transition: {
+              duration: 0.48,
+              ease: [0.16, 1, 0.3, 1]
+            },
+            className: `bezel-outer project-card-3d ${
+              isRobotInspected ? "is-robot-inspected" : ""
+            }`,
+            onPointerMove: handlePointerMove,
+            onClick: () => onOpenModal(project),
+            style: {
+              transform: `perspective(950px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`
+            }
+          },
           h(
             "div",
-            { className: "project-actions-footer" },
+            { className: "bezel-inner", style: { display: "flex", flexDirection: "column", height: "100%" } },
+            // Top Preview Window
             h(
               "div",
-              { style: { display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "wrap" } },
-              project.journeyTrigger
-                ? h(
+              { className: "project-preview-window" },
+              h("span", { className: "project-floating-cat" }, project.shortCategory),
+              (project.liveUrl || project.githubUrl) &&
+                h(
+                  "a",
+                  {
+                    href: project.liveUrl || project.githubUrl,
+                    target: "_blank",
+                    rel: "noopener",
+                    className: "project-floating-ext",
+                    title: project.liveUrl
+                      ? `Open ${project.title} Live Demo`
+                      : `Open ${project.title} GitHub`,
+                    onClick: (e) => e.stopPropagation()
+                  },
+                  h(ExternalArrowIcon, { size: 14 })
+                ),
+              h(ProjectVisualHeader, { project })
+            ),
+
+            // Card Body
+            h(
+              "div",
+              { className: "project-body" },
+              h(
+                "div",
+                { className: "project-body-top" },
+                h("h3", { className: "project-title" }, project.title),
+                h("p", { className: "project-desc" }, project.summary),
+                h(
+                  "div",
+                  { className: "project-tags-row" },
+                  project.tags.slice(0, 4).map((tag) =>
+                    h("span", { key: tag, className: "tech-chip" }, tag)
+                  )
+                )
+              ),
+
+              // Card Footer Actions (Live Demo, GitHub, View Details / Interactive Journey)
+              h(
+                "div",
+                { className: "project-actions-footer" },
+                h(
+                  "div",
+                  { style: { display: "flex", alignItems: "center", gap: "0.45rem", flexWrap: "nowrap" } },
+                  project.journeyTrigger
+                    ? h(
+                        "button",
+                        {
+                          type: "button",
+                          className: "project-action-pill highlight-yellow",
+                          onClick: (e) => {
+                            e.stopPropagation();
+                            onOpenJourney();
+                          }
+                        },
+                        h("span", null, "Interactive Journey →")
+                      )
+                    : project.liveUrl
+                    ? h(
+                        "a",
+                        {
+                          href: project.liveUrl,
+                          target: "_blank",
+                          rel: "noopener",
+                          className: "project-action-pill",
+                          onClick: (e) => e.stopPropagation()
+                        },
+                        h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                        h("span", null, "Live Demo →")
+                      )
+                    : null,
+
+                  h(
                     "button",
                     {
                       type: "button",
-                      className: "project-action-pill highlight-yellow",
+                      className: "project-action-pill",
+                      style: { padding: "0.42rem 0.75rem", fontWeight: 600 },
                       onClick: (e) => {
                         e.stopPropagation();
-                        onOpenJourney();
+                        onOpenModal(project);
                       }
                     },
-                    h("span", null, "Interactive Journey →")
+                    "View Details"
                   )
-                : project.liveUrl
-                ? h(
+                ),
+
+                project.githubUrl &&
+                  h(
                     "a",
                     {
-                      href: project.liveUrl,
+                      href: project.githubUrl,
                       target: "_blank",
                       rel: "noopener",
-                      className: "project-action-pill",
+                      className: "icon-circle-btn",
+                      title: `View ${project.title} Source Code on GitHub`,
+                      "aria-label": `View ${project.title} Source Code on GitHub`,
                       onClick: (e) => e.stopPropagation()
                     },
-                    h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                    h("span", null, "Live Demo →")
+                    h(GithubIcon, { size: 16 })
                   )
-                : null,
-
-              h(
-                "button",
-                {
-                  type: "button",
-                  className: "project-action-pill",
-                  style: { padding: "0.42rem 0.75rem", fontWeight: 600 },
-                  onClick: (e) => {
-                    e.stopPropagation();
-                    onOpenModal(project);
-                  }
-                },
-                "View Details"
               )
-            ),
-
-            project.githubUrl &&
-              h(
-                "a",
-                {
-                  href: project.githubUrl,
-                  target: "_blank",
-                  rel: "noopener",
-                  className: "icon-circle-btn",
-                  title: `View ${project.title} Source Code on GitHub`,
-                  "aria-label": `View ${project.title} Source Code on GitHub`,
-                  onClick: (e) => e.stopPropagation()
-                },
-                h(GithubIcon, { size: 16 })
-              )
+            )
           )
         )
-      )
-    )
   );
 }
 
@@ -1596,10 +1636,7 @@ export function ProjectCard3D({
 export function ProjectFilters({
   categories,
   activeCategory,
-  onSelectCategory,
-  showAllProjects,
-  onToggleShowAll,
-  totalCount
+  onSelectCategory
 }) {
   return h(
     "div",
@@ -1617,17 +1654,7 @@ export function ProjectFilters({
         },
         cat.label
       )
-    ),
-    activeCategory === "all" &&
-      h(
-        "button",
-        {
-          type: "button",
-          className: "filter-pill-btn",
-          onClick: onToggleShowAll
-        },
-        showAllProjects ? "Show Featured (5)" : `View All (${totalCount}) →`
-      )
+    )
   );
 }
 
@@ -1643,18 +1670,21 @@ export function FeaturedProjects({
   onOpenJourney
 }) {
   const [projectFilter, setProjectFilter] = useState("all");
-  const [showAllProjects, setShowAllProjects] = useState(false);
 
-  // Filtered projects list
+  // Filtered projects list (all 6 projects in exact order when 'all' is selected)
   const filteredProjects = useMemo(() => {
     if (projectFilter === "all") {
-      return showAllProjects ? projectsList : projectsList.filter((p) => p.featured);
+      return projectsList;
     }
     return projectsList.filter((p) => p.categories.includes(projectFilter));
-  }, [projectsList, projectFilter, showAllProjects]);
+  }, [projectsList, projectFilter]);
 
-  // Delivery state tracking
-  const [deliveredIds, setDeliveredIds] = useState(() => new Set());
+  // Delivery state tracking — starts empty so cards ONLY show after the bot delivers them!
+  const [deliveredIds, setDeliveredIds] = useState(() =>
+    prefersReducedMotion() || !checkWebGLSupport()
+      ? new Set(projectsList.map((p) => p.id))
+      : new Set()
+  );
   const [justLandedId, setJustLandedId] = useState(null);
   const [robotTelemetry, setRobotTelemetry] = useState({
     state: ANIMATION_STATES.IDLE,
@@ -1720,7 +1750,7 @@ export function FeaturedProjects({
           }
         });
       },
-      { threshold: 0.14 }
+      { threshold: 0.08 }
     );
     io.observe(el);
     return () => io.disconnect();
@@ -1745,16 +1775,9 @@ export function FeaturedProjects({
     }, 2600);
   };
 
-  // Handle category filter change cleanly without blocking access
+  // Handle category filter change cleanly
   const handleSelectCategory = (catId) => {
     setProjectFilter(catId);
-    // Keep cards immediately accessible when switching filters, and let the robot inspect them
-    setDeliveredIds(new Set(projectsList.map((p) => p.id)));
-    setSkipRequested(true);
-  };
-
-  const handleToggleShowAll = () => {
-    setShowAllProjects((v) => !v);
     setDeliveredIds(new Set(projectsList.map((p) => p.id)));
     setSkipRequested(true);
   };
@@ -1787,10 +1810,7 @@ export function FeaturedProjects({
       h(ProjectFilters, {
         categories,
         activeCategory: projectFilter,
-        onSelectCategory: handleSelectCategory,
-        showAllProjects,
-        onToggleShowAll: handleToggleShowAll,
-        totalCount: projectsList.length
+        onSelectCategory: handleSelectCategory
       })
     ),
 
@@ -1901,10 +1921,7 @@ export function FeaturedProjects({
               key: project.id,
               project,
               index: idx,
-              isDelivered:
-                deliveredIds.size === 0 && !hasTriggeredInitialRef.current
-                  ? true
-                  : deliveredIds.has(project.id),
+              isDelivered: deliveredIds.has(project.id),
               isJustLanded: justLandedId === project.id,
               isActiveTarget: activeTargetId === project.id,
               isRobotInspected:

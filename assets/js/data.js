@@ -63,25 +63,6 @@ export const PROJECT_CATEGORIES = [
 
 export const PROJECTS_LIST = [
   {
-    id: "civic-pulse",
-    title: "Civic-Pulse AI",
-    shortCategory: "AI / ML",
-    categories: ["ai-ml", "web"],
-    featured: true,
-    visualType: "civic",
-    summary: "AI-powered civic infrastructure reporting for smarter municipalities with computer vision anomaly triage.",
-    description:
-      "End-to-end municipal incident reporting and intelligence platform built for urban infrastructure management. Uses computer vision and LLM triage to classify citizen-submitted reports of road damage, electrical faults, and water leakages, assign priority scores, and map failure hotspots.",
-    highlights: [
-      "Automated visual anomaly classification and multi-tier urgency scoring for municipal defects",
-      "Interactive geospatial clustering to identify recurring neighborhood infrastructure failures",
-      "Real-time citizen resolution tracking and dispatch queue prioritization"
-    ],
-    tags: ["LLM", "FastAPI", "Computer Vision", "PyTorch", "React", "Leaflet"],
-    liveUrl: "https://civicpulseai.vercel.app/",
-    githubUrl: "https://github.com/fardinhossain/Civic-Pulse_AI_API_Hackathon_2026"
-  },
-  {
     id: "locationkhuji",
     title: "LocationKhuji",
     shortCategory: "Web App",
@@ -89,15 +70,16 @@ export const PROJECTS_LIST = [
     featured: true,
     visualType: "location",
     image: "assets/images/locationkhuji.png",
-    summary: "AI-powered location search platform for discovering places and services across Bangladesh.",
+    summary:
+      "AI-powered MERN location discovery platform for finding nearby flats, hospitals, pharmacies, and services across Bangladesh.",
     description:
-      "Full-stack MERN platform for discovering flats, hospitals, pharmacies, and essential services across Bangladesh. Implements natural-language search in English, Bangla, and Banglish using LLM APIs (Groq, OpenRouter) with a multi-layer fallback architecture for reliability.",
+      "Bangladesh-based MERN full-stack location discovery platform where users can find rental flats, hospitals, pharmacies, restaurants, and local services within a 1–20 km radius on interactive maps. Powered by Groq and OpenRouter LLM APIs for natural-language search in English, Bangla, and Banglish.",
     highlights: [
       "Natural-language search across English, Bangla, and Banglish powered by Groq and OpenRouter LLM APIs",
-      "Multi-layer fallback search architecture ensuring reliable discovery even under API rate limits",
-      "Interactive Leaflet maps, geospatial filtering, and role-based dashboards (User, Owner, Admin)"
+      "Interactive 1–20 km radius map discovery with real-time Socket.io updates and multi-layer search fallback",
+      "Role-based authentication, owner property listings, reviews, and full Admin moderation dashboard"
     ],
-    tags: ["React", "Node.js", "LLM APIs", "Leaflet Maps", "MongoDB", "Tailwind CSS"],
+    tags: ["React 19", "Node.js", "MongoDB", "Groq / OpenRouter", "Leaflet Maps", "Socket.io"],
     liveUrl: "https://locationkhuji.vercel.app/",
     githubUrl: "https://github.com/fardinhossain/Locationkhuji"
   },
@@ -108,36 +90,61 @@ export const PROJECTS_LIST = [
     categories: ["systems", "web"],
     featured: true,
     visualType: "schedos",
-    summary: "Interactive CPU scheduling simulator with real-time Gantt visualization and 557 passing Vitest tests.",
+    image: "assets/images/schedos.png",
+    summary:
+      "Interactive OS CPU scheduling laboratory — visualize, simulate, and compare 8 scheduling algorithms with Gantt charts and 557 passing tests.",
     description:
-      "Client-side operating system simulation laboratory built with React, TypeScript, and Tailwind CSS that visualizes 8 CPU scheduling algorithms (FCFS, SJF, SRTF, LJF, LRTF, Round Robin, Priority preemptive & non-preemptive) in real time with a zero-backend architecture.",
+      "Interactive Operating System CPU Scheduling Algorithm Simulator built with React 19, TypeScript 5, and Tailwind CSS v4. Visualizes, simulates, and compares 8 preemptive and non-preemptive CPU scheduling algorithms with step-by-step execution, Gantt charts, and process metrics.",
     highlights: [
-      "Visualizes 8 CPU scheduling algorithms in real time with interactive Gantt charts and queue telemetry",
-      "Zero-backend deterministic simulation core verified by 557 passing Vitest unit tests",
-      "Live turnaround time, waiting time, response time, and CPU utilization comparison matrix"
+      "Real-time simulation and visual comparison of 8 CPU scheduling algorithms (FCFS, SJF, SRTF, LJF, LRTF, RR, Priority)",
+      "100% client-side deterministic engine verified by 557 passing Vitest unit tests",
+      "Interactive Gantt charts, turnaround/waiting/response metrics, and side-by-side algorithm comparison matrix"
     ],
-    tags: ["React", "TypeScript", "Algorithms", "Simulation", "Tailwind CSS", "Vitest"],
+    tags: ["React 19", "TypeScript", "Tailwind CSS", "Vitest", "OS Algorithms", "Simulation"],
     liveUrl: "https://sched-os.vercel.app",
     githubUrl: "https://github.com/fardinhossain/SchedOS"
   },
   {
-    id: "skin-disease-cv",
-    title: "Skin Disease Classification",
-    shortCategory: "AI / ML",
-    categories: ["ai-ml", "research"],
+    id: "seu-routine-maker",
+    title: "SEU Routine Maker",
+    shortCategory: "Web App",
+    categories: ["web", "systems"],
     featured: true,
-    visualType: "skincv",
-    summary: "Transfer learning computer vision pipeline using GoogLeNet & MobileNet for dermatological image classification.",
+    visualType: "routine",
+    image: "assets/images/seu-routine-maker.jpg",
+    summary:
+      "Fast, mobile-friendly routine builder for SEU students — import UMS HTML or course screenshots to generate conflict-free schedules and export PNG/PDF.",
     description:
-      "Diagnostic computer vision study utilizing fine-tuned GoogLeNet and MobileNet convolutional architectures to classify dermatological lesion imagery across clinical classes with calibrated confidence and Grad-CAM visual explainability.",
+      "Modern, privacy-first weekly routine maker for Southeast University students built with Next.js and React. Imports UMS Offered Sections HTML files, typed course codes, or course screenshots via OCR to automatically build weekly schedules, detect time conflicts and duplicate sections, and export to PNG, PDF, or .ics calendar.",
     highlights: [
-      "Fine-tuned GoogLeNet and MobileNetV2 transfer learning models achieving 98.7% test accuracy",
-      "Class-imbalance mitigation and Grad-CAM heatmaps highlighting predictive lesion regions",
-      "Evaluated for lightweight CPU and edge deployment latency"
+      "Imports UMS HTML files or extracts course codes from screenshots using client-side OCR",
+      "Automatic time-conflict detection, duplicate section alerts, and gap analysis",
+      "Local browser persistence with one-click export to high-res PNG, PDF, and calendar reminders"
     ],
-    tags: ["Python", "PyTorch", "Deep Learning", "Computer Vision", "GoogLeNet", "MobileNet"],
-    liveUrl: "",
-    githubUrl: "https://github.com/fardinhossain/Skin-Disease-Classification-using-Transfer-Learning"
+    tags: ["Next.js", "React", "Tailwind CSS", "OCR", "PDF / PNG Export", "PWA"],
+    liveUrl: "https://seuroutine.vercel.app",
+    githubUrl: "https://github.com/fardinhossain/SEU-Routine_Maker"
+  },
+  {
+    id: "civic-pulse",
+    title: "Civic-Pulse AI",
+    shortCategory: "AI / ML",
+    categories: ["ai-ml", "web"],
+    featured: true,
+    visualType: "civic",
+    image: "assets/images/civicpulse-ai.jpg",
+    summary:
+      "AI-powered civic infrastructure reporting platform for automated issue categorization, severity scoring, duplicate detection, and department routing.",
+    description:
+      "Built for the IEEE Computer Society SEU AI & API Hackathon 2026. Transforms unstructured citizen reports of potholes, broken streetlights, water leaks, and hazards into structured, severity-scored, deduplicated, and automatically routed municipal cases with an explainable AI pipeline.",
+    highlights: [
+      "End-to-end AI triage that categorizes reports, scores severity with explainable rationale, and detects semantic duplicates",
+      "Interactive map pin geocoding, photo evidence upload, and automatic municipal department dispatch",
+      "Public citizen tracking portal and role-based municipal Admin resolution dashboard"
+    ],
+    tags: ["AI / LLM API", "Next.js", "React", "Geospatial Maps", "Automated Triage", "Full-Stack"],
+    liveUrl: "https://civicpulseai.vercel.app/",
+    githubUrl: "https://github.com/fardinhossain/Civic-Pulse_AI_API_Hackathon_2026"
   },
   {
     id: "flyrank-ml-capstone",
@@ -146,77 +153,41 @@ export const PROJECTS_LIST = [
     categories: ["ai-ml", "research"],
     featured: true,
     visualType: "flyrank",
-    image: "assets/images/figures/cost_value_matrix.png",
-    summary: "Content-refresh opportunity ranking over 78.8M DuckDB rows and 9,961 pages (0.78 Precision@50 vs 0.30 baseline).",
+    image: "assets/images/flyrank-ml-capstone.jpg",
+    summary:
+      "Decision-support content-refresh ranking over 78.8M DuckDB rows and 9,961 pages (0.78 Precision@50 vs 0.30 baseline) with IEEE paper.",
     description:
-      "Industrial machine learning research capstone framing content-refresh prioritization as a ranking task over 9,961 candidate pages drawn from a 78.8M-row content-performance warehouse in DuckDB. Evaluated strictly on a client-grouped holdout to prevent domain leakage.",
+      "Applied Search Intelligence ML capstone framing content-refresh prioritization as a ranking problem over 9,961 candidate pages drawn from a 78.8M-row search warehouse in DuckDB. Evaluated on a strict client-grouped holdout across unseen domains, achieving 0.78 Precision@50 vs 0.30 for the fixed-rule baseline.",
     highlights: [
       "Achieved 0.78 Precision@50 with the learned ranker vs 0.30 for the fixed-rule baseline on unseen client domains",
-      "Out-of-core DuckDB data contract over 78.8M daily-performance rows with full feature leakage audit",
-      "Delivered 12 executed ML notebooks, action playbook, and formal research paper"
+      "Out-of-core DuckDB data contract over 78.8M daily-performance rows with full feature-leakage audit",
+      "Delivered 12 executed Google Colab ML notebooks, ranked action playbook, and 6-page IEEE research paper"
     ],
-    tags: ["Python", "DuckDB", "scikit-learn", "Ranking Systems", "pandas", "Research Paper"],
+    tags: ["Python", "DuckDB", "scikit-learn", "Learning-to-Rank", "Colab Notebooks", "IEEE Paper"],
     liveUrl: "https://fardinhossain.github.io/FlyRankAI-ML-Internship-Task/",
     paperUrl: "paper.pdf",
     journeyTrigger: true,
     githubUrl: "https://github.com/fardinhossain/FlyRankAI-ML-Internship-Task"
   },
   {
-    id: "seu-routine-maker",
-    title: "SEU Routine Maker",
-    shortCategory: "Web App",
-    categories: ["web"],
-    featured: false,
-    visualType: "routine",
-    summary: "University routine builder with OCR course-code detection, conflict analysis, and .ics/PDF/PNG export.",
-    description:
-      "React and Next.js tool that converts Southeast University UMS exports (HTML, PDF, screenshots) into a conflict-free weekly class routine with OCR-based course-code detection, free-gap analysis, and calendar exports.",
-    highlights: [
-      "Converts UMS HTML, PDF, and screenshot exports into structured weekly schedules using OCR",
-      "Real-time timetable conflict detection, free-gap analysis, and browser class reminders",
-      "One-click export to .ics calendar, high-res PDF, and PNG"
-    ],
-    tags: ["React", "Next.js", "TypeScript", "OCR", "Tailwind CSS"],
-    liveUrl: "https://seuroutine.vercel.app",
-    githubUrl: "https://github.com/fardinhossain/SEU-Routine_Maker"
-  },
-  {
-    id: "gainthebrain",
-    title: "GainTheBrain",
-    shortCategory: "Web App",
-    categories: ["web"],
-    featured: false,
-    visualType: "brain",
-    summary: "Interactive cognitive acceleration and spaced-repetition learning web platform.",
-    description:
-      "Cognitive acceleration and micro-learning application featuring adaptive spaced repetition, mental agility sprints, and retention analytics.",
-    highlights: [
-      "Adaptive spaced-repetition scheduling tailored to user retention curves",
-      "Interactive cognitive sprints with millisecond accuracy timers and streak tracking",
-      "Fast client-side state persistence and responsive mobile-first interface"
-    ],
-    tags: ["React", "Vite", "Spaced Repetition", "Tailwind CSS", "PWA"],
-    liveUrl: "https://gainthebrain.vercel.app/",
-    githubUrl: "https://github.com/fardinhossain/GainTheBrain"
-  },
-  {
     id: "unibuddy",
-    title: "UniBuddy App",
-    shortCategory: "Web App",
+    title: "UniBuddy",
+    shortCategory: "Mobile / App",
     categories: ["web", "systems"],
-    featured: false,
+    featured: true,
     visualType: "unibuddy",
     image: "assets/images/unibuddy-app.png",
-    summary: "Cross-platform Flutter & Appwrite university student collaboration platform with multi-semester CGPA tracking.",
+    summary:
+      "Ultimate university companion app built with Flutter & Appwrite — featuring class routines, CGPA calculator, tasks, cover page builder, and chat.",
     description:
-      "Cross-platform Flutter (Dart) application backed by Appwrite Cloud featuring a multi-semester GPA/CGPA calculator, PDF grade-report export, user authentication, and offline support for Android, iOS, and Web.",
+      "Comprehensive cross-platform mobile and web application built with Flutter (Dart) and Appwrite Cloud for university students. Combines academic productivity tools—including class routines, multi-semester CGPA calculator, assignment cover page generator, and task manager—with real-time student chat and polls.",
     highlights: [
-      "Multi-semester GPA/CGPA calculator with cloud sync and PDF grade-report generation",
-      "Appwrite authentication, student profiles, and academic resource sharing",
-      "Offline-first synchronization across Android, iOS, and Web"
+      "All-in-one student hub: Class Routine, multi-semester CGPA Calculator, Task Manager, and Cover Page generator",
+      "Real-time campus communication with student chat rooms, polls, and user profiles backed by Appwrite",
+      "Cross-platform Flutter & Dart architecture supporting Android, iOS, and Web"
     ],
-    tags: ["Flutter", "Dart", "Appwrite", "Cross-Platform", "PDF Export"],
-    liveUrl: "",
+    tags: ["Flutter", "Dart", "Appwrite", "Android / iOS", "CGPA & Routine", "Real-Time Chat"],
+    liveUrl: "https://tinyurl.com/unibuddyapk",
     githubUrl: "https://github.com/fardinhossain/Unibuddy_app"
   }
 ];

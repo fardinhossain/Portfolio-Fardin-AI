@@ -82,6 +82,29 @@ export function ExternalArrowIcon({ size = 14 }) {
 }
 
 export function ProjectVisualHeader({ project }) {
+  // Always prioritize the real project screenshot when available (like LocationKhuji)
+  if (project && project.image) {
+    return h(
+      "div",
+      {
+        className: "project-preview-media",
+        style: { position: "relative", background: "#0F172A", width: "100%", height: "100%" }
+      },
+      h("img", {
+        src: project.image,
+        alt: `${project.title} live application preview`,
+        style: {
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "top center",
+          display: "block"
+        },
+        loading: "lazy"
+      })
+    );
+  }
+
   const type = project.visualType;
 
   // 1. Civic-Pulse AI: Municipal Geospatial Anomaly Dashboard
