@@ -3,7 +3,7 @@
 // Supports both Homepage ("/") and Interactive Journey ("/experience/flyrank-ai")
 // ==========================================================================
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import ReactDOM from "react-dom/client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,6 +12,7 @@ import {
   PROJECT_CATEGORIES,
   PROJECTS_LIST,
   VERIFIED_CERTIFICATIONS,
+  ANTHROPIC_CERTIFICATES,
   SKILL_GROUPS
 } from "./data.js";
 import { HeroNeuralScene, ContactGlobeScene } from "./three-scenes.js";
@@ -204,6 +205,131 @@ function ProjectCard({ project, onOpenModal, onOpenJourney }) {
 }
 
 // --------------------------------------------------------------------------
+// REUSABLE BOT F-01 MASCOT ILLUSTRATION (EXACT WHITE-AND-RED DOME HEAD & VISOR)
+// Matches the 3D Bot F-01 design (porcelain dome head, obsidian visor,
+// glowing crimson LED capsule eyes with white specular glints, ear pods with
+// red rings, antenna beacon, torso with red AI core ring, tiny arms & thrusters)
+// --------------------------------------------------------------------------
+export function BotF01MascotSvg({ isActive = false, size = 38, className = "" }) {
+  return h(
+    "svg",
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 64 64",
+      fill: "none",
+      xmlns: "http://www.w3.org/2000/svg",
+      className: `bot-f01-mascot-svg ${isActive ? "is-active-flight" : "is-standby"} ${className}`,
+      "aria-hidden": "true"
+    },
+    // Soft antigravity / thruster red glow ring beneath bot
+    h("ellipse", {
+      cx: "32",
+      cy: "58",
+      rx: isActive ? "15" : "11",
+      ry: "3.2",
+      fill: "rgba(225, 29, 72, 0.26)"
+    }),
+    // Thruster flame cone
+    h("path", {
+      d: isActive ? "M28 50 L32 60 L36 50 Z" : "M29 50 L32 56 L35 50 Z",
+      fill: "#E11D48",
+      opacity: isActive ? "0.92" : "0.65"
+    }),
+    // Hover legs / boots
+    h("rect", { x: "23", y: "46", width: "5.5", height: "6.5", rx: "2.7", fill: "#E2E8F0", stroke: "#0F172A", strokeWidth: "1.2" }),
+    h("rect", { x: "35.5", y: "46", width: "5.5", height: "6.5", rx: "2.7", fill: "#E2E8F0", stroke: "#0F172A", strokeWidth: "1.2" }),
+    // Left & Right Articulated Arms + Red Mechanical Gripper Claws
+    h(
+      "g",
+      { className: "bot-f01-arm-left" },
+      h("rect", { x: "11", y: "31", width: "6", height: "11", rx: "3", transform: "rotate(14 14 36)", fill: "#FFFFFF", stroke: "#CBD5E1", strokeWidth: "1.4" }),
+      h("circle", { cx: "12.5", cy: "42.5", r: "2.2", fill: "#E11D48" })
+    ),
+    h(
+      "g",
+      { className: "bot-f01-arm-right" },
+      h("rect", {
+        x: "47",
+        y: isActive ? "26" : "31",
+        width: "6",
+        height: "11",
+        rx: "3",
+        transform: isActive ? "rotate(-32 50 31)" : "rotate(-14 50 36)",
+        fill: "#FFFFFF",
+        stroke: "#CBD5E1",
+        strokeWidth: "1.4"
+      }),
+      h("circle", { cx: isActive ? "53.5" : "51.5", cy: isActive ? "25.5" : "42.5", r: "2.2", fill: "#E11D48" })
+    ),
+    // Torso / Chassis
+    h("rect", {
+      x: "18.5",
+      y: "29.5",
+      width: "27",
+      height: "19",
+      rx: "9.5",
+      fill: "#FFFFFF",
+      stroke: "#CBD5E1",
+      strokeWidth: "1.5"
+    }),
+    // Dark Collar Joint
+    h("rect", { x: "23", y: "28", width: "18", height: "3", rx: "1.5", fill: "#0F172A" }),
+    // Chest AI Core Badge (Glowing Red Ring + Bright Core)
+    h("circle", { cx: "32", cy: "38.5", r: "4.6", fill: "rgba(225, 29, 72, 0.15)", stroke: "#E11D48", strokeWidth: "1.8" }),
+    h("circle", { cx: "32", cy: "38.5", r: "2", fill: "#FF4D6D" }),
+    // Top Antenna Stem + Glowing Red Beacon Tip
+    h("line", { x1: "32", y1: "5.5", x2: "32", y2: "11.5", stroke: "#94A3B8", strokeWidth: "2.2", strokeLinecap: "round" }),
+    h("circle", { cx: "32", cy: "4.8", r: "3", fill: "#E11D48" }),
+    h("circle", { cx: "31.2", cy: "4", r: "1", fill: "#FFFFFF" }),
+    // Side Ear Pods + Red LED Rings
+    h("rect", { x: "9.5", y: "16", width: "4.5", height: "8.5", rx: "2.2", fill: "#E2E8F0", stroke: "#E11D48", strokeWidth: "1.4" }),
+    h("rect", { x: "50", y: "16", width: "4.5", height: "8.5", rx: "2.2", fill: "#E2E8F0", stroke: "#E11D48", strokeWidth: "1.4" }),
+    // Rounded White Porcelain Dome Head
+    h("rect", {
+      x: "13",
+      y: "10",
+      width: "38",
+      height: "20",
+      rx: "10",
+      fill: "#FFFFFF",
+      stroke: "#CBD5E1",
+      strokeWidth: "1.6"
+    }),
+    // Curved Obsidian Visor Plate
+    h("rect", {
+      x: "16.5",
+      y: "13.2",
+      width: "31",
+      height: "13.5",
+      rx: "6.75",
+      fill: "#090D16"
+    }),
+    // Expressive Glowing Red LED Eyes (Left & Right) + White Specular Glints
+    h("rect", {
+      className: "bot-f01-eye",
+      x: "21.5",
+      y: "17.6",
+      width: "6.8",
+      height: "4.6",
+      rx: "2.3",
+      fill: "#E11D48"
+    }),
+    h("circle", { cx: "23.3", cy: "19", r: "1.1", fill: "#FFFFFF" }),
+    h("rect", {
+      className: "bot-f01-eye",
+      x: "35.7",
+      y: "17.6",
+      width: "6.8",
+      height: "4.6",
+      rx: "2.3",
+      fill: "#E11D48"
+    }),
+    h("circle", { cx: "37.5", cy: "19", r: "1.1", fill: "#FFFFFF" })
+  );
+}
+
+// --------------------------------------------------------------------------
 // MAIN PORTFOLIO APPLICATION
 // --------------------------------------------------------------------------
 function PortfolioApp() {
@@ -214,16 +340,39 @@ function PortfolioApp() {
   const [activeNav, setActiveNav] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Projects Filter State
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [showAllProjects, setShowAllProjects] = useState(false);
+  // Projects Modal State
   const [selectedProject, setSelectedProject] = useState(null);
 
   // Certificate Image Modal State
   const [selectedCertModal, setSelectedCertModal] = useState(null);
 
-  // Contact Modal / Copy State
+  // Anthropic 20/20 Certificate Wall State (Filter & Flipped Cards)
+  const [certWallFilter, setCertWallFilter] = useState("all");
+  const [flippedWallCards, setFlippedWallCards] = useState({});
+
+  // Bot F-01 Section Telemetry States (About Profile Scan & Certifications Delivery)
+  const [aboutBotState, setAboutBotState] = useState({
+    active: false,
+    chip: "UNIT F-01 · STANDBY",
+    text: "SCANNING PROFILE… / SKILLS VERIFIED / 4 DOMAINS LOADED · Standing by beside photo card",
+    runCount: 0
+  });
+  const [certBotState, setCertBotState] = useState({
+    active: false,
+    chip: "UNIT F-01 · STANDBY",
+    text: "DELIVERING CREDENTIALS… 20/20 EARNED / ALL MODULES VERIFIED · Click any card to flip",
+    runCount: 0
+  });
+
+  // Contact Form & Copy Email State
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
+  const [contactStatus, setContactStatus] = useState({ state: "idle", message: "" });
+
+  const aboutSectionRef = useRef(null);
+  const certSectionRef = useRef(null);
+  const hasScannedAboutRef = useRef(false);
+  const hasDeliveredCertsRef = useRef(false);
 
   // Sync browser back/forward button
   useEffect(() => {
@@ -233,6 +382,203 @@ function PortfolioApp() {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
+
+  // Scroll spy for sticky navbar active section (Order: Home -> About -> Experience -> Projects -> Certifications -> Contact)
+  useEffect(() => {
+    if (view !== "home") return;
+    const sectionIds = ["home", "about", "experience", "projects", "certifications", "contact"];
+    const onScroll = () => {
+      const scrollCheck = window.scrollY + 220;
+      let current = "home";
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= scrollCheck) {
+          current = id;
+        }
+      }
+      setActiveNav(current);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [view]);
+
+  // Scripted Bot F-01 "Scans Profile" sequence for About section
+  const triggerAboutBotScan = useCallback(() => {
+    setAboutBotState((prev) => ({
+      active: true,
+      chip: "STEP 1 · SCANNING PROFILE…",
+      text: "SCANNING PROFILE… Verifying Southeast University CSE profile & engineering focus...",
+      runCount: prev.runCount + 1
+    }));
+
+    const t1 = setTimeout(() => {
+      setAboutBotState((prev) => ({
+        ...prev,
+        active: true,
+        chip: "STEP 2 · SKILLS VERIFIED",
+        text: "SKILLS VERIFIED · Cross-checking ML, LLM/MCP, Full-Stack & Security stack..."
+      }));
+    }, 850);
+
+    const t2 = setTimeout(() => {
+      setAboutBotState((prev) => ({
+        ...prev,
+        active: true,
+        chip: "STEP 3 · 4 DOMAINS LOADED",
+        text: "4 DOMAINS LOADED · 20/20 certificates · 6 live projects · 2 internship tracks..."
+      }));
+    }, 1700);
+
+    const t3 = setTimeout(() => {
+      setAboutBotState((prev) => ({
+        ...prev,
+        active: false,
+        chip: "UNIT F-01 · STANDBY",
+        text: "SCANNING PROFILE… / SKILLS VERIFIED / 4 DOMAINS LOADED"
+      }));
+    }, 2600);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
+  // Scripted Bot F-01 "Delivers Credentials" sequence for Certifications section
+  const triggerCertBotDelivery = useCallback(() => {
+    setCertBotState((prev) => ({
+      active: true,
+      chip: "STEP 1 · DELIVERING CREDENTIALS…",
+      text: "DELIVERING CREDENTIALS… 20/20 EARNED · Syncing 7 verified credentials & 20 Anthropic courses...",
+      runCount: prev.runCount + 1
+    }));
+
+    const t1 = setTimeout(() => {
+      setCertBotState((prev) => ({
+        ...prev,
+        active: true,
+        chip: "STEP 2 · 20/20 EARNED",
+        text: "DELIVERING CREDENTIALS… 20/20 EARNED / Loading 10 AI Fluency + 10 ML & Backend certificates..."
+      }));
+    }, 900);
+
+    const t2 = setTimeout(() => {
+      setCertBotState((prev) => ({
+        ...prev,
+        active: true,
+        chip: "STEP 3 · ALL MODULES VERIFIED",
+        text: "ALL MODULES VERIFIED · All 20 real certificate images verified & ready to flip..."
+      }));
+    }, 1800);
+
+    const t3 = setTimeout(() => {
+      setCertBotState((prev) => ({
+        ...prev,
+        active: false,
+        chip: "UNIT F-01 · STANDBY",
+        text: "DELIVERING CREDENTIALS… 20/20 EARNED / ALL MODULES VERIFIED"
+      }));
+    }, 2700);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, []);
+
+  // Trigger About scan and Certifications delivery once when scrolled into view
+  useEffect(() => {
+    if (view !== "home") return;
+    const aboutEl = aboutSectionRef.current;
+    const certEl = certSectionRef.current;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.target === aboutEl && entry.isIntersecting && !hasScannedAboutRef.current) {
+            hasScannedAboutRef.current = true;
+            triggerAboutBotScan();
+          }
+          if (entry.target === certEl && entry.isIntersecting && !hasDeliveredCertsRef.current) {
+            hasDeliveredCertsRef.current = true;
+            triggerCertBotDelivery();
+          }
+        });
+      },
+      { threshold: 0.14 }
+    );
+
+    if (aboutEl) io.observe(aboutEl);
+    if (certEl) io.observe(certEl);
+    return () => io.disconnect();
+  }, [view, triggerAboutBotScan, triggerCertBotDelivery]);
+
+  // Filtered 20 Anthropic Academy Certificates (All / AI Fluency / ML & Backend)
+  const filteredAnthropicCerts = useMemo(() => {
+    if (certWallFilter === "all") return ANTHROPIC_CERTIFICATES;
+    return ANTHROPIC_CERTIFICATES.filter((c) => c.category === certWallFilter);
+  }, [certWallFilter]);
+
+  const toggleWallCardFlip = (idx) => {
+    setFlippedWallCards((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
+
+  // Handle Contact Form Submission (Formspree endpoint + graceful fallback)
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactForm.name.trim() || !contactForm.email.trim() || !contactForm.message.trim()) {
+      setContactStatus({ state: "error", message: "Please fill in your name, email, and message." });
+      return;
+    }
+    setContactStatus({ state: "submitting", message: "Sending your message to Fardin..." });
+    try {
+      const response = await fetch("https://formspree.io/f/xdkogpvr", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          name: contactForm.name,
+          email: contactForm.email,
+          message: contactForm.message,
+          _replyto: contactForm.email,
+          _subject: `Portfolio Message from ${contactForm.name} (fardin.ai)`
+        })
+      });
+      if (response.ok) {
+        setContactStatus({
+          state: "success",
+          message: "✓ Message sent! Fardin will reply to your email shortly."
+        });
+        setContactForm({ name: "", email: "", message: "" });
+      } else {
+        // Fallback: open pre-filled mailto so message is never lost
+        const subject = encodeURIComponent(`Portfolio Inquiry from ${contactForm.name}`);
+        const body = encodeURIComponent(
+          `Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\n${contactForm.message}`
+        );
+        window.location.href = `mailto:${PROFILE_DATA.email}?subject=${subject}&body=${body}`;
+        setContactStatus({
+          state: "success",
+          message: "✓ Opened your email client pre-addressed to fardin.hosn@gmail.com."
+        });
+      }
+    } catch (_err) {
+      const subject = encodeURIComponent(`Portfolio Inquiry from ${contactForm.name}`);
+      const body = encodeURIComponent(
+        `Name: ${contactForm.name}\nEmail: ${contactForm.email}\n\n${contactForm.message}`
+      );
+      window.location.href = `mailto:${PROFILE_DATA.email}?subject=${subject}&body=${body}`;
+      setContactStatus({
+        state: "success",
+        message: "✓ Prepared your message in your email client for fardin.hosn@gmail.com."
+      });
+    }
+  };
 
   // Open Dedicated FlyRank AI 4-Month Journey View (/experience/flyrank-ai)
   const openJourneyExperience = (sectionId = null) => {
@@ -277,15 +623,6 @@ function PortfolioApp() {
       el.scrollIntoView({ behavior: "smooth" });
     }
   };
-
-  const filteredProjects = useMemo(() => {
-    const byCat =
-      projectFilter === "all"
-        ? PROJECTS_LIST
-        : PROJECTS_LIST.filter((p) => p.categories.includes(projectFilter));
-    if (showAllProjects || projectFilter !== "all") return byCat;
-    return byCat.filter((p) => p.featured);
-  }, [projectFilter, showAllProjects]);
 
   const handleCopyEmail = () => {
     if (navigator.clipboard) {
@@ -410,9 +747,9 @@ function PortfolioApp() {
                 { style: { display: "flex", flexDirection: "column", gap: "0.4rem" } },
                 [
                   { id: "home", label: "Home" },
-                  { id: "about", label: "About Me" },
-                  { id: "projects", label: "Featured Projects" },
-                  { id: "experience", label: "FlyRank AI Experience" },
+                  { id: "about", label: "About" },
+                  { id: "experience", label: "Experience" },
+                  { id: "projects", label: "Projects" },
                   { id: "certifications", label: "Certifications" },
                   { id: "contact", label: "Contact" }
                 ].map((item) =>
@@ -459,7 +796,7 @@ function PortfolioApp() {
             { className: "page-shell" },
 
             // ================================================================
-            // B. HERO SECTION
+            // 1. HERO SECTION (#home)
             // ================================================================
             h(
               "section",
@@ -489,9 +826,13 @@ function PortfolioApp() {
                     ),
                     h(
                       "h1",
-                      { className: "hero-headline" },
-                      PROFILE_DATA.heroHeadlinePrefix,
-                      h("span", { className: "text-red" }, PROFILE_DATA.heroHeadlineHighlight)
+                      {
+                        className: "hero-headline",
+                        "aria-label": "Building Intelligent Solutions."
+                      },
+                      "Building ",
+                      h("br", { "aria-hidden": "true" }),
+                      h("span", { className: "text-red" }, "Intelligent Solutions.")
                     ),
                     h("p", { className: "hero-subtext" }, PROFILE_DATA.heroSupportingText),
 
@@ -579,7 +920,300 @@ function PortfolioApp() {
             ),
 
             // ================================================================
-            // C. FEATURED PROJECTS SECTION (3D FLYING ROBOT SHOWCASE)
+            // 2. ABOUT ME & TECHNICAL STACK SECTION (#about)
+            // Placed directly after Hero (Home -> About -> Experience -> Projects -> Certifications -> Contact)
+            // Strictly general profile & technical stack — ZERO FlyRank task metrics here.
+            // ================================================================
+            h(
+              "section",
+              { id: "about", ref: aboutSectionRef, className: "section-block" },
+              h(
+                "div",
+                { className: "section-header-bar" },
+                h(
+                  "div",
+                  { className: "section-title-group" },
+                  h("span", { className: "section-red-bar" }),
+                  h(
+                    "h2",
+                    { className: "section-heading" },
+                    "About Me & Technical Stack",
+                    h("span", { className: "red-dot" })
+                  )
+                ),
+                h(
+                  "a",
+                  {
+                    href: PROFILE_DATA.resumeUrl,
+                    target: "_blank",
+                    rel: "noopener",
+                    className: "project-action-pill"
+                  },
+                  "📄 Full Resume PDF ↗"
+                )
+              ),
+
+              // Bot F-01 "Scans Profile" Telemetry & Control Bar (Exact same Bot F-01 component & bar pattern)
+              h(
+                "div",
+                {
+                  className: "robot-telemetry-bar",
+                  role: "region",
+                  "aria-label": "Bot F-01 Profile Scanner Controls"
+                },
+                h(
+                  "div",
+                  { className: "robot-telemetry-left" },
+                  h(
+                    "span",
+                    {
+                      className: `robot-holopad-dock bot-f01-dock-stage ${
+                        aboutBotState.active ? "is-bot-scanning" : "is-bot-docked"
+                      }`,
+                      title: "Bot F-01 Profile Scanner Dock"
+                    },
+                    h(
+                      motion.span,
+                      {
+                        key: `about-bot-${aboutBotState.runCount}`,
+                        initial: { x: -44, y: -6, rotate: -12, opacity: 0.4 },
+                        animate: aboutBotState.active
+                          ? { x: [-44, 14, -4, 0], y: [-6, -4, 0, -2], rotate: [-12, 8, -4, 0], opacity: 1 }
+                          : { x: 0, y: 0, rotate: 0, opacity: 1 },
+                        transition: { duration: 1.35, ease: [0.16, 1, 0.3, 1] },
+                        style: { display: "inline-flex", alignItems: "center", justifyContent: "center" }
+                      },
+                      h(BotF01MascotSvg, { isActive: aboutBotState.active, size: 36 })
+                    )
+                  ),
+                  h(
+                    "span",
+                    { className: "robot-unit-badge" },
+                    h("span", { className: "robot-unit-led" }),
+                    h("span", null, "BOT F-01")
+                  ),
+                  h(
+                    "span",
+                    {
+                      className: `robot-state-chip ${
+                        !aboutBotState.active ? "state-idle" : ""
+                      }`
+                    },
+                    aboutBotState.chip
+                  ),
+                  h(
+                    "span",
+                    { className: "robot-status-text" },
+                    aboutBotState.text
+                  )
+                ),
+                h(
+                  "div",
+                  { className: "robot-telemetry-actions" },
+                  h(
+                    "button",
+                    {
+                      type: "button",
+                      className: "robot-control-btn primary-replay",
+                      onClick: triggerAboutBotScan,
+                      title: "Replay Bot F-01 profile scan"
+                    },
+                    "Replay Scan ↻"
+                  ),
+                  h(
+                    "a",
+                    {
+                      href: PROFILE_DATA.resumeUrl,
+                      target: "_blank",
+                      rel: "noopener",
+                      className: "robot-control-btn"
+                    },
+                    "Full Resume PDF ↗"
+                  )
+                )
+              ),
+
+              // 2-Column Upgraded About Me Card
+              h(
+                "div",
+                { className: "bezel-outer" },
+                h(
+                  "div",
+                  { className: "bezel-inner about-stage-inner" },
+                  h(
+                    "div",
+                    { className: "about-two-col-grid" },
+                    // LEFT COLUMN: Photo Card with floating IDEAS / CODE / MODELS / PRODUCTS / IMPACT chip + Bot F-01 Standby Perch
+                    h(
+                      "div",
+                      { className: "about-photo-col" },
+                      h(
+                        "div",
+                        {
+                          className: `about-photo-card-wrap ${
+                            aboutBotState.active ? "is-being-scanned" : ""
+                          }`
+                        },
+                        aboutBotState.active &&
+                          h("div", { className: "about-scan-laser-line", "aria-hidden": "true" }),
+                        h(
+                          "div",
+                          { className: "about-photo-card" },
+                          h("img", {
+                            src: PROFILE_DATA.aboutPortrait,
+                            alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
+                            className: "about-portrait-img",
+                            loading: "lazy"
+                          })
+                        ),
+                        // Floating IDEAS / CODE / MODELS / PRODUCTS / IMPACT chip matching hero photo card style
+                        h(
+                          "div",
+                          {
+                            className: "hero-pillars-float about-pillars-float",
+                            "aria-label": "Engineering workflow pillars"
+                          },
+                          h("span", null, "IDEAS"),
+                          h("span", null, "CODE"),
+                          h("span", null, "MODELS"),
+                          h("span", null, "PRODUCTS"),
+                          h("span", null, "IMPACT")
+                        )
+                      ),
+
+                      // Name, Red Role Line & Bot F-01 Settled Companion Badge beside Photo Card
+                      h(
+                        "div",
+                        { className: "about-identity-meta" },
+                        h(
+                          "div",
+                          null,
+                          h("h3", { className: "about-person-name" }, PROFILE_DATA.name),
+                          h(
+                            "div",
+                            { className: "about-person-role" },
+                            "AI Engineer & Full-Stack Developer · Dhaka, Bangladesh"
+                          )
+                        ),
+                        h(
+                          "div",
+                          {
+                            className: `about-bot-perch-badge ${
+                              aboutBotState.active ? "is-scanning" : "is-standby"
+                            }`,
+                            title: "Bot F-01 settled beside photo card"
+                          },
+                          h(BotF01MascotSvg, { isActive: aboutBotState.active, size: 28 }),
+                          h(
+                            "div",
+                            { className: "about-bot-perch-meta" },
+                            h("span", { className: "about-bot-perch-unit" }, "BOT F-01"),
+                            h(
+                              "span",
+                              { className: "about-bot-perch-status" },
+                              aboutBotState.active ? "SCANNING…" : "STANDBY"
+                            )
+                          )
+                        )
+                      )
+                    ),
+
+                    // RIGHT COLUMN: 3-4 Sentence General Story Bio + Neutral Stat Strip + 4-Group Skills Chip Grid
+                    h(
+                      "div",
+                      { className: "about-bio-col" },
+                      h(
+                        "div",
+                        { className: "about-story-bio" },
+                        h(
+                          "p",
+                          null,
+                          "I am a Computer Science & Engineering student at Southeast University in Dhaka, Bangladesh, passionate about building ML-powered applications, LLM-based developer tools, and full-stack web and mobile products. My work spans end-to-end machine learning workflows, computer vision and natural language applications, and agentic systems built with the Claude API and Model Context Protocol (MCP). Across web and native mobile platforms, I focus on clean architecture, automated testing, and responsive interfaces that turn complex models into reliable everyday software. I am actively seeking Machine Learning Engineer, AI Engineer, and Full-Stack Developer roles and internships where I can ship high-impact products."
+                        )
+                      ),
+
+                      // Small Neutral Stat Strip under Bio (Strictly general stats — zero FlyRank task metrics)
+                      h(
+                        "div",
+                        { className: "about-neutral-stat-strip", role: "list", "aria-label": "Portfolio Summary Highlights" },
+                        h(
+                          "div",
+                          { className: "about-stat-pill", role: "listitem" },
+                          h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                          h("strong", null, "20/20"),
+                          " ",
+                          h("span", null, "certificates earned")
+                        ),
+                        h(
+                          "div",
+                          { className: "about-stat-pill", role: "listitem" },
+                          h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                          h("strong", null, "6"),
+                          " ",
+                          h("span", null, "projects live on this site")
+                        ),
+                        h(
+                          "div",
+                          { className: "about-stat-pill", role: "listitem" },
+                          h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                          h("strong", null, "2"),
+                          " ",
+                          h("span", null, "internship tracks completed (ML + AI Fluency)")
+                        )
+                      ),
+
+                      // 4-Group Skills Chip Grid
+                      h(
+                        "div",
+                        { className: "about-skills-grid" },
+                        SKILL_GROUPS.map((group) =>
+                          h(
+                            "div",
+                            { key: group.category, className: "about-skill-group-card" },
+                            h(
+                              "div",
+                              { className: "about-skill-group-title" },
+                              h("span", {
+                                className: group.accent === "red" ? "red-dot" : "yellow-dot",
+                                style: { width: 6, height: 6 }
+                              }),
+                              h("span", null, group.category)
+                            ),
+                            h(
+                              "div",
+                              { className: "about-skill-chips-wrap" },
+                              group.items.map((skill) =>
+                                h(
+                                  "span",
+                                  {
+                                    key: skill,
+                                    className: "tech-chip",
+                                    style: { background: "#FFFFFF", fontWeight: 600 }
+                                  },
+                                  skill
+                                )
+                              )
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+
+            // ================================================================
+            // 3. EXPERIENCE SECTION (#experience)
+            // Robot-Guided FlyRank AI Vertical Career Timeline
+            // ================================================================
+            h(ExperienceTimelineSection, {
+              onExploreInternship: () => openJourneyExperience()
+            }),
+
+            // ================================================================
+            // 4. FEATURED PROJECTS SECTION (#projects)
+            // 3D Flying Robot Project Showcase
             // ================================================================
             h(FeaturedProjects, {
               projectsList: PROJECTS_LIST,
@@ -589,80 +1223,157 @@ function PortfolioApp() {
             }),
 
             // ================================================================
-            // D. EXPERIENCE SECTION (ROBOT-GUIDED FLYRANK AI TIMELINE ONLY)
-            // ================================================================
-            h(ExperienceTimelineSection, {
-              onExploreInternship: () => openJourneyExperience()
-            }),
-
-            // ================================================================
-            // F, G. LOWER BENTO: CERTIFICATIONS & CONTACT
+            // 5. CERTIFICATIONS SECTION (#certifications)
+            // Rebuilt with Bot F-01 Delivery Bar + Compact 7-Row Credentials Strip + 20-Card Real-Image Flip Wall
             // ================================================================
             h(
-              "div",
-              { className: "section-block lower-bento-grid" },
-
-              // 2. CERTIFICATIONS COLUMN
+              "section",
+              { id: "certifications", ref: certSectionRef, className: "section-block" },
               h(
-                "section",
-                { id: "certifications" },
+                "div",
+                { className: "section-header-bar" },
                 h(
                   "div",
-                  { className: "section-header-bar" },
+                  { className: "section-title-group" },
+                  h("span", { className: "section-red-bar" }),
                   h(
-                    "div",
-                    { className: "section-title-group" },
-                    h("span", { className: "section-red-bar" }),
+                    "h2",
+                    { className: "section-heading" },
+                    "Certifications",
+                    h("span", { className: "red-dot" })
+                  )
+                ),
+                h(
+                  "a",
+                  {
+                    href: "#anthropic-cert-wall",
+                    className: "project-action-pill",
+                    onClick: (e) => {
+                      e.preventDefault();
+                      const wallEl = document.getElementById("anthropic-cert-wall");
+                      if (wallEl) wallEl.scrollIntoView({ behavior: "smooth" });
+                    }
+                  },
+                  "20/20 Wall →"
+                )
+              ),
+
+              // Bot F-01 "Delivers Credentials" Telemetry & Control Bar (Exact same Bot F-01 component & bar pattern)
+              h(
+                "div",
+                {
+                  className: "robot-telemetry-bar",
+                  role: "region",
+                  "aria-label": "Bot F-01 Credential Delivery Controls"
+                },
+                h(
+                  "div",
+                  { className: "robot-telemetry-left" },
+                  h(
+                    "span",
+                    {
+                      className: `robot-holopad-dock bot-f01-dock-stage ${
+                        certBotState.active ? "is-bot-scanning" : "is-bot-docked"
+                      }`,
+                      title: "Bot F-01 Credential Delivery Dock"
+                    },
                     h(
-                      "h2",
-                      { className: "section-heading" },
-                      "Certifications",
-                      h("span", { className: "red-dot" })
+                      motion.span,
+                      {
+                        key: `cert-bot-${certBotState.runCount}`,
+                        initial: { x: -46, y: -8, rotate: -14, opacity: 0.4 },
+                        animate: certBotState.active
+                          ? { x: [-46, 16, -5, 0], y: [-8, -4, 0, -2], rotate: [-14, 10, -4, 0], opacity: 1 }
+                          : { x: 0, y: 0, rotate: 0, opacity: 1 },
+                        transition: { duration: 1.4, ease: [0.16, 1, 0.3, 1] },
+                        style: { display: "inline-flex", alignItems: "center", justifyContent: "center" }
+                      },
+                      h(BotF01MascotSvg, { isActive: certBotState.active, size: 36 })
                     )
                   ),
+                  h(
+                    "span",
+                    { className: "robot-unit-badge" },
+                    h("span", { className: "robot-unit-led" }),
+                    h("span", null, "BOT F-01")
+                  ),
+                  h(
+                    "span",
+                    {
+                      className: `robot-state-chip ${
+                        !certBotState.active ? "state-idle" : ""
+                      }`
+                    },
+                    certBotState.chip
+                  ),
+                  h(
+                    "span",
+                    { className: "robot-status-text" },
+                    certBotState.text
+                  )
+                ),
+                h(
+                  "div",
+                  { className: "robot-telemetry-actions" },
                   h(
                     "button",
                     {
                       type: "button",
-                      className: "project-action-pill",
-                      onClick: () => openJourneyExperience("journey-certificates")
+                      className: "robot-control-btn primary-replay",
+                      onClick: triggerCertBotDelivery,
+                      title: "Replay Bot F-01 credential delivery sequence"
                     },
-                    "20/20 Wall →"
+                    "Replay Delivery ↻"
                   )
-                ),
+                )
+              ),
 
+              // Part 1: Compact 7-Row "Credentials" Summary Strip Above the Wall
+              h(
+                "div",
+                { className: "bezel-outer", style: { marginBottom: "1.75rem" } },
                 h(
                   "div",
-                  { className: "bezel-outer" },
+                  { className: "bezel-inner credentials-strip-container" },
                   h(
                     "div",
-                    { className: "bezel-inner cert-stack-list" },
+                    { className: "credentials-strip-header" },
+                    h(
+                      "span",
+                      { className: "credentials-strip-eyebrow" },
+                      h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                      "PRIMARY INDUSTRY & ACADEMIC CREDENTIALS (7 VERIFIED TRACKS)"
+                    ),
+                    h(
+                      "span",
+                      { className: "credentials-strip-hint" },
+                      "Click 👁 to view scan or ↗ to verify"
+                    )
+                  ),
+                  h(
+                    "div",
+                    { className: "credentials-compact-grid" },
                     VERIFIED_CERTIFICATIONS.map((cert) =>
                       h(
                         "div",
-                        { key: cert.id, className: "cert-row-card" },
+                        { key: cert.id, className: "cert-row-card compact-credential-card" },
                         h(
                           "div",
-                          { style: { display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0 } },
+                          { style: { display: "flex", alignItems: "center", gap: "0.7rem", minWidth: 0 } },
                           h("div", { className: "cert-issuer-logo" }, cert.logoText),
                           h(
                             "div",
                             { style: { minWidth: 0 } },
                             h(
                               "div",
-                              { style: { fontWeight: 800, fontSize: "0.88rem", color: "var(--text-primary)" } },
+                              { style: { fontWeight: 800, fontSize: "0.84rem", color: "var(--text-primary)" } },
                               cert.issuer
                             ),
                             h(
                               "div",
                               {
-                                style: {
-                                  fontSize: "0.76rem",
-                                  color: "var(--text-muted)",
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis"
-                                }
+                                className: "compact-credential-title",
+                                title: cert.title
                               },
                               cert.title
                             )
@@ -670,7 +1381,7 @@ function PortfolioApp() {
                         ),
                         h(
                           "div",
-                          { style: { display: "flex", alignItems: "center", gap: "0.45rem", flexShrink: 0 } },
+                          { style: { display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 } },
                           h(
                             "span",
                             {
@@ -706,7 +1417,23 @@ function PortfolioApp() {
                               },
                               "👁"
                             ),
-                          (cert.openCertWall || cert.openJourney) &&
+                          cert.openCertWall &&
+                            h(
+                              "a",
+                              {
+                                href: "#anthropic-cert-wall",
+                                className: "icon-circle-btn",
+                                style: { width: 28, height: 28 },
+                                title: "Scroll to 20/20 Certificate Wall below",
+                                onClick: (e) => {
+                                  e.preventDefault();
+                                  const el = document.getElementById("anthropic-cert-wall");
+                                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                                }
+                              },
+                              "↓"
+                            ),
+                          cert.openJourney &&
                             h(
                               "button",
                               {
@@ -714,10 +1441,7 @@ function PortfolioApp() {
                                 className: "icon-circle-btn",
                                 style: { width: 28, height: 28 },
                                 title: "Open in Interactive Journey",
-                                onClick: () =>
-                                  openJourneyExperience(
-                                    cert.openCertWall ? "journey-certificates" : "journey-timeline"
-                                  )
+                                onClick: () => openJourneyExperience("journey-timeline")
                               },
                               "→"
                             )
@@ -728,36 +1452,355 @@ function PortfolioApp() {
                 )
               ),
 
-              // 3. CONTACT & 3D GLOBE COLUMN
+              // Part 2: 20/20 Anthropic Academy Real-Image Certificate Flip Wall (#anthropic-cert-wall)
               h(
-                "section",
-                { id: "contact" },
+                "div",
+                { id: "anthropic-cert-wall", className: "bezel-outer" },
                 h(
                   "div",
-                  { className: "section-header-bar" },
+                  { className: "bezel-inner cert-wall-stage-inner" },
+                  // Wall Header & Filter Chips (All / AI Fluency / ML & Backend)
                   h(
                     "div",
-                    { className: "section-title-group" },
-                    h("span", { className: "section-red-bar" }),
+                    { className: "cert-wall-header-bar" },
                     h(
-                      "h2",
-                      { className: "section-heading" },
-                      "Let's Connect",
-                      h("span", { className: "red-dot" })
+                      "div",
+                      null,
+                      h(
+                        "div",
+                        { className: "credentials-strip-eyebrow" },
+                        h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                        "ANTHROPIC ACADEMY · 20/20 VERIFIED CERTIFICATES WALL"
+                      ),
+                      h(
+                        "h3",
+                        { className: "cert-wall-heading" },
+                        "20/20 Certificate Wall — Real Scans & Key Takeaways"
+                      ),
+                      h(
+                        "p",
+                        { className: "cert-wall-subtext" },
+                        "Hover or tap any certificate card to flip between the official certificate scan and what I learned in that course."
+                      )
+                    ),
+                    // Filter Chips: All / AI Fluency / ML & Backend
+                    h(
+                      "div",
+                      {
+                        className: "filter-pills-row",
+                        role: "tablist",
+                        "aria-label": "Filter Anthropic Academy certificates"
+                      },
+                      [
+                        { id: "all", label: "All (20)" },
+                        { id: "ai-fluency", label: "AI Fluency (10)" },
+                        { id: "ml-backend", label: "ML & Backend (10)" }
+                      ].map((tab) =>
+                        h(
+                          "button",
+                          {
+                            key: tab.id,
+                            type: "button",
+                            role: "tab",
+                            "aria-selected": certWallFilter === tab.id,
+                            className: `filter-pill-btn ${certWallFilter === tab.id ? "active" : ""}`,
+                            onClick: () => setCertWallFilter(tab.id)
+                          },
+                          tab.label
+                        )
+                      )
                     )
+                  ),
+
+                  // 20-Card Animated Flip Grid
+                  h(
+                    "div",
+                    { className: "cert-wall-real-grid" },
+                    filteredAnthropicCerts.map((cert) => {
+                      const isFlipped = !!flippedWallCards[cert.index];
+                      const paddedNum = String(cert.index).padStart(2, "0");
+                      return h(
+                        motion.div,
+                        {
+                          key: `anthropic-wall-cert-${certWallFilter}-${cert.index}`,
+                          initial: { opacity: 0, scale: 0.94, y: 10 },
+                          animate: { opacity: 1, scale: 1, y: 0 },
+                          transition: { duration: 0.24, ease: [0.16, 1, 0.3, 1] },
+                          className: `flip-card-container real-cert-flip-card ${
+                            isFlipped ? "is-flipped" : ""
+                          }`,
+                          onClick: () => toggleWallCardFlip(cert.index),
+                          role: "button",
+                          tabIndex: 0,
+                          "aria-label": `Certificate ${paddedNum}: ${cert.title}. Click to flip for takeaway notes.`,
+                          onKeyDown: (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              toggleWallCardFlip(cert.index);
+                            }
+                          }
+                        },
+                        h(
+                          "div",
+                          { className: "flip-card-inner" },
+                          // FRONT FACE: Real Certificate Image (lazy-loaded) + Course Title Footer
+                          h(
+                            "div",
+                            { className: "flip-card-face real-cert-front" },
+                            h(
+                              "div",
+                              { className: "real-cert-img-wrap" },
+                              h("img", {
+                                src: cert.image,
+                                alt: `${cert.title} — Anthropic Academy Certificate #${paddedNum}`,
+                                loading: "lazy",
+                                className: "real-cert-img",
+                                onError: (e) => {
+                                  if (cert.fallbackImage && !e.currentTarget.dataset.fallbackUsed) {
+                                    e.currentTarget.dataset.fallbackUsed = "true";
+                                    e.currentTarget.src = cert.fallbackImage;
+                                  }
+                                }
+                              }),
+                              h(
+                                "span",
+                                { className: "real-cert-badge-num" },
+                                `#${paddedNum}`
+                              ),
+                              h(
+                                "span",
+                                { className: "real-cert-badge-cat" },
+                                cert.categoryLabel
+                              )
+                            ),
+                            h(
+                              "div",
+                              { className: "real-cert-front-bar" },
+                              h(
+                                "div",
+                                { className: "real-cert-front-title", title: cert.title },
+                                cert.title
+                              ),
+                              h(
+                                "span",
+                                { className: "real-cert-flip-hint" },
+                                "Flip ↻"
+                              )
+                            )
+                          ),
+
+                          // BACK FACE: Course Name, Issuer, and One-Line "What I Learned" Note
+                          h(
+                            "div",
+                            { className: "flip-card-face flip-back real-cert-back" },
+                            h(
+                              "div",
+                              { className: "real-cert-back-top" },
+                              h(
+                                "span",
+                                { className: "real-cert-back-issuer" },
+                                `#${paddedNum} · ANTHROPIC ACADEMY`
+                              ),
+                              h(
+                                "span",
+                                { className: "real-cert-back-track" },
+                                cert.categoryLabel
+                              )
+                            ),
+                            h(
+                              "h4",
+                              { className: "real-cert-back-title" },
+                              cert.title
+                            ),
+                            h(
+                              "p",
+                              { className: "real-cert-back-learned" },
+                              cert.learned
+                            ),
+                            h(
+                              "div",
+                              { className: "real-cert-back-actions" },
+                              h(
+                                "button",
+                                {
+                                  type: "button",
+                                  className: "real-cert-zoom-btn",
+                                  onClick: (e) => {
+                                    e.stopPropagation();
+                                    setSelectedCertModal({
+                                      issuer: "Anthropic Academy",
+                                      title: `${cert.title} (#${paddedNum}/20)`,
+                                      certificateImage: cert.image
+                                    });
+                                  }
+                                },
+                                "Enlarge Certificate ⤢"
+                              )
+                            )
+                          )
+                        )
+                      );
+                    })
+                  )
+                )
+              )
+            ),
+
+            // ================================================================
+            // 6. CONTACT SECTION (#contact)
+            // Working Formspree Contact Form + Interactive 3D Dhaka Globe + Copy Email & Say Hello
+            // ================================================================
+            h(
+              "section",
+              { id: "contact", className: "section-block" },
+              h(
+                "div",
+                { className: "section-header-bar" },
+                h(
+                  "div",
+                  { className: "section-title-group" },
+                  h("span", { className: "section-red-bar" }),
+                  h(
+                    "h2",
+                    { className: "section-heading" },
+                    "Let's Connect",
+                    h("span", { className: "red-dot" })
                   )
                 ),
+                h(
+                  "span",
+                  { className: "exp-timeline-top-tag" },
+                  h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                  "DHAKA, BANGLADESH · OPEN TO OPPORTUNITIES"
+                )
+              ),
 
+              h(
+                "div",
+                { className: "bezel-outer" },
                 h(
                   "div",
-                  { className: "bezel-outer" },
+                  { className: "bezel-inner contact-two-col-stage" },
+                  // Left Column: Working Contact Form (Name, Email, Message -> fardin.hosn@gmail.com)
                   h(
                     "div",
-                    { className: "bezel-inner contact-card-body" },
+                    { className: "contact-form-col" },
+                    h(
+                      "div",
+                      { className: "credentials-strip-eyebrow", style: { marginBottom: "0.35rem" } },
+                      h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                      "DIRECT MESSAGE FORM"
+                    ),
+                    h(
+                      "h3",
+                      { className: "contact-form-heading" },
+                      "Send a Message"
+                    ),
                     h(
                       "p",
-                      { style: { fontSize: "0.88rem", color: "var(--text-secondary)", maxWidth: "280px" } },
-                      "Open to AI Engineering, Machine Learning, and Full-Stack roles, research collaborations, and technical interviews."
+                      { className: "contact-form-subtext" },
+                      "Looking for an ML/AI Engineer or Full-Stack Developer? Fill out the form below to message fardin.hosn@gmail.com directly."
+                    ),
+                    h(
+                      "form",
+                      {
+                        className: "contact-form-fields",
+                        onSubmit: handleContactSubmit
+                      },
+                      h(
+                        "div",
+                        { className: "contact-input-group" },
+                        h(
+                          "label",
+                          { htmlFor: "contact-name-input", className: "contact-label" },
+                          "Your Name"
+                        ),
+                        h("input", {
+                          id: "contact-name-input",
+                          type: "text",
+                          name: "name",
+                          required: true,
+                          placeholder: "e.g. Sarah Jenkins",
+                          className: "contact-input",
+                          value: contactForm.name,
+                          onChange: (e) =>
+                            setContactForm((prev) => ({ ...prev, name: e.target.value }))
+                        })
+                      ),
+                      h(
+                        "div",
+                        { className: "contact-input-group" },
+                        h(
+                          "label",
+                          { htmlFor: "contact-email-input", className: "contact-label" },
+                          "Your Email"
+                        ),
+                        h("input", {
+                          id: "contact-email-input",
+                          type: "email",
+                          name: "email",
+                          required: true,
+                          placeholder: "you@company.com",
+                          className: "contact-input",
+                          value: contactForm.email,
+                          onChange: (e) =>
+                            setContactForm((prev) => ({ ...prev, email: e.target.value }))
+                        })
+                      ),
+                      h(
+                        "div",
+                        { className: "contact-input-group" },
+                        h(
+                          "label",
+                          { htmlFor: "contact-message-input", className: "contact-label" },
+                          "Message"
+                        ),
+                        h("textarea", {
+                          id: "contact-message-input",
+                          name: "message",
+                          required: true,
+                          rows: 4,
+                          placeholder: "Tell me about the role, project, or collaboration...",
+                          className: "contact-textarea",
+                          value: contactForm.message,
+                          onChange: (e) =>
+                            setContactForm((prev) => ({ ...prev, message: e.target.value }))
+                        })
+                      ),
+                      contactStatus.state !== "idle" &&
+                        h(
+                          "div",
+                          {
+                            className: `contact-status-banner status-${contactStatus.state}`,
+                            role: "status"
+                          },
+                          contactStatus.message
+                        ),
+                      h(
+                        "button",
+                        {
+                          type: "submit",
+                          disabled: contactStatus.state === "submitting",
+                          className: "btn-pill-dark contact-submit-btn"
+                        },
+                        h(
+                          "span",
+                          null,
+                          contactStatus.state === "submitting" ? "Sending Message…" : "Send Message"
+                        ),
+                        h("span", { className: "btn-trailing-circle", "aria-hidden": "true" }, "→")
+                      )
+                    )
+                  ),
+
+                  // Right Column: 3D Dhaka Globe + Copy Email + Say Hello Direct Options
+                  h(
+                    "div",
+                    { className: "contact-globe-col" },
+                    h(
+                      "p",
+                      { style: { fontSize: "0.9rem", color: "var(--text-secondary)", lineHeight: 1.6 } },
+                      "Open to AI Engineering, Machine Learning, and Full-Stack roles, internships, research collaborations, and technical interviews."
                     ),
 
                     // Interactive Three.js 3D Globe with Dhaka, Bangladesh Pin
@@ -773,10 +1816,10 @@ function PortfolioApp() {
                       h(ContactGlobeScene)
                     ),
 
-                    // Social Icons Row
+                    // Social Icons + Copy Email Row
                     h(
                       "div",
-                      { style: { display: "flex", alignItems: "center", gap: "0.55rem", marginBottom: "0.9rem" } },
+                      { className: "contact-quick-actions-row" },
                       h(
                         "a",
                         {
@@ -816,7 +1859,7 @@ function PortfolioApp() {
                         {
                           type: "button",
                           className: "project-action-pill",
-                          style: { fontSize: "0.72rem", padding: "0.35rem 0.7rem" },
+                          style: { fontSize: "0.76rem", padding: "0.4rem 0.85rem" },
                           onClick: handleCopyEmail
                         },
                         copiedEmail ? "✓ Email Copied" : "Copy Email"
@@ -839,219 +1882,131 @@ function PortfolioApp() {
             ),
 
             // ================================================================
-            // E. ABOUT ME & TECHNICAL SKILLS SECTION
-            // ================================================================
-            h(
-              "section",
-              { id: "about", className: "section-block" },
-              h(
-                "div",
-                { className: "section-header-bar" },
-                h(
-                  "div",
-                  { className: "section-title-group" },
-                  h("span", { className: "section-red-bar" }),
-                  h(
-                    "h2",
-                    { className: "section-heading" },
-                    "About Me & Technical Stack",
-                    h("span", { className: "red-dot" })
-                  )
-                ),
-                h(
-                  "a",
-                  {
-                    href: PROFILE_DATA.resumeUrl,
-                    target: "_blank",
-                    rel: "noopener",
-                    className: "project-action-pill"
-                  },
-                  "📄 Full Resume PDF ↗"
-                )
-              ),
-
-              h(
-                "div",
-                { className: "bezel-outer" },
-                h(
-                  "div",
-                  {
-                    className: "bezel-inner",
-                    style: {
-                      padding: "2rem",
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                      gap: "2rem",
-                      alignItems: "center"
-                    }
-                  },
-                  // Left: Portrait + Short Personal Introduction & 4 Pillars
-                  h(
-                    "div",
-                    { style: { display: "flex", flexDirection: "column", gap: "1.15rem" } },
-                    h(
-                      "div",
-                      { style: { display: "flex", alignItems: "center", gap: "1rem" } },
-                      h("img", {
-                        src: PROFILE_DATA.aboutPortrait,
-                        alt: "Md. Fardin Hossain",
-                        style: {
-                          width: "76px",
-                          height: "76px",
-                          borderRadius: "18px",
-                          objectFit: "cover",
-                          border: "2px solid var(--border-light)"
-                        },
-                        loading: "lazy"
-                      }),
-                      h(
-                        "div",
-                        null,
-                        h(
-                          "h3",
-                          { style: { fontSize: "1.25rem", fontWeight: 800, color: "var(--text-primary)" } },
-                          PROFILE_DATA.name
-                        ),
-                        h(
-                          "div",
-                          { style: { fontSize: "0.84rem", fontWeight: 700, color: "var(--accent-red)" } },
-                          "AI Engineer & Full-Stack Developer · Dhaka, Bangladesh"
-                        )
-                      )
-                    ),
-                    h(
-                      "p",
-                      { style: { fontSize: "0.92rem", color: "var(--text-secondary)", lineHeight: 1.65 } },
-                      "I am a Computer Science & Engineering student at Southeast University and Machine Learning Intern at FlyRank AI. I build leak-free ranking pipelines, computer vision classifiers, and full-stack web & mobile products designed to hold up on messy real-world data."
-                    ),
-                    h(
-                      "div",
-                      {
-                        style: {
-                          display: "grid",
-                          gridTemplateColumns: "repeat(2, 1fr)",
-                          gap: "0.65rem"
-                        }
-                      },
-                      [
-                        { title: "AI & Machine Learning", desc: "Ranking, DuckDB, PyTorch CV & LLMs" },
-                        { title: "Full-Stack Development", desc: "React, Next.js, TypeScript, MERN & Flutter" },
-                        { title: "Research Problem Solving", desc: "Client-grouped evaluation & 12 ML notebooks" },
-                        { title: "Software & Security", desc: "557 Vitest tests, C|PTE & OWASP Top 10" }
-                      ].map((pillar) =>
-                        h(
-                          "div",
-                          {
-                            key: pillar.title,
-                            style: {
-                              background: "var(--bg-page)",
-                              border: "1px solid var(--border-light)",
-                              borderRadius: "12px",
-                              padding: "0.75rem 0.9rem"
-                            }
-                          },
-                          h(
-                            "div",
-                            { style: { fontWeight: 800, fontSize: "0.82rem", color: "var(--text-primary)" } },
-                            pillar.title
-                          ),
-                          h(
-                            "div",
-                            { style: { fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.15rem" } },
-                            pillar.desc
-                          )
-                        )
-                      )
-                    )
-                  ),
-
-                  // Right: Categorized Technical Skill Chips
-                  h(
-                    "div",
-                    { style: { display: "flex", flexDirection: "column", gap: "1rem" } },
-                    SKILL_GROUPS.map((group) =>
-                      h(
-                        "div",
-                        {
-                          key: group.category,
-                          style: {
-                            background: "var(--bg-page)",
-                            border: "1px solid var(--border-light)",
-                            borderRadius: "14px",
-                            padding: "0.95rem 1.15rem"
-                          }
-                        },
-                        h(
-                          "div",
-                          {
-                            style: {
-                              fontSize: "0.76rem",
-                              fontWeight: 800,
-                              textTransform: "uppercase",
-                              letterSpacing: "0.06em",
-                              color: "var(--text-primary)",
-                              marginBottom: "0.5rem",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.4rem"
-                            }
-                          },
-                          h("span", {
-                            className: group.accent === "red" ? "red-dot" : "yellow-dot",
-                            style: { width: 6, height: 6 }
-                          }),
-                          group.category
-                        ),
-                        h(
-                          "div",
-                          { style: { display: "flex", flexWrap: "wrap", gap: "0.38rem" } },
-                          group.items.map((skill) =>
-                            h(
-                              "span",
-                              {
-                                key: skill,
-                                className: "tech-chip",
-                                style: { background: "#FFFFFF", fontWeight: 600 }
-                              },
-                              skill
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            ),
-
-            // ================================================================
-            // FOOTER
+            // 7. EXPANDED FOOTER (Nav Links, Social Icons & Back to Top ↑)
             // ================================================================
             h(
               "footer",
-              {
-                style: {
-                  marginTop: "4rem",
-                  paddingTop: "1.75rem",
-                  borderTop: "1px solid var(--border-light)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  flexWrap: "wrap",
-                  gap: "1rem",
-                  fontSize: "0.82rem",
-                  color: "var(--text-muted)"
-                }
-              },
+              { className: "site-footer" },
               h(
                 "div",
-                { style: { display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 700, color: "var(--text-primary)" } },
-                h("span", null, "fardin.ai"),
-                h("span", { className: "red-dot" }),
+                { className: "site-footer-top" },
+                // Brand & Tagline
+                h(
+                  "div",
+                  { className: "site-footer-brand" },
+                  h(
+                    "a",
+                    {
+                      href: "#home",
+                      className: "brand-logo",
+                      onClick: (e) => {
+                        e.preventDefault();
+                        navigateToSection("home");
+                      }
+                    },
+                    h("span", { className: "brand-icon-circle", "aria-hidden": "true" }, "✦"),
+                    h("span", null, "fardin.ai"),
+                    h("span", { className: "red-dot", "aria-hidden": "true" })
+                  ),
+                  h(
+                    "p",
+                    { className: "site-footer-desc" },
+                    "Md. Fardin Hossain · AI Engineer & Full-Stack Developer · Dhaka, Bangladesh"
+                  )
+                ),
+
+                // Footer Navigation Links (Matching exact section order)
+                h(
+                  "nav",
+                  { className: "site-footer-nav", "aria-label": "Footer Navigation" },
+                  [
+                    { id: "home", label: "Home" },
+                    { id: "about", label: "About" },
+                    { id: "experience", label: "Experience" },
+                    { id: "projects", label: "Projects" },
+                    { id: "certifications", label: "Certifications" },
+                    { id: "contact", label: "Contact" }
+                  ].map((item) =>
+                    h(
+                      "button",
+                      {
+                        key: item.id,
+                        type: "button",
+                        className: "site-footer-link",
+                        onClick: () => navigateToSection(item.id)
+                      },
+                      item.label
+                    )
+                  )
+                ),
+
+                // Social Icons & Back to Top Button
+                h(
+                  "div",
+                  { className: "site-footer-actions" },
+                  h(
+                    "div",
+                    { className: "site-footer-socials" },
+                    h(
+                      "a",
+                      {
+                        href: PROFILE_DATA.github,
+                        target: "_blank",
+                        rel: "noopener",
+                        className: "icon-circle-btn",
+                        title: "GitHub @fardinhossain",
+                        "aria-label": "GitHub"
+                      },
+                      h(GithubIcon, { size: 16 })
+                    ),
+                    h(
+                      "a",
+                      {
+                        href: PROFILE_DATA.linkedin,
+                        target: "_blank",
+                        rel: "noopener",
+                        className: "icon-circle-btn",
+                        title: "LinkedIn @fardinhosn",
+                        "aria-label": "LinkedIn"
+                      },
+                      h(LinkedInIcon, { size: 16 })
+                    ),
+                    h(
+                      "a",
+                      {
+                        href: `mailto:${PROFILE_DATA.email}`,
+                        className: "icon-circle-btn",
+                        title: `Email ${PROFILE_DATA.email}`,
+                        "aria-label": "Email"
+                      },
+                      h(MailIcon, { size: 16 })
+                    )
+                  ),
+                  h(
+                    "button",
+                    {
+                      type: "button",
+                      className: "project-action-pill back-to-top-btn",
+                      onClick: () => window.scrollTo({ top: 0, behavior: "smooth" }),
+                      "aria-label": "Back to top"
+                    },
+                    "Back to top ↑"
+                  )
+                )
+              ),
+              h(
+                "div",
+                { className: "site-footer-bottom" },
                 h(
                   "span",
-                  { style: { fontWeight: 500, color: "var(--text-muted)" } },
-                  "· Md. Fardin Hossain · AI Engineer & Full-Stack Developer"
+                  null,
+                  `© ${new Date().getFullYear()} Md. Fardin Hossain. Built with React, Tailwind & Bot F-01.`
+                ),
+                h(
+                  "span",
+                  { className: "site-footer-status" },
+                  h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
+                  "All systems operational · Unit F-01 on standby"
                 )
               )
             )
@@ -1059,21 +2014,20 @@ function PortfolioApp() {
     ),
 
     // ========================================================================
-    // MOBILE BOTTOM TAB BAR (MATCHES FIGMA MOBILE DESIGN)
+    // MOBILE BOTTOM TAB BAR (MATCHES EXACT SECTION ORDER)
     // ========================================================================
     h(
       "nav",
       { className: "mobile-bottom-bar", "aria-label": "Mobile Quick Navigation" },
       [
         { id: "home", label: "Home", icon: "⌂", action: () => navigateToSection("home") },
+        { id: "about", label: "About", icon: "◉", action: () => navigateToSection("about") },
+        { id: "experience", label: "Exp", icon: "★", action: () => navigateToSection("experience") },
         { id: "projects", label: "Projects", icon: "⊞", action: () => navigateToSection("projects") },
-        { id: "journey", label: "Journey", icon: "★", action: () => openJourneyExperience() },
         { id: "certifications", label: "Certs", icon: "✓", action: () => navigateToSection("certifications") },
         { id: "contact", label: "Contact", icon: "✉", action: () => navigateToSection("contact") }
       ].map((tab) => {
-        const isActive =
-          (tab.id === "journey" && view === "journey") ||
-          (view === "home" && activeNav === tab.id);
+        const isActive = view === "home" && activeNav === tab.id;
         return h(
           "button",
           {
@@ -1082,7 +2036,7 @@ function PortfolioApp() {
             className: `mobile-tab-item ${isActive ? "active" : ""}`,
             onClick: tab.action
           },
-          h("span", { style: { fontSize: "1rem", lineHeight: 1 } }, tab.icon),
+          h("span", { style: { fontSize: "0.95rem", lineHeight: 1 } }, tab.icon),
           h("span", null, tab.label)
         );
       })
