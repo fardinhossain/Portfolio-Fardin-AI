@@ -808,37 +808,43 @@ export function RobotScene({
       return new THREE.Vector3(x, y, 0);
     }
 
-    // Distinct entry directions and scan waypoints per project index
+    // Distinct entry directions and scan waypoints anchored around targetPos.y
     function getFlightVectorsForIndex(index, targetPos) {
       const { vW, vH } = getVisibleBoundsAtZ0();
-      const pattern = index % 5;
+      const pattern = index % 6;
+      const scanLift = 1.05 * baseScale;
+      const entryLift = 1.65 * baseScale;
       let startPos;
       let scanPos;
 
       if (pattern === 0) {
-        // 1. Swoop in from Top-Left sky
-        startPos = new THREE.Vector3(-vW * 0.58, vH * 0.54, 1.8);
-        scanPos = new THREE.Vector3(-vW * 0.24, vH * 0.32, 1.1);
+        // 1. Swoop in from Top-Left
+        startPos = new THREE.Vector3(-vW * 0.56, targetPos.y + entryLift, 1.8);
+        scanPos = new THREE.Vector3(targetPos.x - vW * 0.12, targetPos.y + scanLift, 1.1);
       } else if (pattern === 1) {
         // 2. Bank in from Top-Right
-        startPos = new THREE.Vector3(vW * 0.58, vH * 0.5, 1.8);
-        scanPos = new THREE.Vector3(vW * 0.16, vH * 0.33, 1.1);
+        startPos = new THREE.Vector3(vW * 0.56, targetPos.y + entryLift, 1.8);
+        scanPos = new THREE.Vector3(targetPos.x + vW * 0.12, targetPos.y + scanLift, 1.1);
       } else if (pattern === 2) {
         // 3. Arc in from Far-Right flank
-        startPos = new THREE.Vector3(vW * 0.62, vH * 0.08, 2.0);
-        scanPos = new THREE.Vector3(vW * 0.28, vH * 0.22, 1.2);
+        startPos = new THREE.Vector3(vW * 0.6, targetPos.y + scanLift * 0.6, 2.0);
+        scanPos = new THREE.Vector3(targetPos.x - vW * 0.08, targetPos.y + scanLift, 1.2);
       } else if (pattern === 3) {
         // 4. Climb in from Left flank
-        startPos = new THREE.Vector3(-vW * 0.62, -vH * 0.08, 1.9);
-        scanPos = new THREE.Vector3(-vW * 0.2, vH * 0.06, 1.2);
+        startPos = new THREE.Vector3(-vW * 0.6, targetPos.y + scanLift * 0.6, 1.9);
+        scanPos = new THREE.Vector3(targetPos.x + vW * 0.1, targetPos.y + scanLift, 1.2);
+      } else if (pattern === 4) {
+        // 5. Dive in from High Center Arc
+        startPos = new THREE.Vector3(0.0, targetPos.y + entryLift * 1.15, 2.2);
+        scanPos = new THREE.Vector3(targetPos.x, targetPos.y + scanLift, 1.25);
       } else {
-        // 5. Dive in from High Center Orbit
-        startPos = new THREE.Vector3(0.0, vH * 0.62, 2.4);
-        scanPos = new THREE.Vector3(targetPos.x * 0.45, vH * 0.22, 1.3);
+        // 6. Sweep in from Right-Upper diagonal
+        startPos = new THREE.Vector3(vW * 0.58, targetPos.y + entryLift, 1.9);
+        scanPos = new THREE.Vector3(targetPos.x - vW * 0.1, targetPos.y + scanLift, 1.15);
       }
 
       // Control points for smooth cubic Bézier curves
-      const arcLift = Math.min(0.85, vH * 0.12);
+      const arcLift = Math.min(0.65, vH * 0.09);
       const enterC1 = new THREE.Vector3(
         (startPos.x + scanPos.x) * 0.5,
         Math.max(startPos.y, scanPos.y) + arcLift,
@@ -948,7 +954,15 @@ export function RobotScene({
       );
     }
 
+    let userScrollPauseUntil = 0;
+    const onUserManualScrollInput = () => {
+      userScrollPauseUntil = performance.now() + 1600;
+    };
+    window.addEventListener("wheel", onUserManualScrollInput, { passive: true });
+    window.addEventListener("touchmove", onUserManualScrollInput, { passive: true });
+
     function startFullSequence() {
+      userScrollPauseUntil = 0;
       const list = latestPropsRef.current.projects || [];
       if (reducedMotion || list.length === 0) {
         list.forEach((p) => {
@@ -1338,6 +1352,37 @@ export function RobotScene({
         }
       }
 
+      // Smoothly auto-scroll the viewport with the bot's live position during project delivery
+      const isBotDelivering =
+        sm.state === ANIMATION_STATES.ENTERING ||
+        sm.state === ANIMATION_STATES.SCANNING ||
+        sm.state === ANIMATION_STATES.PICKING_UP ||
+        sm.state === ANIMATION_STATES.DELIVERING ||
+        sm.state === ANIMATION_STATES.RELEASING;
+
+      if (isBotDelivering && now > userScrollPauseUntil) {
+        const containerRect = container.getBoundingClientRect();
+        const botDom = worldToDomPoint(sm.currentPos);
+        const botViewportY = containerRect.top + botDom.py;
+
+        let focusViewportY = botViewportY + 70;
+        if (activeProj) {
+          const slotEl = slotRefsMap.current.get(activeProj.id);
+          if (slotEl) {
+            const slotRect = slotEl.getBoundingClientRect();
+            const slotCenterViewportY = slotRect.top + slotRect.height * 0.42;
+            focusViewportY = botViewportY * 0.45 + slotCenterViewportY * 0.55;
+          }
+        }
+
+        const desiredViewportY = window.innerHeight * 0.44;
+        const deltaY = focusViewportY - desiredViewportY;
+        if (Math.abs(deltaY) > 4) {
+          const step = deltaY * Math.min(1, dt * 8.5);
+          window.scrollTo({ top: window.scrollY + step, behavior: "instant" });
+        }
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -1347,6 +1392,8 @@ export function RobotScene({
       if (rafId) cancelAnimationFrame(rafId);
       io.disconnect();
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("wheel", onUserManualScrollInput);
+      window.removeEventListener("touchmove", onUserManualScrollInput);
       renderer.dispose();
     };
   }, []);
