@@ -372,6 +372,8 @@ function PortfolioApp() {
 
   const aboutSectionRef = useRef(null);
   const certSectionRef = useRef(null);
+  const certListRef = useRef(null);
+  const certTimersRef = useRef([]);
   const hasScannedAboutRef = useRef(false);
   const hasDeliveredCertsRef = useRef(false);
 
@@ -449,6 +451,10 @@ function PortfolioApp() {
 
   // Scripted 7-Bot Squadron "Two-Sided Smooth Convergence" sequence for Certifications section
   const triggerCertBotDelivery = useCallback(() => {
+    certTimersRef.current.forEach((id) => clearTimeout(id));
+    certTimersRef.current = [];
+    hasDeliveredCertsRef.current = true;
+
     setCertBotState((prev) => ({
       phase: "delivering",
       active: true,
@@ -477,17 +483,14 @@ function PortfolioApp() {
       }));
     }, 1450);
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
+    certTimersRef.current = [t1, t2];
   }, []);
 
-  // Trigger About scan and Certifications delivery once when scrolled into view
+  // Trigger About scan on scroll, and trigger Certifications two-sided bot delivery ONLY when the user
+  // scrolls/navigates to the Certifications section (never on initial page load or while #projects is auto-scrolling)
   useEffect(() => {
     if (view !== "home") return;
     const aboutEl = aboutSectionRef.current;
-    const certEl = certSectionRef.current;
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -496,18 +499,67 @@ function PortfolioApp() {
             hasScannedAboutRef.current = true;
             triggerAboutBotScan();
           }
-          if (entry.target === certEl && entry.isIntersecting && !hasDeliveredCertsRef.current) {
-            hasDeliveredCertsRef.current = true;
-            triggerCertBotDelivery();
-          }
         });
       },
       { threshold: 0.14 }
     );
 
     if (aboutEl) io.observe(aboutEl);
-    if (certEl) io.observe(certEl);
-    return () => io.disconnect();
+
+    const checkCertSectionOnScroll = () => {
+      const targetEl = certListRef.current || certSectionRef.current;
+      if (!targetEl) return;
+
+      const rect = targetEl.getBoundingClientRect();
+      const vh = window.innerHeight || 800;
+
+      // Reset to waiting state when the user is above #certifications so the animation always
+      // plays freshly when the user scrolls down to the Certifications section
+      if (rect.top > vh * 0.92) {
+        if (hasDeliveredCertsRef.current) {
+          hasDeliveredCertsRef.current = false;
+          certTimersRef.current.forEach((id) => clearTimeout(id));
+          certTimersRef.current = [];
+          setCertBotState((prev) => ({
+            ...prev,
+            phase: "waiting",
+            active: false,
+            chip: "7× BOT SQUAD · READY",
+            text: "7 BOTS READY FOR SIMULTANEOUS DELIVERY · Scroll to Certifications to deploy 7/7 units together"
+          }));
+        }
+        return;
+      }
+
+      // Trigger when the Certifications list enters the active viewing zone of the viewport
+      if (
+        !hasDeliveredCertsRef.current &&
+        rect.top <= vh * 0.78 &&
+        rect.bottom >= vh * 0.15
+      ) {
+        hasDeliveredCertsRef.current = true;
+        triggerCertBotDelivery();
+      }
+    };
+
+    const certIo = new IntersectionObserver(
+      () => {
+        checkCertSectionOnScroll();
+      },
+      { threshold: [0, 0.15, 0.35, 0.6] }
+    );
+    if (certListRef.current) {
+      certIo.observe(certListRef.current);
+    } else if (certSectionRef.current) {
+      certIo.observe(certSectionRef.current);
+    }
+
+    window.addEventListener("scroll", checkCertSectionOnScroll, { passive: true });
+    return () => {
+      io.disconnect();
+      certIo.disconnect();
+      window.removeEventListener("scroll", checkCertSectionOnScroll);
+    };
   }, [view, triggerAboutBotScan, triggerCertBotDelivery]);
 
   // Filtered 20 Anthropic Academy Certificates (All / AI Fluency / ML & Backend)
@@ -608,6 +660,19 @@ function PortfolioApp() {
   const navigateToSection = (sectionId) => {
     setMobileMenuOpen(false);
     setActiveNav(sectionId);
+    if (typeof window !== "undefined") {
+      window.__navScrollingUntil = performance.now() + 2200;
+    }
+    if (sectionId === "certifications") {
+      hasDeliveredCertsRef.current = false;
+      setCertBotState((prev) => ({
+        ...prev,
+        phase: "waiting",
+        active: false,
+        chip: "7× BOT SQUAD · READY",
+        text: "7 BOTS READY FOR SIMULTANEOUS DELIVERY · Flying in as you arrive at Certifications..."
+      }));
+    }
     if (view !== "home") {
       closeJourneyExperience(sectionId);
       return;
@@ -615,6 +680,14 @@ function PortfolioApp() {
     const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
+      if (sectionId === "certifications") {
+        setTimeout(() => {
+          if (!hasDeliveredCertsRef.current) {
+            hasDeliveredCertsRef.current = true;
+            triggerCertBotDelivery();
+          }
+        }, 420);
+      }
     }
   };
 
@@ -1274,7 +1347,10 @@ function PortfolioApp() {
                       {
                         key: `cert-bot-${certBotState.runCount}`,
                         initial: { x: -32, opacity: 0.4 },
-                        animate: { x: 0, opacity: 1 },
+                        animate:
+                          certBotState.phase === "waiting"
+                            ? { x: -32, opacity: 0.4 }
+                            : { x: 0, opacity: 1 },
                         transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
                         style: { display: "inline-flex", alignItems: "center", justifyContent: "center" }
                       },
@@ -1353,7 +1429,7 @@ function PortfolioApp() {
 
                   h(
                     "div",
-                    { className: "cert-tiles-list", role: "list" },
+                    { ref: certListRef, className: "cert-tiles-list", role: "list" },
                     VERIFIED_CERTIFICATIONS.map((cert, idx) => {
                       const unitNum = String(idx + 1).padStart(2, "0");
                       // Alternate Left (-220px) and Right (+220px) so all 7 small bots & tiles
