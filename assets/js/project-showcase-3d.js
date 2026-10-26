@@ -1419,26 +1419,11 @@ export function RobotScene({
     }
   }, [summonTargetId]);
 
-  return h(
-    React.Fragment,
-    null,
-    h("div", {
-      ref: mountRef,
-      className: "robot-scene-canvas-layer",
-      "aria-hidden": "true"
-    }),
-    h(
-      "div",
-      {
-        ref: hudRef,
-        className: "robot-floating-hud",
-        style: { opacity: 0 },
-        "aria-hidden": "true"
-      },
-      h("span", { className: "hud-dot" }),
-      h("span", { className: "hud-label" }, "SCANNING")
-    )
-  );
+  return h("div", {
+    ref: mountRef,
+    className: "robot-scene-canvas-layer",
+    "aria-hidden": "true"
+  });
 }
 
 // --------------------------------------------------------------------------
@@ -1519,25 +1504,10 @@ export function ProjectCard3D({
     },
     isJustLanded && h("div", { className: "card-landing-pulse", "aria-hidden": "true" }),
     !isDelivered
-      ? h(
-          "div",
-          {
-            className: `project-slot-dropzone ${isActiveTarget ? "is-incoming" : ""}`,
-            "aria-hidden": "true"
-          },
-          h(
-            "div",
-            { className: "dropzone-reticle" },
-            h("span", { className: "dropzone-dot" }),
-            h(
-              "span",
-              { className: "dropzone-label" },
-              isActiveTarget
-                ? `BOT F-01 DELIVERING · ${project.title.toUpperCase()}`
-                : `SLOT 0${index + 1} · AWAITING BOT DELIVERY`
-            )
-          )
-        )
+      ? h("div", {
+          className: "project-slot-dropzone",
+          "aria-hidden": "true"
+        })
       : h(
           motion.article,
           {
