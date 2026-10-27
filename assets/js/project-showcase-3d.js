@@ -804,10 +804,11 @@ export function RobotScene({
       }
       // Fallback grid estimate if DOM rect not yet measured
       const { vW, vH } = getVisibleBoundsAtZ0();
-      const col = index % 3;
-      const row = Math.floor(index / 3);
-      const x = (col - 1) * (vW * 0.28);
-      const y = vH * 0.16 - row * (vH * 0.34);
+      const cols = isMobile ? 1 : 3;
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const x = isMobile ? 0 : (col - 1) * (vW * 0.28);
+      const y = vH * 0.16 - row * (vH * (isMobile ? 0.22 : 0.34));
       return new THREE.Vector3(x, y, 0);
     }
 
