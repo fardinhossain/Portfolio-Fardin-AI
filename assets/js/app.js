@@ -27,6 +27,7 @@ import {
 import { FlyRankJourneyView } from "./journey-view.js";
 import { FeaturedProjects } from "./project-showcase-3d.js";
 import { ExperienceTimelineSection } from "./experience-timeline-3d.js";
+import { CertificationShowcase } from "./certification-showcase-3d.js";
 
 const h = React.createElement;
 
@@ -350,18 +351,11 @@ function PortfolioApp() {
   const [certWallFilter, setCertWallFilter] = useState("all");
   const [flippedWallCards, setFlippedWallCards] = useState({});
 
-  // Bot F-01 Section Telemetry States (About Profile Scan & 7-Bot Certifications Squadron Delivery)
+  // Bot F-01 Section Telemetry States (About Profile Scan)
   const [aboutBotState, setAboutBotState] = useState({
     active: false,
     chip: "UNIT F-01 · STANDBY",
     text: "SCANNING PROFILE… / SKILLS VERIFIED / 4 DOMAINS LOADED · Standing by beside photo card",
-    runCount: 0
-  });
-  const [certBotState, setCertBotState] = useState({
-    phase: "waiting",
-    active: false,
-    chip: "7× BOT SQUAD · READY",
-    text: "7 BOTS READY FOR SIMULTANEOUS DELIVERY · Scroll or click Replay to deploy 7/7 units together",
     runCount: 0
   });
 
@@ -371,11 +365,7 @@ function PortfolioApp() {
   const [contactStatus, setContactStatus] = useState({ state: "idle", message: "" });
 
   const aboutSectionRef = useRef(null);
-  const certSectionRef = useRef(null);
-  const certListRef = useRef(null);
-  const certTimersRef = useRef([]);
   const hasScannedAboutRef = useRef(false);
-  const hasDeliveredCertsRef = useRef(false);
 
   // Sync browser back/forward button
   useEffect(() => {
@@ -449,45 +439,7 @@ function PortfolioApp() {
     };
   }, []);
 
-  // Scripted 7-Bot Squadron "Two-Sided Smooth Convergence" sequence for Certifications section
-  const triggerCertBotDelivery = useCallback(() => {
-    certTimersRef.current.forEach((id) => clearTimeout(id));
-    certTimersRef.current = [];
-    hasDeliveredCertsRef.current = true;
-
-    setCertBotState((prev) => ({
-      phase: "delivering",
-      active: true,
-      chip: "7 MINI-BOTS · CONVERGING FROM 2 SIDES",
-      text: "FLYING IN TOGETHER FROM LEFT & RIGHT… 7 small Bot F-01 units showcasing all 7 credentials...",
-      runCount: prev.runCount + 1
-    }));
-
-    const t1 = setTimeout(() => {
-      setCertBotState((prev) => ({
-        ...prev,
-        phase: "releasing",
-        active: true,
-        chip: "7/7 TILES ALIGNED",
-        text: "LOCKING CREDENTIAL TILES IN PLACE · All 7 verified tracks converged smoothly..."
-      }));
-    }, 850);
-
-    const t2 = setTimeout(() => {
-      setCertBotState((prev) => ({
-        ...prev,
-        phase: "standby",
-        active: false,
-        chip: "7/7 DELIVERED · STANDBY",
-        text: "ALL 7 CREDENTIAL TILES SHOWCASED · Small Bot F-01 units docked beside each tile"
-      }));
-    }, 1450);
-
-    certTimersRef.current = [t1, t2];
-  }, []);
-
-  // Trigger About scan on scroll, and trigger Certifications two-sided bot delivery ONLY when the user
-  // scrolls/navigates to the Certifications section (never on initial page load or while #projects is auto-scrolling)
+  // Trigger About scan on scroll when the user reaches the About section
   useEffect(() => {
     if (view !== "home") return;
     const aboutEl = aboutSectionRef.current;
@@ -506,61 +458,10 @@ function PortfolioApp() {
 
     if (aboutEl) io.observe(aboutEl);
 
-    const checkCertSectionOnScroll = () => {
-      const targetEl = certListRef.current || certSectionRef.current;
-      if (!targetEl) return;
-
-      const rect = targetEl.getBoundingClientRect();
-      const vh = window.innerHeight || 800;
-
-      // Reset to waiting state when the user is above #certifications so the animation always
-      // plays freshly when the user scrolls down to the Certifications section
-      if (rect.top > vh * 0.92) {
-        if (hasDeliveredCertsRef.current) {
-          hasDeliveredCertsRef.current = false;
-          certTimersRef.current.forEach((id) => clearTimeout(id));
-          certTimersRef.current = [];
-          setCertBotState((prev) => ({
-            ...prev,
-            phase: "waiting",
-            active: false,
-            chip: "7× BOT SQUAD · READY",
-            text: "7 BOTS READY FOR SIMULTANEOUS DELIVERY · Scroll to Certifications to deploy 7/7 units together"
-          }));
-        }
-        return;
-      }
-
-      // Trigger when the Certifications list enters the active viewing zone of the viewport
-      if (
-        !hasDeliveredCertsRef.current &&
-        rect.top <= vh * 0.78 &&
-        rect.bottom >= vh * 0.15
-      ) {
-        hasDeliveredCertsRef.current = true;
-        triggerCertBotDelivery();
-      }
-    };
-
-    const certIo = new IntersectionObserver(
-      () => {
-        checkCertSectionOnScroll();
-      },
-      { threshold: [0, 0.15, 0.35, 0.6] }
-    );
-    if (certListRef.current) {
-      certIo.observe(certListRef.current);
-    } else if (certSectionRef.current) {
-      certIo.observe(certSectionRef.current);
-    }
-
-    window.addEventListener("scroll", checkCertSectionOnScroll, { passive: true });
     return () => {
       io.disconnect();
-      certIo.disconnect();
-      window.removeEventListener("scroll", checkCertSectionOnScroll);
     };
-  }, [view, triggerAboutBotScan, triggerCertBotDelivery]);
+  }, [view, triggerAboutBotScan]);
 
   // Filtered 20 Anthropic Academy Certificates (All / AI Fluency / ML & Backend)
   const filteredAnthropicCerts = useMemo(() => {
@@ -1292,278 +1193,14 @@ function PortfolioApp() {
 
             // ================================================================
             // 5. CERTIFICATIONS SECTION (#certifications)
-            // Compact List-Tile Showcase — Small Bots Fly Smoothly from 2 Sides (Left & Right)
-            // Together at the Same Time to Showcase All 7 Verified Credentials
+            // Dual-Side Flying Robot Delivery System (Robot A from Left, Robot B from Right)
+            // Alternating deliveries for all 7 verified credential rows with 3D carried tiles
             // ================================================================
-            h(
-              "section",
-              { id: "certifications", ref: certSectionRef, className: "section-block" },
-              h(
-                "div",
-                { className: "section-header-bar" },
-                h(
-                  "div",
-                  { className: "section-title-group" },
-                  h("span", { className: "section-red-bar" }),
-                  h(
-                    "h2",
-                    { className: "section-heading" },
-                    "Certifications",
-                    h("span", { className: "red-dot" })
-                  )
-                ),
-                h(
-                  "button",
-                  {
-                    type: "button",
-                    className: "project-action-pill",
-                    onClick: () => openJourneyExperience("journey-certificates")
-                  },
-                  "20/20 Certificate Wall (FlyRank Explore) →"
-                )
-              ),
-
-              // Compact Telemetry & Control Bar (Small Bot F-01 Mascot)
-              h(
-                "div",
-                {
-                  className: "robot-telemetry-bar",
-                  role: "region",
-                  "aria-label": "Bot F-01 Credential Delivery Controls"
-                },
-                h(
-                  "div",
-                  { className: "robot-telemetry-left" },
-                  h(
-                    "span",
-                    {
-                      className: `robot-holopad-dock bot-f01-dock-stage ${
-                        certBotState.active ? "is-bot-scanning" : "is-bot-docked"
-                      }`,
-                      title: "Bot F-01 Command Dock"
-                    },
-                    h(
-                      motion.span,
-                      {
-                        key: `cert-bot-${certBotState.runCount}`,
-                        initial: { x: -32, opacity: 0.4 },
-                        animate:
-                          certBotState.phase === "waiting"
-                            ? { x: -32, opacity: 0.4 }
-                            : { x: 0, opacity: 1 },
-                        transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] },
-                        style: { display: "inline-flex", alignItems: "center", justifyContent: "center" }
-                      },
-                      h(BotF01MascotSvg, { isActive: certBotState.active, size: 28 })
-                    )
-                  ),
-                  h(
-                    "span",
-                    { className: "robot-unit-badge" },
-                    h("span", { className: "robot-unit-led" }),
-                    h("span", null, "BOT F-01 · 7 UNITS")
-                  ),
-                  h(
-                    "span",
-                    {
-                      className: `robot-state-chip ${
-                        !certBotState.active ? "state-idle" : ""
-                      }`
-                    },
-                    certBotState.chip
-                  ),
-                  h(
-                    "span",
-                    { className: "robot-status-text" },
-                    certBotState.text
-                  )
-                ),
-                h(
-                  "div",
-                  { className: "robot-telemetry-actions" },
-                  h(
-                    "button",
-                    {
-                      type: "button",
-                      className: "robot-control-btn primary-replay",
-                      onClick: triggerCertBotDelivery,
-                      title: "Replay smooth two-sided bot delivery"
-                    },
-                    "Replay Delivery ↻"
-                  ),
-                  h(
-                    "button",
-                    {
-                      type: "button",
-                      className: "robot-control-btn",
-                      onClick: () => openJourneyExperience("journey-certificates"),
-                      title: "Open 20/20 Anthropic Certificate Wall on FlyRank Internship Explore Page"
-                    },
-                    "Explore 20/20 Wall ↗"
-                  )
-                )
-              ),
-
-              // Compact List-Tile Container — Small Bots Fly In Smoothly from Left & Right Together
-              h(
-                "div",
-                { className: "bezel-outer" },
-                h(
-                  "div",
-                  { className: "bezel-inner credentials-strip-container cert-squad-stage-inner" },
-                  h(
-                    "div",
-                    { className: "credentials-strip-header" },
-                    h(
-                      "span",
-                      { className: "credentials-strip-eyebrow" },
-                      h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                      "PRIMARY INDUSTRY & ACADEMIC CREDENTIALS (7 VERIFIED TRACKS)"
-                    ),
-                    h(
-                      "span",
-                      { className: "credentials-strip-hint" },
-                      "Click 👁 to view scan or ↗ to verify"
-                    )
-                  ),
-
-                  h(
-                    "div",
-                    { ref: certListRef, className: "cert-tiles-list", role: "list" },
-                    VERIFIED_CERTIFICATIONS.map((cert, idx) => {
-                      const unitNum = String(idx + 1).padStart(2, "0");
-                      // Alternate Left (-220px) and Right (+220px) so all 7 small bots & tiles
-                      // fly in smoothly from the 2 sides at the exact same time (delay: 0) and come together!
-                      const fromLeft = idx % 2 === 0;
-                      const startX = fromLeft ? -220 : 220;
-                      const isWaiting = certBotState.phase === "waiting";
-                      const isFlying = certBotState.active;
-
-                      return h(
-                        motion.div,
-                        {
-                          key: `cert-tile-${certBotState.runCount}-${cert.id}`,
-                          role: "listitem",
-                          className: `cert-row-card cert-list-tile ${
-                            isFlying ? "is-tile-gliding" : "is-tile-settled"
-                          } ${fromLeft ? "from-left-wing" : "from-right-wing"}`,
-                          initial: {
-                            opacity: 0,
-                            x: startX
-                          },
-                          animate: isWaiting
-                            ? {
-                                opacity: 0,
-                                x: startX
-                              }
-                            : {
-                                opacity: 1,
-                                x: 0
-                              },
-                          transition: {
-                            duration: 1.05,
-                            delay: 0,
-                            ease: [0.22, 1, 0.36, 1]
-                          }
-                        },
-                        // Left Side of Tile: Small Bot F-01 Mascot + Issuer Logo + Issuer & Title
-                        h(
-                          "div",
-                          { className: "cert-tile-left" },
-                          h(
-                            "span",
-                            {
-                              className: `cert-mini-bot-badge ${isFlying ? "is-bot-flying" : ""}`,
-                              title: `Bot F-${unitNum} (${fromLeft ? "Left Wing" : "Right Wing"})`
-                            },
-                            h(BotF01MascotSvg, { isActive: isFlying, size: 22 }),
-                            h("span", { className: "cert-mini-bot-tag" }, `F-${unitNum}`)
-                          ),
-                          h("div", { className: "cert-issuer-logo cert-tile-logo" }, cert.logoText),
-                          h(
-                            "div",
-                            { className: "cert-tile-text" },
-                            h(
-                              "div",
-                              { className: "cert-tile-title-row" },
-                              h("span", { className: "cert-tile-title", title: cert.title }, cert.title)
-                            ),
-                            h(
-                              "div",
-                              { className: "cert-tile-meta-row" },
-                              h("span", { className: "cert-tile-issuer" }, cert.issuer),
-                              cert.period &&
-                                h("span", { className: "cert-tile-period" }, `· ${cert.period}`)
-                            )
-                          )
-                        ),
-
-                        // Right Side of Tile: Status Pill + Compact Action Buttons
-                        h(
-                          "div",
-                          { className: "cert-tile-right" },
-                          h(
-                            "span",
-                            {
-                              className:
-                                cert.statusType === "verified"
-                                  ? "verified-pill"
-                                  : "inprogress-pill"
-                            },
-                            cert.statusType === "verified" ? `✓ ${cert.status}` : `⏳ ${cert.status}`
-                          ),
-                          cert.verifyUrl &&
-                            h(
-                              "a",
-                              {
-                                href: cert.verifyUrl,
-                                target: "_blank",
-                                rel: "noopener",
-                                className: "icon-circle-btn cert-tile-icon-btn",
-                                title: `Verify ${cert.issuer} Credential`
-                              },
-                              h(ExternalArrowIcon, { size: 12 })
-                            ),
-                          cert.certificateImage &&
-                            h(
-                              "button",
-                              {
-                                type: "button",
-                                className: "icon-circle-btn cert-tile-icon-btn",
-                                title: `View ${cert.title} Certificate Scan`,
-                                onClick: () => setSelectedCertModal(cert)
-                              },
-                              "👁"
-                            ),
-                          cert.openCertWall &&
-                            h(
-                              "button",
-                              {
-                                type: "button",
-                                className: "icon-circle-btn cert-tile-icon-btn",
-                                title: "Explore 20/20 Certificate Wall on FlyRank Internship Page",
-                                onClick: () => openJourneyExperience("journey-certificates")
-                              },
-                              "→"
-                            ),
-                          cert.openJourney &&
-                            h(
-                              "button",
-                              {
-                                type: "button",
-                                className: "icon-circle-btn cert-tile-icon-btn",
-                                title: "Open in Interactive Journey",
-                                onClick: () => openJourneyExperience("journey-timeline")
-                              },
-                              "→"
-                            )
-                        )
-                      );
-                    })
-                  )
-                )
-              )
-            ),
+            h(CertificationShowcase, {
+              certifications: VERIFIED_CERTIFICATIONS,
+              onOpenModal: (cert) => setSelectedCertModal(cert),
+              onOpenJourneyExperience: (tab) => openJourneyExperience(tab)
+            }),
 
             // ================================================================
             // 6. CONTACT SECTION (#contact)

@@ -2384,8 +2384,87 @@ body {
 }
 
 /* ==========================================================================
-   COMPACT LIST-TILE CREDENTIAL SHOWCASE WITH SMALL BOTS FROM 2 SIDES (#certifications)
+   COMPACT LIST-TILE CREDENTIAL SHOWCASE WITH DUAL FLYING ROBOTS (#certifications)
+   Robot A from Left Wing (Crimson LED), Robot B from Right Wing (Amber-Red LED)
    ========================================================================== */
+
+.cert-showcase-stage {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+.cert-robot-canvas-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.cert-row-slot {
+  position: relative;
+  min-height: 54px;
+  border-radius: 13px;
+  transition: box-shadow 0.28s ease, outline-color 0.28s ease, background 0.28s ease;
+}
+
+.cert-row-slot.is-active-target {
+  border-radius: 13px;
+  outline: 2px dashed rgba(225, 29, 72, 0.45);
+  outline-offset: 2px;
+  background: rgba(225, 29, 72, 0.02);
+  box-shadow: 0 0 20px rgba(225, 29, 72, 0.12);
+}
+
+.cert-slot-placeholder {
+  min-height: 52px;
+  border-radius: 13px;
+  border: 1px dashed rgba(15, 23, 42, 0.12);
+  background: rgba(248, 250, 252, 0.65);
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cert-slot-placeholder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  background: linear-gradient(90deg, transparent 0%, rgba(225, 29, 72, 0.05) 50%, transparent 100%);
+  animation: certSlotShimmer 2.2s infinite ease-in-out;
+}
+
+@keyframes certSlotShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.card-landing-pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 15px;
+  border: 2px solid rgba(225, 29, 72, 0.75);
+  pointer-events: none;
+  z-index: 16;
+  animation: cardLandingPulse 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cardLandingPulse {
+  0% {
+    transform: scale(0.985);
+    opacity: 0.95;
+    box-shadow: 0 0 16px rgba(225, 29, 72, 0.45);
+  }
+  100% {
+    transform: scale(1.02);
+    opacity: 0;
+    box-shadow: 0 0 0px transparent;
+  }
+}
 
 .cert-squad-stage-inner {
   overflow: hidden;
@@ -2396,10 +2475,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+  position: relative;
+  z-index: 12;
 }
 
 .cert-list-tile {
   position: relative;
+  z-index: 15;
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2533,6 +2616,14 @@ body {
 }
 
 @media (max-width: 680px) {
+  .cert-row-slot {
+    min-height: 82px;
+  }
+
+  .cert-slot-placeholder {
+    min-height: 80px;
+  }
+
   .cert-list-tile {
     flex-direction: column;
     align-items: stretch;
