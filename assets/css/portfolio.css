@@ -2390,8 +2390,17 @@ body {
 
 .cert-showcase-stage {
   position: relative;
-  overflow: hidden;
+  overflow: visible !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+  padding: 2.25rem 1.75rem 1.75rem;
+}
+
+.bezel-inner.cert-showcase-stage {
+  overflow: visible !important;
+}
+
+.cert-showcase-stage .credentials-strip-header {
+  margin-bottom: 2rem;
 }
 
 .cert-robot-canvas-layer {
@@ -2467,7 +2476,7 @@ body {
 }
 
 .cert-squad-stage-inner {
-  overflow: hidden;
+  overflow: visible !important;
   background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
 }
 

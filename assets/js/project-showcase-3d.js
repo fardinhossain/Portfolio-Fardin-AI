@@ -1775,21 +1775,25 @@ export function FeaturedProjects({
       return;
     }
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasTriggeredInitialRef.current) {
-            hasTriggeredInitialRef.current = true;
-            setDeliveredIds(new Set());
-            setSkipRequested(false);
-            setDeliveryRunId((r) => r + 1);
-          }
-        });
-      },
-      { threshold: 0.08 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
+    const checkProjScroll = () => {
+      if (hasTriggeredInitialRef.current) return;
+      if (window.scrollY < 200) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 800;
+      if (rect.top <= vh * 0.48 && rect.bottom >= vh * 0.2) {
+        hasTriggeredInitialRef.current = true;
+        setDeliveredIds(new Set());
+        setSkipRequested(false);
+        setDeliveryRunId((r) => r + 1);
+      }
+    };
+
+    window.addEventListener("scroll", checkProjScroll, { passive: true });
+    checkProjScroll();
+
+    return () => {
+      window.removeEventListener("scroll", checkProjScroll);
+    };
   }, [projectsList]);
 
   // Replay full robot delivery sequence on demand

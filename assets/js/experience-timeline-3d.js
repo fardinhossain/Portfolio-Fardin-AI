@@ -600,26 +600,30 @@ export function ExperienceTimelineSection({ onExploreInternship }) {
       return;
     }
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasTriggeredRef.current) {
-            hasTriggeredRef.current = true;
-            setTimelineState({
-              fillPct: 0,
-              topLit: false,
-              midLit: false,
-              cardRevealed: false,
-              botLit: false
-            });
-            setRunTrigger((c) => c + 1);
-          }
+    const checkExpScroll = () => {
+      if (hasTriggeredRef.current) return;
+      if (window.scrollY < 150) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || 800;
+      if (rect.top <= vh * 0.55 && rect.bottom >= vh * 0.2) {
+        hasTriggeredRef.current = true;
+        setTimelineState({
+          fillPct: 0,
+          topLit: false,
+          midLit: false,
+          cardRevealed: false,
+          botLit: false
         });
-      },
-      { threshold: 0.22 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
+        setRunTrigger((c) => c + 1);
+      }
+    };
+
+    window.addEventListener("scroll", checkExpScroll, { passive: true });
+    checkExpScroll();
+
+    return () => {
+      window.removeEventListener("scroll", checkExpScroll);
+    };
   }, []);
 
   const handleProgressUpdate = (next) => {

@@ -390,7 +390,7 @@ export function createCertificationRobot3D(options = {}) {
 
   // --- E. CARRIED 3D MINIATURE CREDENTIAL TILE + TRACTOR BEAM ---
   const cargoPivot = new THREE.Group();
-  cargoPivot.position.set(0, -0.68, 0.1);
+  cargoPivot.position.set(0, -0.42, 0.1);
   cargoPivot.visible = false;
   bodyPivot.add(cargoPivot);
 
@@ -407,7 +407,7 @@ export function createCertificationRobot3D(options = {}) {
   // Sleek horizontal tile geometry matching list tile aspect ratio (1.8 : 0.58)
   const miniTileGeo = new THREE.BoxGeometry(1.75, 0.58, 0.05);
   const miniTileMesh = new THREE.Mesh(miniTileGeo, tileMaterials);
-  miniTileMesh.position.set(0, -0.22, 0);
+  miniTileMesh.position.set(0, -0.12, 0);
   cargoPivot.add(miniTileMesh);
 
   // Soft drop shadow plane beneath tile
@@ -419,7 +419,7 @@ export function createCertificationRobot3D(options = {}) {
     depthWrite: false
   });
   const miniShadowMesh = new THREE.Mesh(miniShadowGeo, miniShadowMat);
-  miniShadowMesh.position.set(0, -0.62, 0);
+  miniShadowMesh.position.set(0, -0.46, 0);
   cargoPivot.add(miniShadowMesh);
 
   // Tractor beam ring
@@ -683,6 +683,14 @@ export function DualRobotDeliveryScene({
         latestPropsRef.current.onTargetRow(cert.id);
       }
 
+      // Smooth auto-scroll following the robot delivery
+      const slotEl = slotRefsMap.current.get(cert.id);
+      if (slotEl && typeof slotEl.scrollIntoView === "function") {
+        try {
+          slotEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        } catch (_err) {}
+      }
+
       // Prepare robot cargo tile
       currentBot.updateCredentialTile(cert);
       currentBot.cargoPivot.visible = true;
@@ -691,13 +699,13 @@ export function DualRobotDeliveryScene({
       currentBot.rightArmParts.gripperPivot.rotation.z = -0.22;
 
       // Vertical offset so the carried tile aligns exactly with the row center
-      const targetTileOffsetY = 0.9 * baseScale;
+      const targetTileOffsetY = 0.54 * baseScale;
 
       // Positions for smooth 3D Bézier approach (clearly in front with z > 0.6)
       const p0 = new THREE.Vector3(startX, slotPos.y + targetTileOffsetY + 0.6, 0.6);
       const c1 = new THREE.Vector3(sideMultiplier * (vW * 0.28), slotPos.y + targetTileOffsetY + 1.2, 1.5);
       const c2 = new THREE.Vector3(sideMultiplier * (vW * 0.1), slotPos.y + targetTileOffsetY + 0.35, 1.1);
-      const p3 = new THREE.Vector3(0, slotPos.y + targetTileOffsetY, 0.85); // precise alignment in front
+      const p3 = new THREE.Vector3(0, slotPos.y + targetTileOffsetY, 0.95); // precise alignment in front
 
       currentBot.root.position.copy(p0);
 
@@ -1160,24 +1168,36 @@ export function CertificationShowcase({
       return;
     }
 
-    const checkScroll = () => {
+    const triggerIfArrived = () => {
       if (hasTriggeredRef.current) return;
+      if (window.scrollY < 200) return;
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 800;
-
-      // Trigger only when user actually scrolls to Certifications section
-      if (rect.top <= vh * 0.78 && rect.bottom >= vh * 0.15) {
+      if (rect.top <= vh * 0.65 && rect.bottom >= vh * 0.2) {
         hasTriggeredRef.current = true;
         setDeliveredIds(new Set());
         setRunCount((r) => r + 1);
       }
     };
 
-    window.addEventListener("scroll", checkScroll, { passive: true });
-    checkScroll();
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            triggerIfArrived();
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    io.observe(el);
+
+    window.addEventListener("scroll", triggerIfArrived, { passive: true });
+    triggerIfArrived();
 
     return () => {
-      window.removeEventListener("scroll", checkScroll);
+      io.disconnect();
+      window.removeEventListener("scroll", triggerIfArrived);
     };
   }, [certifications]);
 

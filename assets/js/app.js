@@ -443,23 +443,26 @@ function PortfolioApp() {
   useEffect(() => {
     if (view !== "home") return;
     const aboutEl = aboutSectionRef.current;
+    if (!aboutEl) return;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.target === aboutEl && entry.isIntersecting && !hasScannedAboutRef.current) {
-            hasScannedAboutRef.current = true;
-            triggerAboutBotScan();
-          }
-        });
-      },
-      { threshold: 0.14 }
-    );
+    const checkAboutScroll = () => {
+      if (hasScannedAboutRef.current) return;
+      // Do not trigger on initial page load when user is near top of hero
+      if (window.scrollY < 100) return;
 
-    if (aboutEl) io.observe(aboutEl);
+      const rect = aboutEl.getBoundingClientRect();
+      const vh = window.innerHeight || 800;
+      if (rect.top <= vh * 0.55 && rect.bottom >= vh * 0.15) {
+        hasScannedAboutRef.current = true;
+        triggerAboutBotScan();
+      }
+    };
+
+    window.addEventListener("scroll", checkAboutScroll, { passive: true });
+    checkAboutScroll();
 
     return () => {
-      io.disconnect();
+      window.removeEventListener("scroll", checkAboutScroll);
     };
   }, [view, triggerAboutBotScan]);
 
