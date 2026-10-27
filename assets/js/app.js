@@ -28,6 +28,11 @@ import { FlyRankJourneyView } from "./journey-view.js";
 import { FeaturedProjects } from "./project-showcase-3d.js";
 import { ExperienceTimelineSection } from "./experience-timeline-3d.js";
 import { CertificationShowcase } from "./certification-showcase-3d.js";
+import {
+  getCurrentTheme,
+  subscribeTheme,
+  launchRobotThemeTransition
+} from "./theme-manager.js";
 
 const h = React.createElement;
 
@@ -340,6 +345,21 @@ function PortfolioApp() {
   const [journeyTargetSection, setJourneyTargetSection] = useState(null);
   const [activeNav, setActiveNav] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Theme State synced with Theme Manager
+  const [theme, setTheme] = useState(() => getCurrentTheme());
+
+  useEffect(() => {
+    return subscribeTheme((newTheme) => {
+      setTheme(newTheme);
+    });
+  }, []);
+
+  const handleToggleTheme = (e) => {
+    const rect = e?.currentTarget?.getBoundingClientRect();
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    launchRobotThemeTransition(nextTheme, rect);
+  };
 
   // Projects Modal State
   const [selectedProject, setSelectedProject] = useState(null);
@@ -663,10 +683,34 @@ function PortfolioApp() {
           )
         ),
 
-        // Right Actions: Let's Talk + Mobile Menu Button
+        // Right Actions: Theme Toggle + Let's Talk + Mobile Menu Button
         h(
           "div",
           { className: "nav-actions-right" },
+          h(
+            "button",
+            {
+              type: "button",
+              className: "theme-toggle-btn",
+              onClick: (e) => handleToggleTheme(e),
+              "aria-label": theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode",
+              title:
+                theme === "dark"
+                  ? "Activate Solar Light Mode (Bot Assistant)"
+                  : "Activate Robotic Dark Mode (Bot Assistant)"
+            },
+            h("span", { className: "theme-toggle-led" }),
+            h(
+              "span",
+              { className: "theme-toggle-icon-box", "aria-hidden": "true" },
+              theme === "dark" ? "☀️" : "🌙"
+            ),
+            h(
+              "span",
+              { className: "theme-toggle-label" },
+              theme === "dark" ? "Light" : "Dark"
+            )
+          ),
           h(
             "button",
             {
@@ -706,7 +750,7 @@ function PortfolioApp() {
                 transition: { duration: 0.2 },
                 style: {
                   marginTop: "8px",
-                  background: "#FFFFFF",
+                  background: "var(--bg-surface)",
                   border: "1px solid var(--border-light)",
                   borderRadius: "20px",
                   padding: "1rem",
@@ -744,6 +788,47 @@ function PortfolioApp() {
                       }
                     },
                     item.label
+                  )
+                ),
+                // Mobile Theme Toggle Row inside Drawer
+                h(
+                  "button",
+                  {
+                    type: "button",
+                    className: "theme-toggle-btn",
+                    style: {
+                      width: "100%",
+                      justifyContent: "space-between",
+                      marginTop: "0.5rem",
+                      padding: "0.65rem 0.9rem"
+                    },
+                    onClick: (e) => {
+                      handleToggleTheme(e);
+                      setMobileMenuOpen(false);
+                    },
+                    "aria-label":
+                      theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"
+                  },
+                  h(
+                    "span",
+                    {
+                      style: {
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.5rem"
+                      }
+                    },
+                    h("span", { className: "theme-toggle-led" }),
+                    h(
+                      "span",
+                      { style: { fontSize: "0.86rem" } },
+                      theme === "dark" ? "Switch to Solar Light" : "Switch to Robotic Dark"
+                    )
+                  ),
+                  h(
+                    "span",
+                    { className: "theme-toggle-icon-box" },
+                    theme === "dark" ? "☀️" : "🌙"
                   )
                 )
               )

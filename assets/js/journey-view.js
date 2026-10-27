@@ -276,7 +276,7 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
             "div",
             {
               style: {
-                background: "#FFFFFF",
+                background: "var(--bg-surface)",
                 border: "1px solid var(--border-light)",
                 borderRadius: "14px",
                 padding: "0.95rem 1.15rem"
@@ -297,7 +297,7 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
             "div",
             {
               style: {
-                background: "#FFFFFF",
+                background: "var(--bg-surface)",
                 border: "1px solid var(--border-light)",
                 borderRadius: "14px",
                 padding: "0.95rem 1.15rem"
@@ -836,7 +836,7 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                         {
                           style: {
                             marginTop: "0.85rem",
-                            background: "#FFFFFF",
+                            background: "var(--bg-surface)",
                             border: "1px solid #FDE68A",
                             borderRadius: "12px",
                             padding: "0.9rem 1.1rem"
@@ -949,7 +949,8 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                       fontSize: "0.78rem",
                       fontFamily: "var(--font-sans)",
                       minWidth: "215px",
-                      background: "#FFFFFF"
+                      background: "var(--bg-surface)",
+                      color: "var(--text-primary)"
                     }
                   }),
                   h(

@@ -115,13 +115,16 @@ function createMiniCardCanvasTexture() {
     const category = project ? project.shortCategory : "AI / ML";
     const tags = project && project.tags ? project.tags.slice(0, 3) : ["Python", "PyTorch"];
 
-    // Outer white card surface
+    // Outer card surface
+    const isDark =
+      typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-theme") === "dark";
     ctx.clearRect(0, 0, 512, 340);
-    ctx.fillStyle = "#FFFFFF";
+    ctx.fillStyle = isDark ? "#181C26" : "#FFFFFF";
     ctx.fillRect(0, 0, 512, 340);
 
     // Subtle outer border
-    ctx.strokeStyle = "#CBD5E1";
+    ctx.strokeStyle = isDark ? "#292E3A" : "#CBD5E1";
     ctx.lineWidth = 8;
     ctx.strokeRect(4, 4, 504, 332);
 

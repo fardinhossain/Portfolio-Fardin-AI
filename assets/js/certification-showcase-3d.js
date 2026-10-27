@@ -73,25 +73,29 @@ function createCredentialMiniTileTexture() {
     if (!ctx) return;
     ctx.clearRect(0, 0, 512, 160);
 
+    const isDark =
+      typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-theme") === "dark";
+
     // Card background with rounded edges
-    ctx.fillStyle = "#FFFFFF";
+    ctx.fillStyle = isDark ? "#181C26" : "#FFFFFF";
     ctx.beginPath();
     ctx.roundRect(8, 8, 496, 144, 22);
     ctx.fill();
 
     // Subtle outer border
     ctx.lineWidth = 4;
-    ctx.strokeStyle = "rgba(15, 23, 42, 0.12)";
+    ctx.strokeStyle = isDark ? "#292E3A" : "rgba(15, 23, 42, 0.12)";
     ctx.stroke();
 
     // Left accent strip (Crimson Red)
-    ctx.fillStyle = "#E11D48";
+    ctx.fillStyle = isDark ? "#FF304F" : "#E11D48";
     ctx.beginPath();
     ctx.roundRect(14, 14, 12, 132, 6);
     ctx.fill();
 
     // Issuer logo box
-    ctx.fillStyle = "#0F172A";
+    ctx.fillStyle = isDark ? "#12151D" : "#0F172A";
     ctx.beginPath();
     ctx.roundRect(40, 32, 96, 96, 16);
     ctx.fill();
@@ -103,13 +107,13 @@ function createCredentialMiniTileTexture() {
     ctx.fillText(cert.logoText || "AI", 88, 80);
 
     // Unit carrier tag
-    ctx.fillStyle = "#E11D48";
+    ctx.fillStyle = isDark ? "#FF304F" : "#E11D48";
     ctx.font = "bold 20px 'JetBrains Mono', monospace";
     ctx.textAlign = "left";
     ctx.fillText(`AIR DELIVERED BY ${unitName}`, 154, 46);
 
     // Title (truncated cleanly)
-    ctx.fillStyle = "#0F172A";
+    ctx.fillStyle = isDark ? "#F5F6FA" : "#0F172A";
     ctx.font = "bold 32px 'Plus Jakarta Sans', sans-serif";
     const titleText = (cert.title || "").length > 24
       ? (cert.title || "").substring(0, 23) + "…"

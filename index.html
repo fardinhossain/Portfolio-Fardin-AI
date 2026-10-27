@@ -31,6 +31,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Theme Pre-Hydration Sync (Guarantees zero theme flash) -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('fardin_theme');
+        var pref = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        var theme = saved || pref || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
   <link rel="stylesheet" href="/assets/css/portfolio.css" />
 
   <!-- ESM Importmap: React 18, Framer Motion 11, Three.js, GSAP -->

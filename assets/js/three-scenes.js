@@ -196,6 +196,11 @@ export function HeroNeuralScene() {
       if (!isVisible) return;
 
       const t = clock.getElapsedTime();
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      matDark.color.setHex(isDark ? 0x94a3b8 : 0x0f172a);
+      ringMatDark.color.setHex(isDark ? 0x64748b : 0x0f172a);
+      ringMatDark.opacity = isDark ? 0.22 : 0.1;
+
       if (!reduced) {
         rootGroup.rotation.y += (targetX * 0.35 - rootGroup.rotation.y) * 0.05;
         rootGroup.rotation.x += (targetY * 0.25 - rootGroup.rotation.x) * 0.05;
@@ -353,6 +358,11 @@ export function ContactGlobeScene() {
       rafId = requestAnimationFrame(animate);
       if (!isVisible) return;
       const t = clock.getElapsedTime();
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      innerMat.color.setHex(isDark ? 0x12151d : 0xf8fafc);
+      wireMat.color.setHex(isDark ? 0x64748b : 0x0f172a);
+      wireMat.opacity = isDark ? 0.35 : 0.16;
+
       if (!reduced) {
         globeGroup.rotation.y = Math.sin(t * 0.45) * 0.32;
         const pulse = 1 + Math.sin(t * 3.2) * 0.25;
