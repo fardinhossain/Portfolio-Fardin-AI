@@ -396,7 +396,7 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
           ),
           h(
             "span",
-            { className: "tech-chip", style: { fontWeight: 700, background: "#FEF3C7", borderColor: "#FDE68A", color: "#92400E" } },
+            { className: "tech-chip ranker-demo-badge", style: { fontWeight: 700 } },
             "Illustrative 12-Page Interactive Demo"
           )
         ),
@@ -476,17 +476,17 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                 { className: "ranker-score-box learned" },
                 h(
                   "span",
-                  { style: { fontSize: "0.84rem", fontWeight: 700, color: "#065F46" } },
+                  { className: "ranker-score-title", style: { fontSize: "0.84rem", fontWeight: 700 } },
                   "Learned ranker (decline + demand)"
                 ),
                 h(
                   "b",
-                  { className: "ranker-big-score", style: { color: "#065F46" } },
+                  { className: "ranker-big-score" },
                   learnedPrecision.toFixed(2)
                 ),
                 h(
                   "span",
-                  { style: { fontSize: "0.8rem", fontFamily: "var(--font-mono)", color: "#047857" } },
+                  { className: "ranker-score-sub", style: { fontSize: "0.8rem", fontFamily: "var(--font-mono)" } },
                   `precision@${topN}`
                 ),
                 h(
@@ -503,17 +503,17 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                 { className: "ranker-score-box fixed" },
                 h(
                   "span",
-                  { style: { fontSize: "0.84rem", fontWeight: 700, color: "#9F1239" } },
+                  { className: "ranker-score-title", style: { fontSize: "0.84rem", fontWeight: 700 } },
                   "Fixed rule (biggest decline only)"
                 ),
                 h(
                   "b",
-                  { className: "ranker-big-score", style: { color: "#BE123C" } },
+                  { className: "ranker-big-score" },
                   fixedPrecision.toFixed(2)
                 ),
                 h(
                   "span",
-                  { style: { fontSize: "0.8rem", fontFamily: "var(--font-mono)", color: "#9F1239" } },
+                  { className: "ranker-score-sub", style: { fontSize: "0.8rem", fontFamily: "var(--font-mono)" } },
                   `precision@${topN}`
                 ),
                 h(
@@ -834,17 +834,16 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                       h(
                         "div",
                         {
+                          className: "month-honest-box",
                           style: {
                             marginTop: "0.85rem",
-                            background: "var(--bg-surface)",
-                            border: "1px solid #FDE68A",
                             borderRadius: "12px",
                             padding: "0.9rem 1.1rem"
                           }
                         },
                         h(
                           "div",
-                          { style: { fontWeight: 800, fontSize: "0.84rem", color: "#92400E", marginBottom: "0.3rem" } },
+                          { className: "honest-title", style: { fontWeight: 800, fontSize: "0.84rem", marginBottom: "0.3rem" } },
                           m.honestNoteTitle
                         ),
                         h(

@@ -1262,7 +1262,7 @@ function PortfolioApp() {
                                   {
                                     key: skill,
                                     className: "tech-chip",
-                                    style: { background: "#FFFFFF", fontWeight: 600 }
+                                    style: { fontWeight: 600 }
                                   },
                                   skill
                                 )
