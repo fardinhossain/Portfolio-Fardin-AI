@@ -3799,6 +3799,261 @@ body,
   overflow: hidden;
 }
 
+/* ==========================================================================
+   APP PRELOADER (Instant load shell before React hydrates)
+   ========================================================================== */
+.app-preloader {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  z-index: 99999;
+  font-family: var(--font-sans);
+}
+
+.preloader-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.preloader-robot-glyph {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-ambient);
+  color: var(--text-primary);
+}
+
+.preloader-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 22px;
+  border: 2px dashed var(--accent-red);
+  opacity: 0.45;
+  animation: preloaderSpin 6s linear infinite;
+}
+
+@keyframes preloaderSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.preloader-brand {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.preloader-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.preloader-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  box-shadow: 0 0 8px var(--accent-red);
+  animation: themeLedPulse 1.4s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   ROBOTIC PORTFOLIO ENTRANCE (Bot F-01 Door Opening Portal)
+   ========================================================================== */
+.portfolio-intro-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9990;
+  background: #0A0D14;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+  user-select: none;
+}
+
+[data-theme="light"] .portfolio-intro-overlay {
+  background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #EEF2F6 70%, #E2E8F0 100%);
+}
+
+[data-theme="dark"] .portfolio-intro-overlay {
+  background: radial-gradient(circle at 50% 45%, #141824 0%, #0B0D12 70%, #05070A 100%);
+}
+
+.portfolio-intro-overlay.intro-fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-canvas-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.intro-top-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.intro-system-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-ambient);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+}
+
+.intro-system-beacon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  box-shadow: 0 0 10px var(--accent-red);
+  animation: themeLedPulse 1.2s infinite;
+}
+
+.intro-system-beacon.beacon-granted {
+  background: #10B981;
+  box-shadow: 0 0 12px #10B981;
+}
+
+.intro-skip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-ambient);
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.intro-skip-btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.intro-kbd-hint {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+}
+
+.intro-bottom-bar {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1.5rem 2rem 2.5rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.intro-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-red);
+  text-transform: uppercase;
+}
+
+.intro-status-badge.status-granted {
+  color: #10B981;
+}
+
+.intro-status-sub {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Replay entrance button in footer */
+.replay-entrance-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.replay-entrance-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-red);
+  background: var(--accent-red-soft);
+}
+
 /* Reduced Motion Respect */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

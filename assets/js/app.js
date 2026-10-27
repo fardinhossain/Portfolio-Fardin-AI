@@ -33,6 +33,12 @@ import {
   subscribeTheme,
   launchRobotThemeTransition
 } from "./theme-manager.js";
+import {
+  PortfolioIntro,
+  hasSeenIntro,
+  resetIntroSeen,
+  prefersReducedMotion
+} from "./portfolio-intro.js";
 
 const h = React.createElement;
 
@@ -346,6 +352,13 @@ function PortfolioApp() {
   const [activeNav, setActiveNav] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Robotic Entrance Animation State (Only show if not yet seen in session and on homepage)
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window === "undefined") return false;
+    if (isJourneyRouteFromLocation()) return false;
+    return !hasSeenIntro() && !prefersReducedMotion();
+  });
+
   // Theme State synced with Theme Manager
   const [theme, setTheme] = useState(() => getCurrentTheme());
 
@@ -626,6 +639,10 @@ function PortfolioApp() {
   return h(
     React.Fragment,
     null,
+    showIntro &&
+      h(PortfolioIntro, {
+        onComplete: () => setShowIntro(false)
+      }),
     h("a", { href: "#main-content", className: "skip-link" }, "Skip to content"),
 
     // ========================================================================
@@ -1647,6 +1664,16 @@ function PortfolioApp() {
                   `© ${new Date().getFullYear()} Md. Fardin Hossain. All rights reserved.`
                 ),
                 h(
+                  "button",
+                  {
+                    type: "button",
+                    className: "replay-entrance-btn",
+                    onClick: () => setShowIntro(true),
+                    "aria-label": "Replay 3D robotic entrance animation"
+                  },
+                  "↺ Replay Entrance"
+                ),
+                h(
                   "span",
                   null,
                   "Built with React & Tailwind CSS"
@@ -1874,8 +1901,80 @@ function PortfolioApp() {
   );
 }
 
+// ============================================================================
+// SYSTEM ERROR BOUNDARY (Guarantees zero blank screen failures)
+// ============================================================================
+class PortfolioErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("PortfolioApp ErrorBoundary caught an exception:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return h(
+        "div",
+        {
+          style: {
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2rem",
+            fontFamily: "var(--font-sans, sans-serif)",
+            background: "var(--bg-page, #F6F7FA)",
+            color: "var(--text-primary, #090D16)",
+            textAlign: "center"
+          }
+        },
+        h("div", {
+          style: {
+            width: "52px",
+            height: "52px",
+            borderRadius: "14px",
+            background: "var(--accent-red, #E11D48)",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            marginBottom: "1rem"
+          }
+        }, "!"),
+        h("h1", { style: { fontSize: "1.6rem", fontWeight: 800, marginBottom: "0.5rem" } }, "fardin.ai System Recovery"),
+        h("p", { style: { color: "var(--text-secondary, #475569)", maxWidth: "520px", marginBottom: "1.5rem", fontSize: "0.95rem" } },
+          "An interface component encountered an unexpected error. The system has safely isolated it so your session remains intact."
+        ),
+        h(
+          "button",
+          {
+            type: "button",
+            className: "btn-pill-dark",
+            onClick: () => {
+              try { sessionStorage.clear(); } catch (_e) {}
+              window.location.reload();
+            }
+          },
+          "Reload Portfolio System"
+        )
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const rootElement = document.getElementById("app-root");
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(h(PortfolioApp));
+  root.render(h(PortfolioErrorBoundary, null, h(PortfolioApp)));
 }
