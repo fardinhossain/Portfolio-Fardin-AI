@@ -662,6 +662,31 @@ export function DualRobotDeliveryScene({
     // Delivery state management
     let currentDeliveryAbort = null;
     let isRunning = false;
+    let activeCertId = null;
+    let userScrollPauseUntil = 0;
+    let userScrolledAway = false;
+
+    const onUserManualScrollInput = (e) => {
+      if (e.type === "wheel" && Math.abs(e.deltaY) < 3 && Math.abs(e.deltaX) < 3) return;
+      if (e.type === "keydown") {
+        const scrollKeys = [
+          "ArrowDown", "ArrowUp", "PageDown", "PageUp",
+          "Space", "End", "Home"
+        ];
+        if (!scrollKeys.includes(e.code) && !scrollKeys.includes(e.key)) return;
+      }
+      userScrollPauseUntil = performance.now() + 4500;
+      if (container) {
+        const cRect = container.getBoundingClientRect();
+        if (cRect.bottom < 50 || cRect.top > window.innerHeight - 50) {
+          userScrolledAway = true;
+        }
+      }
+    };
+
+    window.addEventListener("wheel", onUserManualScrollInput, { passive: true });
+    window.addEventListener("touchmove", onUserManualScrollInput, { passive: true });
+    window.addEventListener("keydown", onUserManualScrollInput, { passive: true });
 
     function getRowWorldCenter(certId, defaultY = 0) {
       const slotEl = slotRefsMap.current.get(certId);
@@ -675,6 +700,7 @@ export function DualRobotDeliveryScene({
 
     async function deliverOneCard(cert, idx, totalCount, abortSignal) {
       if (abortSignal.aborted) return;
+      activeCertId = cert.id;
       const isRobotBTurn = idx % 2 === 1;
       const currentBot = isRobotBTurn ? robotB : robotA;
       const botName = isRobotBTurn ? "ROBOT B (RIGHT)" : "ROBOT A (LEFT)";
@@ -757,6 +783,7 @@ export function DualRobotDeliveryScene({
       if (latestPropsRef.current.onRowDelivered) {
         latestPropsRef.current.onRowDelivered(cert.id);
       }
+      activeCertId = null;
 
       // Mini celebration hover & eye pulse
       gsap.to(currentBot.bodyPivot.rotation, {
@@ -846,6 +873,8 @@ export function DualRobotDeliveryScene({
     }
 
     async function buildDeliverySequence() {
+      userScrollPauseUntil = 0;
+      userScrolledAway = false;
       const certs = latestPropsRef.current.certifications || [];
       if (certs.length === 0 || reducedMotion) {
         certs.forEach((c) => {
@@ -907,6 +936,7 @@ export function DualRobotDeliveryScene({
           currentDeliveryAbort = null;
         }
         isRunning = false;
+        activeCertId = null;
         stopAllTweens();
         resetRobotsToRest();
 
@@ -964,6 +994,31 @@ export function DualRobotDeliveryScene({
       robotA.headGroup.position.y = 0.54 + bobA * 0.5;
       robotB.headGroup.position.y = 0.54 + bobB * 0.5;
 
+      // Smooth, gentle auto-scroll focusing the dual robots — strictly pauses when user scrolls manually
+      if (isRunning && activeCertId && !userScrolledAway && now > userScrollPauseUntil) {
+        const containerRect = container.getBoundingClientRect();
+        // Only auto-scroll when the certifications stage is currently in comfortable view
+        if (containerRect.top <= window.innerHeight * 0.75 && containerRect.bottom >= window.innerHeight * 0.25) {
+          const slotEl = slotRefsMap.current.get(activeCertId);
+          if (slotEl) {
+            const slotRect = slotEl.getBoundingClientRect();
+            const slotTargetY = slotRect.top + slotRect.height * 0.5;
+            const desiredY = window.innerHeight * 0.48;
+            const deltaY = slotTargetY - desiredY;
+
+            // Gentle drift only when in reasonable proximity - NEVER drag or force from far away!
+            if (Math.abs(deltaY) > 8 && Math.abs(deltaY) < window.innerHeight * 0.55) {
+              const maxStep = 3.2; // Smooth, gentle drift
+              const step = Math.sign(deltaY) * Math.min(Math.abs(deltaY * dt * 3.5), maxStep);
+              window.scrollBy({ top: step, behavior: "instant" });
+            }
+          }
+        } else if (containerRect.bottom < 0 || containerRect.top > window.innerHeight) {
+          // User scrolled away to another section! Never yank them back!
+          userScrolledAway = true;
+        }
+      }
+
       renderer.render(scene, camera);
     };
     rafId = requestAnimationFrame(animate);
@@ -987,6 +1042,9 @@ export function DualRobotDeliveryScene({
       stopAllTweens();
       io.disconnect();
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("wheel", onUserManualScrollInput);
+      window.removeEventListener("touchmove", onUserManualScrollInput);
+      window.removeEventListener("keydown", onUserManualScrollInput);
       renderer.dispose();
       if (externalControllerRef) {
         externalControllerRef.current = null;
@@ -1269,35 +1327,23 @@ export function CertificationShowcase({
     [certifications]
   );
 
-  // Manual scroll interruption listener during PLAYING state
-  // Absolute user priority: any wheel, touch swipe, or scroll key immediately interrupts
+  // If user scrolls completely away from Certifications while playing, quietly complete remaining rows
+  // without any viewport movement or forcing
   useEffect(() => {
     if (lifecycle !== ANIM_LIFECYCLE.PLAYING) return;
 
-    const onUserScrollAction = (e) => {
-      if (lifecycleRef.current !== ANIM_LIFECYCLE.PLAYING) return;
-      if (e.type === "wheel") {
-        if (Math.abs(e.deltaY) < 3 && Math.abs(e.deltaX) < 3) return;
+    const checkScrollAway = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // If user has scrolled completely past or far away:
+      if (rect.bottom < -180 || rect.top > window.innerHeight + 180) {
+        interruptSequence("scrolled-away");
       }
-      if (e.type === "keydown") {
-        const scrollKeys = [
-          "ArrowDown", "ArrowUp", "PageDown", "PageUp",
-          "Space", "End", "Home"
-        ];
-        if (!scrollKeys.includes(e.code) && !scrollKeys.includes(e.key)) return;
-      }
-      interruptSequence("manual-scroll");
     };
 
-    window.addEventListener("wheel", onUserScrollAction, { passive: true });
-    window.addEventListener("touchmove", onUserScrollAction, { passive: true });
-    window.addEventListener("keydown", onUserScrollAction, { passive: true });
-
-    return () => {
-      window.removeEventListener("wheel", onUserScrollAction);
-      window.removeEventListener("touchmove", onUserScrollAction);
-      window.removeEventListener("keydown", onUserScrollAction);
-    };
+    window.addEventListener("scroll", checkScrollAway, { passive: true });
+    return () => window.removeEventListener("scroll", checkScrollAway);
   }, [lifecycle, interruptSequence]);
 
   // Initial trigger on arrival into view (ONE TIME ONLY)

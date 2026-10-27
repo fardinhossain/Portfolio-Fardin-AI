@@ -958,7 +958,35 @@ export function RobotScene({
       );
     }
 
+    let userScrollPauseUntil = 0;
+    let userScrolledAway = false;
+
+    const onUserManualScrollInput = (e) => {
+      if (e.type === "wheel" && Math.abs(e.deltaY) < 3 && Math.abs(e.deltaX) < 3) return;
+      if (e.type === "keydown") {
+        const scrollKeys = [
+          "ArrowDown", "ArrowUp", "PageDown", "PageUp",
+          "Space", "End", "Home"
+        ];
+        if (!scrollKeys.includes(e.code) && !scrollKeys.includes(e.key)) return;
+      }
+      // User is scrolling manually: pause auto-scroll for 4.5 seconds
+      userScrollPauseUntil = performance.now() + 4500;
+      if (container) {
+        const cRect = container.getBoundingClientRect();
+        if (cRect.bottom < 50 || cRect.top > window.innerHeight - 50) {
+          userScrolledAway = true;
+        }
+      }
+    };
+
+    window.addEventListener("wheel", onUserManualScrollInput, { passive: true });
+    window.addEventListener("touchmove", onUserManualScrollInput, { passive: true });
+    window.addEventListener("keydown", onUserManualScrollInput, { passive: true });
+
     function startFullSequence() {
+      userScrollPauseUntil = 0;
+      userScrolledAway = false;
       const list = latestPropsRef.current.projects || [];
       if (reducedMotion || list.length === 0) {
         list.forEach((p) => {
@@ -1361,6 +1389,39 @@ export function RobotScene({
         projSectionEl.setAttribute("data-projects-delivering", isBotDelivering ? "true" : "false");
       }
 
+      // Smooth, gentle auto-scroll focusing the robot — strictly pauses when user scrolls manually
+      if (isBotDelivering && !userScrolledAway && now > userScrollPauseUntil) {
+        const containerRect = container.getBoundingClientRect();
+        // Only auto-scroll when the projects section is currently in comfortable view
+        if (containerRect.top <= window.innerHeight * 0.75 && containerRect.bottom >= window.innerHeight * 0.25) {
+          const botDom = worldToDomPoint(sm.currentPos);
+          const botViewportY = containerRect.top + botDom.py;
+
+          let focusViewportY = botViewportY + 60;
+          if (activeProj) {
+            const slotEl = slotRefsMap.current.get(activeProj.id);
+            if (slotEl) {
+              const slotRect = slotEl.getBoundingClientRect();
+              const slotCenterViewportY = slotRect.top + slotRect.height * 0.45;
+              focusViewportY = botViewportY * 0.4 + slotCenterViewportY * 0.6;
+            }
+          }
+
+          const desiredViewportY = window.innerHeight * 0.46;
+          const deltaY = focusViewportY - desiredViewportY;
+
+          // Gentle drift only when in reasonable proximity - NEVER drag or force from far away!
+          if (Math.abs(deltaY) > 8 && Math.abs(deltaY) < window.innerHeight * 0.55) {
+            const maxStep = 3.2; // Smooth, gentle drift
+            const step = Math.sign(deltaY) * Math.min(Math.abs(deltaY * dt * 3.5), maxStep);
+            window.scrollBy({ top: step, behavior: "instant" });
+          }
+        } else if (containerRect.bottom < 0 || containerRect.top > window.innerHeight) {
+          // User scrolled away to another section! Never yank them back!
+          userScrolledAway = true;
+        }
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -1370,6 +1431,9 @@ export function RobotScene({
       if (rafId) cancelAnimationFrame(rafId);
       io.disconnect();
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("wheel", onUserManualScrollInput);
+      window.removeEventListener("touchmove", onUserManualScrollInput);
+      window.removeEventListener("keydown", onUserManualScrollInput);
       renderer.dispose();
     };
   }, []);
