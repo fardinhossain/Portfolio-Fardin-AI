@@ -959,10 +959,9 @@ export function RobotScene({
     }
 
     let userScrollPauseUntil = 0;
-    let userScrolledAway = false;
 
     const onUserManualScrollInput = (e) => {
-      if (e.type === "wheel" && Math.abs(e.deltaY) < 3 && Math.abs(e.deltaX) < 3) return;
+      if (e.type === "wheel" && Math.abs(e.deltaY) < 2 && Math.abs(e.deltaX) < 2) return;
       if (e.type === "keydown") {
         const scrollKeys = [
           "ArrowDown", "ArrowUp", "PageDown", "PageUp",
@@ -970,23 +969,23 @@ export function RobotScene({
         ];
         if (!scrollKeys.includes(e.code) && !scrollKeys.includes(e.key)) return;
       }
-      // User is scrolling manually: pause auto-scroll for 4.5 seconds
-      userScrollPauseUntil = performance.now() + 4500;
-      if (container) {
-        const cRect = container.getBoundingClientRect();
-        if (cRect.bottom < 50 || cRect.top > window.innerHeight - 50) {
-          userScrolledAway = true;
-        }
+      // User is scrolling manually: pause auto-scroll immediately for 1.4s of inactivity
+      userScrollPauseUntil = performance.now() + 1400;
+    };
+
+    const onPointerDown = (e) => {
+      if (e.clientX >= window.innerWidth - 24) {
+        userScrollPauseUntil = performance.now() + 1800;
       }
     };
 
     window.addEventListener("wheel", onUserManualScrollInput, { passive: true });
     window.addEventListener("touchmove", onUserManualScrollInput, { passive: true });
     window.addEventListener("keydown", onUserManualScrollInput, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
 
     function startFullSequence() {
       userScrollPauseUntil = 0;
-      userScrolledAway = false;
       const list = latestPropsRef.current.projects || [];
       if (reducedMotion || list.length === 0) {
         list.forEach((p) => {
@@ -1389,11 +1388,19 @@ export function RobotScene({
         projSectionEl.setAttribute("data-projects-delivering", isBotDelivering ? "true" : "false");
       }
 
-      // Smooth, gentle auto-scroll focusing the robot — strictly pauses when user scrolls manually
-      if (isBotDelivering && !userScrolledAway && now > userScrollPauseUntil) {
-        const containerRect = container.getBoundingClientRect();
-        // Only auto-scroll when the projects section is currently in comfortable view
-        if (containerRect.top <= window.innerHeight * 0.75 && containerRect.bottom >= window.innerHeight * 0.25) {
+      // Smooth, responsive auto-scroll focusing the robot & active card:
+      // - Actively tracks bot across multiple rows (Row 1 & Row 2)
+      // - Pauses instantly whenever user manually scrolls (mouse wheel, touch swipe, keys)
+      // - Never forces or yanks viewport if user has scrolled away to another section
+      if (isBotDelivering && now > userScrollPauseUntil) {
+        const projRect = projSectionEl.getBoundingClientRect();
+        const vh = window.innerHeight || 800;
+
+        // Only auto-scroll when user is viewing the projects section
+        const isSectionInView = projRect.top < vh * 0.85 && projRect.bottom > vh * 0.15;
+
+        if (isSectionInView) {
+          const containerRect = container.getBoundingClientRect();
           const botDom = worldToDomPoint(sm.currentPos);
           const botViewportY = containerRect.top + botDom.py;
 
@@ -1403,22 +1410,20 @@ export function RobotScene({
             if (slotEl) {
               const slotRect = slotEl.getBoundingClientRect();
               const slotCenterViewportY = slotRect.top + slotRect.height * 0.45;
-              focusViewportY = botViewportY * 0.4 + slotCenterViewportY * 0.6;
+              focusViewportY = botViewportY * 0.35 + slotCenterViewportY * 0.65;
             }
           }
 
-          const desiredViewportY = window.innerHeight * 0.46;
+          const desiredViewportY = vh * 0.46;
           const deltaY = focusViewportY - desiredViewportY;
 
-          // Gentle drift only when in reasonable proximity - NEVER drag or force from far away!
-          if (Math.abs(deltaY) > 8 && Math.abs(deltaY) < window.innerHeight * 0.55) {
-            const maxStep = 3.2; // Smooth, gentle drift
-            const step = Math.sign(deltaY) * Math.min(Math.abs(deltaY * dt * 3.5), maxStep);
+          // Responsive smooth tracking across both row 1 and row 2 cards
+          if (Math.abs(deltaY) > 8) {
+            const maxStep = 16.0; // Responsive tracking for multi-row moves (~960px/s max)
+            const speed = Math.min(Math.abs(deltaY) * dt * 5.2, maxStep);
+            const step = Math.sign(deltaY) * Math.max(speed, 1.0);
             window.scrollBy({ top: step, behavior: "instant" });
           }
-        } else if (containerRect.bottom < 0 || containerRect.top > window.innerHeight) {
-          // User scrolled away to another section! Never yank them back!
-          userScrolledAway = true;
         }
       }
 
@@ -1434,6 +1439,7 @@ export function RobotScene({
       window.removeEventListener("wheel", onUserManualScrollInput);
       window.removeEventListener("touchmove", onUserManualScrollInput);
       window.removeEventListener("keydown", onUserManualScrollInput);
+      window.removeEventListener("pointerdown", onPointerDown);
       renderer.dispose();
     };
   }, []);
@@ -1798,10 +1804,18 @@ export function FeaturedProjects({
 
     const checkProjScroll = () => {
       if (hasTriggeredInitialRef.current) return;
-      if (window.scrollY < 200) return;
+      if (window.scrollY < 200 && !window.location.hash.includes("projects")) return;
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 800;
-      if (rect.top <= vh * 0.48 && rect.bottom >= vh * 0.2) {
+
+      // If user has already scrolled past Projects, complete immediately without blocking
+      if (rect.bottom < 0) {
+        hasTriggeredInitialRef.current = true;
+        setDeliveredIds(new Set(projectsList.map((p) => p.id)));
+        return;
+      }
+
+      if (rect.top <= vh * 0.68 && rect.bottom >= vh * 0.2) {
         hasTriggeredInitialRef.current = true;
         setDeliveredIds(new Set());
         setSkipRequested(false);
@@ -1809,10 +1823,23 @@ export function FeaturedProjects({
       }
     };
 
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            checkProjScroll();
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+    io.observe(el);
+
     window.addEventListener("scroll", checkProjScroll, { passive: true });
     checkProjScroll();
 
     return () => {
+      io.disconnect();
       window.removeEventListener("scroll", checkProjScroll);
     };
   }, [projectsList]);

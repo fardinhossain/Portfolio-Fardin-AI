@@ -664,10 +664,9 @@ export function DualRobotDeliveryScene({
     let isRunning = false;
     let activeCertId = null;
     let userScrollPauseUntil = 0;
-    let userScrolledAway = false;
 
     const onUserManualScrollInput = (e) => {
-      if (e.type === "wheel" && Math.abs(e.deltaY) < 3 && Math.abs(e.deltaX) < 3) return;
+      if (e.type === "wheel" && Math.abs(e.deltaY) < 2 && Math.abs(e.deltaX) < 2) return;
       if (e.type === "keydown") {
         const scrollKeys = [
           "ArrowDown", "ArrowUp", "PageDown", "PageUp",
@@ -675,18 +674,19 @@ export function DualRobotDeliveryScene({
         ];
         if (!scrollKeys.includes(e.code) && !scrollKeys.includes(e.key)) return;
       }
-      userScrollPauseUntil = performance.now() + 4500;
-      if (container) {
-        const cRect = container.getBoundingClientRect();
-        if (cRect.bottom < 50 || cRect.top > window.innerHeight - 50) {
-          userScrolledAway = true;
-        }
+      userScrollPauseUntil = performance.now() + 1400;
+    };
+
+    const onPointerDown = (e) => {
+      if (e.clientX >= window.innerWidth - 24) {
+        userScrollPauseUntil = performance.now() + 1800;
       }
     };
 
     window.addEventListener("wheel", onUserManualScrollInput, { passive: true });
     window.addEventListener("touchmove", onUserManualScrollInput, { passive: true });
     window.addEventListener("keydown", onUserManualScrollInput, { passive: true });
+    window.addEventListener("pointerdown", onPointerDown, { passive: true });
 
     function getRowWorldCenter(certId, defaultY = 0) {
       const slotEl = slotRefsMap.current.get(certId);
@@ -874,7 +874,6 @@ export function DualRobotDeliveryScene({
 
     async function buildDeliverySequence() {
       userScrollPauseUntil = 0;
-      userScrolledAway = false;
       const certs = latestPropsRef.current.certifications || [];
       if (certs.length === 0 || reducedMotion) {
         certs.forEach((c) => {
@@ -994,28 +993,31 @@ export function DualRobotDeliveryScene({
       robotA.headGroup.position.y = 0.54 + bobA * 0.5;
       robotB.headGroup.position.y = 0.54 + bobB * 0.5;
 
-      // Smooth, gentle auto-scroll focusing the dual robots — strictly pauses when user scrolls manually
-      if (isRunning && activeCertId && !userScrolledAway && now > userScrollPauseUntil) {
-        const containerRect = container.getBoundingClientRect();
-        // Only auto-scroll when the certifications stage is currently in comfortable view
-        if (containerRect.top <= window.innerHeight * 0.75 && containerRect.bottom >= window.innerHeight * 0.25) {
+      // Smooth, responsive auto-scroll focusing the dual robots and active credential row:
+      // - Tracks down across all 7 certification rows
+      // - Pauses instantly when user manually scrolls
+      // - Never forces or yanks viewport if user scrolled away to another section
+      const certSectionEl = document.getElementById("certifications") || container;
+      if (isRunning && activeCertId && now > userScrollPauseUntil) {
+        const certRect = certSectionEl.getBoundingClientRect();
+        const vh = window.innerHeight || 800;
+        const isSectionInView = certRect.top < vh * 0.85 && certRect.bottom > vh * 0.15;
+
+        if (isSectionInView) {
           const slotEl = slotRefsMap.current.get(activeCertId);
           if (slotEl) {
             const slotRect = slotEl.getBoundingClientRect();
             const slotTargetY = slotRect.top + slotRect.height * 0.5;
-            const desiredY = window.innerHeight * 0.48;
+            const desiredY = vh * 0.48;
             const deltaY = slotTargetY - desiredY;
 
-            // Gentle drift only when in reasonable proximity - NEVER drag or force from far away!
-            if (Math.abs(deltaY) > 8 && Math.abs(deltaY) < window.innerHeight * 0.55) {
-              const maxStep = 3.2; // Smooth, gentle drift
-              const step = Math.sign(deltaY) * Math.min(Math.abs(deltaY * dt * 3.5), maxStep);
+            if (Math.abs(deltaY) > 8) {
+              const maxSpeed = 16.0;
+              const trackingSpeed = Math.min(Math.abs(deltaY) * dt * 5.2, maxSpeed);
+              const step = Math.sign(deltaY) * Math.max(trackingSpeed, 1.0);
               window.scrollBy({ top: step, behavior: "instant" });
             }
           }
-        } else if (containerRect.bottom < 0 || containerRect.top > window.innerHeight) {
-          // User scrolled away to another section! Never yank them back!
-          userScrolledAway = true;
         }
       }
 
@@ -1045,6 +1047,7 @@ export function DualRobotDeliveryScene({
       window.removeEventListener("wheel", onUserManualScrollInput);
       window.removeEventListener("touchmove", onUserManualScrollInput);
       window.removeEventListener("keydown", onUserManualScrollInput);
+      window.removeEventListener("pointerdown", onPointerDown);
       renderer.dispose();
       if (externalControllerRef) {
         externalControllerRef.current = null;
