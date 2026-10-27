@@ -39,6 +39,7 @@ import {
   resetIntroSeen,
   prefersReducedMotion
 } from "./portfolio-intro.js";
+import { HeroHalftonePortrait } from "./hero-halftone-portrait.js";
 
 const h = React.createElement;
 
@@ -934,40 +935,13 @@ function PortfolioApp() {
                     )
                   ),
 
-                  // Right Column: Uploaded Professional Editorial Portrait + Layered 3D Details
-                  h(
-                    motion.div,
-                    {
-                      className: "hero-visual-stage",
-                      initial: { opacity: 0, scale: 0.96 },
-                      animate: { opacity: 1, scale: 1 },
-                      transition: { duration: 0.55, delay: 0.08 }
-                    },
-                    h(
-                      "div",
-                      { className: "hero-annotation-badge" },
-                      h("span", { className: "red-dot" }),
-                      h("span", null, "Md. Fardin Hossain")
-                    ),
-                    h(
-                      "div",
-                      { className: "hero-portrait-card" },
-                      h("img", {
-                        src: PROFILE_DATA.heroPortrait,
-                        alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
-                        className: "hero-portrait-img"
-                      })
-                    ),
-                    h(
-                      "div",
-                      { className: "hero-pillars-float", "aria-label": "Engineering workflow pillars" },
-                      h("span", null, "IDEAS"),
-                      h("span", null, "CODE"),
-                      h("span", null, "MODELS"),
-                      h("span", null, "PRODUCTS"),
-                      h("span", null, "IMPACT")
-                    )
-                  )
+                  // Right Column: Uploaded Professional Editorial Portrait with Scroll-Driven Halftone Transformation
+                  h(HeroHalftonePortrait, {
+                    src: PROFILE_DATA.heroPortrait,
+                    alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
+                    annotation: "Md. Fardin Hossain",
+                    pillars: ["IDEAS", "CODE", "MODELS", "PRODUCTS", "IMPACT"]
+                  })
                 )
               )
             ),
