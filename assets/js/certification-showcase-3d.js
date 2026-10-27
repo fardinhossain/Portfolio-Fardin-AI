@@ -687,14 +687,6 @@ export function DualRobotDeliveryScene({
         latestPropsRef.current.onTargetRow(cert.id);
       }
 
-      // Smooth auto-scroll following the robot delivery
-      const slotEl = slotRefsMap.current.get(cert.id);
-      if (slotEl && typeof slotEl.scrollIntoView === "function") {
-        try {
-          slotEl.scrollIntoView({ behavior: "smooth", block: "center" });
-        } catch (_err) {}
-      }
-
       // Prepare robot cargo tile
       currentBot.updateCredentialTile(cert);
       currentBot.cargoPivot.visible = true;

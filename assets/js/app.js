@@ -597,19 +597,6 @@ function PortfolioApp() {
   const navigateToSection = (sectionId) => {
     setMobileMenuOpen(false);
     setActiveNav(sectionId);
-    if (typeof window !== "undefined") {
-      window.__navScrollingUntil = performance.now() + 2200;
-    }
-    if (sectionId === "certifications") {
-      hasDeliveredCertsRef.current = false;
-      setCertBotState((prev) => ({
-        ...prev,
-        phase: "waiting",
-        active: false,
-        chip: "7× BOT SQUAD · READY",
-        text: "7 BOTS READY FOR SIMULTANEOUS DELIVERY · Flying in as you arrive at Certifications..."
-      }));
-    }
     if (view !== "home") {
       closeJourneyExperience(sectionId);
       return;
@@ -617,14 +604,6 @@ function PortfolioApp() {
     const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
-      if (sectionId === "certifications") {
-        setTimeout(() => {
-          if (!hasDeliveredCertsRef.current) {
-            hasDeliveredCertsRef.current = true;
-            triggerCertBotDelivery();
-          }
-        }, 420);
-      }
     }
   };
 

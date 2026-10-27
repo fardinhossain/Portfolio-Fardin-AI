@@ -420,29 +420,53 @@ export function PortfolioIntro({ onComplete, forceShow = false }) {
   const [isGranted, setIsGranted] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
-  const handleFinish = useCallback(() => {
+  const handleFinish = useCallback((immediate = false) => {
     markIntroSeen();
     setIsExiting(true);
-    setTimeout(() => {
+    if (immediate) {
       if (onComplete) onComplete();
-    }, 320);
+    } else {
+      setTimeout(() => {
+        if (onComplete) onComplete();
+      }, 240);
+    }
   }, [onComplete]);
 
   useEffect(() => {
     // If reduced motion is requested or WebGL isn't supported, finish immediately
     if (prefersReducedMotion() || !checkWebGLSupport()) {
-      handleFinish();
+      handleFinish(true);
       return;
     }
 
-    // Keyboard ESC or Space skip listener
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" || e.code === "Space") {
-        e.preventDefault();
-        handleFinish();
+    // User manual scroll / gesture interruption:
+    // Any scroll input (wheel, mobile swipe, arrow/page keys) immediately reveals the portfolio
+    const onUserScrollInput = (e) => {
+      if (e.type === "wheel") {
+        if (Math.abs(e.deltaY) > 5 || Math.abs(e.deltaX) > 5) {
+          handleFinish(true);
+        }
+        return;
+      }
+      if (e.type === "touchmove") {
+        handleFinish(true);
+        return;
+      }
+      if (e.type === "keydown") {
+        const scrollKeys = [
+          "ArrowDown", "ArrowUp", "PageDown", "PageUp",
+          "Space", "End", "Home", "Escape", "Enter"
+        ];
+        if (scrollKeys.includes(e.code) || scrollKeys.includes(e.key)) {
+          if (e.key === "Escape" || e.code === "Space") e.preventDefault();
+          handleFinish(true);
+        }
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
+
+    window.addEventListener("wheel", onUserScrollInput, { passive: true });
+    window.addEventListener("touchmove", onUserScrollInput, { passive: true });
+    window.addEventListener("keydown", onUserScrollInput);
 
     const container = containerRef.current;
     if (!container) return;
@@ -725,7 +749,9 @@ export function PortfolioIntro({ onComplete, forceShow = false }) {
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("wheel", onUserScrollInput);
+      window.removeEventListener("touchmove", onUserScrollInput);
+      window.removeEventListener("keydown", onUserScrollInput);
       window.removeEventListener("resize", handleResize);
       tl.kill();
       if (rafId) cancelAnimationFrame(rafId);

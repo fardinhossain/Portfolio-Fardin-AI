@@ -958,14 +958,6 @@ export function RobotScene({
       );
     }
 
-    let userScrollPauseUntil = 0;
-    const onUserManualScrollInput = () => {
-      userScrollPauseUntil = performance.now() + 1800;
-    };
-    window.addEventListener("wheel", onUserManualScrollInput, { passive: true });
-    window.addEventListener("touchmove", onUserManualScrollInput, { passive: true });
-    window.addEventListener("keydown", onUserManualScrollInput, { passive: true });
-
     function startFullSequence() {
       const list = latestPropsRef.current.projects || [];
       if (reducedMotion || list.length === 0) {
@@ -1369,43 +1361,6 @@ export function RobotScene({
         projSectionEl.setAttribute("data-projects-delivering", isBotDelivering ? "true" : "false");
       }
 
-      const navScrollUntil =
-        typeof window !== "undefined" && window.__navScrollingUntil
-          ? window.__navScrollingUntil
-          : 0;
-      if (isBotDelivering && now > userScrollPauseUntil && now > navScrollUntil) {
-        const containerRect = container.getBoundingClientRect();
-        // Only auto-scroll with the project bot while the user is actually within the #projects section
-        // (never pull the screen back up if the user scrolled down to #certifications or #contact)
-        const isUserViewingProjects =
-          containerRect.top < window.innerHeight * 0.65 &&
-          containerRect.bottom > window.innerHeight * 0.62;
-
-        if (isUserViewingProjects) {
-          const botDom = worldToDomPoint(sm.currentPos);
-          const botViewportY = containerRect.top + botDom.py;
-
-          let focusViewportY = botViewportY + 70;
-          if (activeProj) {
-            const slotEl = slotRefsMap.current.get(activeProj.id);
-            if (slotEl) {
-              const slotRect = slotEl.getBoundingClientRect();
-              const slotCenterViewportY = slotRect.top + slotRect.height * 0.42;
-              focusViewportY = botViewportY * 0.45 + slotCenterViewportY * 0.55;
-            }
-          }
-
-          // Keep row 2 framed comfortably without overshooting into #certifications below
-          const desiredViewportY =
-            sm.projectIndex >= 3 ? window.innerHeight * 0.58 : window.innerHeight * 0.44;
-          const deltaY = focusViewportY - desiredViewportY;
-          if (Math.abs(deltaY) > 4) {
-            const step = deltaY * Math.min(1, dt * 8.5);
-            window.scrollTo({ top: window.scrollY + step, behavior: "instant" });
-          }
-        }
-      }
-
       renderer.render(scene, camera);
     };
 
@@ -1415,8 +1370,6 @@ export function RobotScene({
       if (rafId) cancelAnimationFrame(rafId);
       io.disconnect();
       window.removeEventListener("resize", onResize);
-      window.removeEventListener("wheel", onUserManualScrollInput);
-      window.removeEventListener("touchmove", onUserManualScrollInput);
       renderer.dispose();
     };
   }, []);
