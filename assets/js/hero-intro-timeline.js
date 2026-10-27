@@ -1,197 +1,118 @@
 // ==========================================================================
-// FARDIN.AI — CINEMATIC HERO OPENING SEQUENCE TIMELINE
-// 5-Phase Choreography inspired by PORTIX & Robot Interaction:
-// Phase A: Prepare Scene — ambient grid, circular halo aura, subtle entry
-// Phase B: Robot Flight across headline (Right -> Left) revealing:
-//          1. Hossain -> 2. Fardin -> 3. Md.
-// Phase C: Portrait Focus & Halftone emergence into photographic clarity
-// Phase D: Robot sweeps up left side, dives behind head (depth), orbits upper halo
-// Phase E: Hero Settles — label, tagline, action buttons settle; fully interactive
+// FARDIN.AI — HERO ENTRANCE ANIMATION TIMELINE
+// Runs once on initial page load:
+// - Navbar: gentle fade-in
+// - Role label, headline, and description: short staggered fade-up (8px-14px)
+// - Portrait & circular gradient: single smooth fade-in
+// - Large bottom name: smooth left-to-right word reveal (MD. -> FARDIN -> HOSSAIN)
+// - Respects prefers-reduced-motion: reduce
 // ==========================================================================
 
 import gsap from "gsap";
 
 export function createHeroIntroTimeline({
   elements,
-  robotRef,
   onComplete,
   isReducedMotion = false
 }) {
   const {
+    navbar,
     bgLayer,
     haloAura,
-    telemetryBadge,
     portraitContainer,
+    labelBadge,
     headlineRef,
+    taglineText,
     wordMd,
     wordFardin,
-    wordHossain,
-    labelBadge,
-    taglineText,
-    ctaRow,
-    skipBtn,
-    scrollHint
+    wordHossain
   } = elements;
 
-  const words = [wordHossain, wordFardin, wordMd].filter(Boolean);
+  const words = [wordMd, wordFardin, wordHossain].filter(Boolean);
+  const allTargets = [
+    navbar,
+    bgLayer,
+    haloAura,
+    portraitContainer,
+    labelBadge,
+    headlineRef,
+    taglineText,
+    ...words
+  ].filter(Boolean);
 
   if (isReducedMotion) {
-    if (robotRef && robotRef.current) {
-      robotRef.current.skipFlight();
-    }
-    gsap.set(
-      [
-        bgLayer,
-        haloAura,
-        telemetryBadge,
-        portraitContainer,
-        headlineRef,
-        labelBadge,
-        taglineText,
-        ctaRow,
-        scrollHint,
-        ...words
-      ],
-      { opacity: 1, y: 0, clipPath: "none", clearProps: "all" }
-    );
-    if (skipBtn) gsap.set(skipBtn, { display: "none" });
+    gsap.set(allTargets, {
+      opacity: 1,
+      y: 0,
+      clipPath: "none",
+      clearProps: "all"
+    });
     if (onComplete) onComplete();
     return {
       play: () => {},
       skip: () => {},
-      kill: () => {},
-      revealWord: () => {}
+      kill: () => {}
     };
   }
 
-  // Initial State Setup
-  gsap.set(bgLayer, { opacity: 0 });
-  if (haloAura) gsap.set(haloAura, { opacity: 0, scale: 0.88 });
-  gsap.set(telemetryBadge, { opacity: 0, y: -6 });
-  // Portrait starts subdued (Phase A)
-  gsap.set(portraitContainer, { opacity: 0.35, scale: 0.97 });
-  if (headlineRef) gsap.set(headlineRef, { opacity: 0, y: 16 });
+  // Initial state before entrance animation
+  if (navbar) gsap.set(navbar, { opacity: 0 });
+  if (bgLayer) gsap.set(bgLayer, { opacity: 0 });
+  if (haloAura) gsap.set(haloAura, { opacity: 0 });
+  if (portraitContainer) gsap.set(portraitContainer, { opacity: 0 });
+  if (labelBadge) gsap.set(labelBadge, { opacity: 0, y: 10 });
+  if (headlineRef) gsap.set(headlineRef, { opacity: 0, y: 12 });
+  if (taglineText) gsap.set(taglineText, { opacity: 0, y: 10 });
 
-  // Each word starts hidden from right to left
   words.forEach((w) => {
     gsap.set(w, {
-      clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)",
+      clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)",
       opacity: 0,
-      y: 4
+      y: 8
     });
   });
-
-  gsap.set(labelBadge, { opacity: 0, y: 12 });
-  gsap.set(taglineText, { opacity: 0, y: 12 });
-  gsap.set(ctaRow, { opacity: 0, y: 14 });
-  gsap.set(scrollHint, { opacity: 0 });
-  if (skipBtn) gsap.set(skipBtn, { opacity: 0 });
-
-  // Function to smoothly unmask a specific word right-to-left
-  function revealWord(wordKey) {
-    let target = null;
-    if (wordKey === "hossain") target = wordHossain;
-    else if (wordKey === "fardin") target = wordFardin;
-    else if (wordKey === "md") target = wordMd;
-
-    if (target) {
-      gsap.to(target, {
-        clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
-        opacity: 1,
-        y: 0,
-        duration: 0.42,
-        ease: "power2.out"
-      });
-    }
-  }
 
   const tl = gsap.timeline({
     paused: true,
     defaults: { ease: "power2.out" },
     onComplete: () => {
-      if (skipBtn) {
-        gsap.to(skipBtn, {
-          opacity: 0,
-          duration: 0.3,
-          onComplete: () => gsap.set(skipBtn, { display: "none" })
-        });
-      }
       if (onComplete) onComplete();
     }
   });
 
-  // --- Phase A: Prepare Scene (0.0s - 0.4s) ---
-  tl.to(bgLayer, { opacity: 1, duration: 0.5 }, 0.05);
-  if (haloAura) tl.to(haloAura, { opacity: 0.85, scale: 1.0, duration: 0.6 }, 0.1);
-  tl.to(telemetryBadge, { opacity: 1, y: 0, duration: 0.45 }, 0.15);
-  if (labelBadge) tl.to(labelBadge, { opacity: 1, y: 0, duration: 0.45 }, 0.2);
-  if (headlineRef) tl.to(headlineRef, { opacity: 1, y: 0, duration: 0.6 }, 0.28);
-  if (skipBtn) tl.to(skipBtn, { opacity: 1, duration: 0.35 }, 0.25);
+  // 1. Navbar & Background gentle fade-in
+  if (navbar) tl.to(navbar, { opacity: 1, duration: 0.45 }, 0.0);
+  if (bgLayer) tl.to(bgLayer, { opacity: 1, duration: 0.5 }, 0.0);
 
-  // --- Phase B: Launch 3D Flying Robot across Bottom Name (0.4s) ---
-  tl.call(
-    () => {
-      if (robotRef && robotRef.current) {
-        robotRef.current.startFlight();
-      }
-    },
-    null,
-    0.4
-  );
+  // 2. Portrait & circular halo single smooth fade-in
+  if (haloAura) tl.to(haloAura, { opacity: 1, duration: 0.65 }, 0.08);
+  if (portraitContainer) tl.to(portraitContainer, { opacity: 1, duration: 0.7 }, 0.12);
 
-  // Fallback programmatic reveal triggers in case WebGL triggers don't fire
-  tl.call(() => revealWord("hossain"), null, 1.15);
-  tl.call(() => revealWord("fardin"), null, 1.85);
-  tl.call(() => revealWord("md"), null, 2.55);
+  // 3. Left column staggered fade-up (role label -> headline -> description)
+  if (labelBadge) tl.to(labelBadge, { opacity: 1, y: 0, duration: 0.45 }, 0.14);
+  if (headlineRef) tl.to(headlineRef, { opacity: 1, y: 0, duration: 0.52 }, 0.24);
+  if (taglineText) tl.to(taglineText, { opacity: 1, y: 0, duration: 0.45 }, 0.36);
 
-  // --- Phase C: Portrait Emerges into Full Photographic Clarity (2.8s) ---
-  tl.to(
-    portraitContainer,
-    {
-      opacity: 1,
-      scale: 1,
-      duration: 0.75,
-      ease: "power2.out"
-    },
-    2.8
-  );
-
-  // --- Phase E: Supporting Text, Tagline & CTAs (3.0s - 3.6s) ---
-  tl.to(taglineText, { opacity: 1, y: 0, duration: 0.45 }, 3.1);
-  tl.to(ctaRow, { opacity: 1, y: 0, duration: 0.45 }, 3.3);
-  tl.to(scrollHint, { opacity: 1, duration: 0.45 }, 3.6);
-
-  // Skip Function — Immediate graceful settle
-  function skip() {
-    tl.pause();
-    if (robotRef && robotRef.current) {
-      robotRef.current.skipFlight();
-    }
-    words.forEach((w) => {
-      if (w) gsap.set(w, { clipPath: "none", opacity: 1, y: 0 });
-    });
-    gsap.set(
-      [
-        bgLayer,
-        haloAura,
-        telemetryBadge,
-        portraitContainer,
-        headlineRef,
-        labelBadge,
-        taglineText,
-        ctaRow,
-        scrollHint
-      ],
-      { opacity: 1, y: 0, scale: 1 }
+  // 4. Bottom oversized name smooth left-to-right reveal (MD. -> FARDIN -> HOSSAIN)
+  words.forEach((w, idx) => {
+    tl.to(
+      w,
+      {
+        clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 100%)",
+        opacity: 1,
+        y: 0,
+        duration: 0.48,
+        ease: "power2.out"
+      },
+      0.28 + idx * 0.12
     );
-    if (skipBtn) gsap.set(skipBtn, { display: "none" });
-    if (onComplete) onComplete();
-  }
+  });
 
   return {
     play: () => tl.play(),
-    skip,
-    kill: () => tl.kill(),
-    revealWord
+    skip: () => {
+      tl.progress(1);
+    },
+    kill: () => tl.kill()
   };
 }

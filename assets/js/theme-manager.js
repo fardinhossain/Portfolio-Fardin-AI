@@ -19,12 +19,7 @@ export function getStoredTheme() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "dark" || saved === "light") return saved;
   } catch (_e) {}
-  if (typeof window !== "undefined" && window.matchMedia) {
-    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark";
-    }
-  }
-  return "light";
+  return "dark";
 }
 
 let currentTheme = getStoredTheme();

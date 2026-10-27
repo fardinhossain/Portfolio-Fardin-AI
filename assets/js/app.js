@@ -641,7 +641,6 @@ function PortfolioApp() {
               navigateToSection("home");
             }
           },
-          h("span", { className: "brand-icon-circle", "aria-hidden": "true" }, "✦"),
           h("span", { className: "brand-name-text" }, "fardin.ai"),
           h("span", { className: "red-dot", "aria-hidden": "true" })
         ),
@@ -651,12 +650,12 @@ function PortfolioApp() {
           "ul",
           { className: "nav-links-desktop" },
           [
-            { id: "home", label: "Home" },
-            { id: "about", label: "About" },
-            { id: "experience", label: "Experience" },
-            { id: "projects", label: "Projects" },
-            { id: "certifications", label: "Certifications" },
-            { id: "contact", label: "Contact" }
+            { id: "home", label: "HOME" },
+            { id: "about", label: "ABOUT" },
+            { id: "experience", label: "EXPERIENCE" },
+            { id: "projects", label: "PROJECTS" },
+            { id: "certifications", label: "CERTIFICATIONS" },
+            { id: "contact", label: "CONTACT" }
           ].map((item) =>
             h(
               "li",
@@ -686,22 +685,35 @@ function PortfolioApp() {
               type: "button",
               className: "theme-toggle-btn",
               onClick: (e) => handleToggleTheme(e),
-              "aria-label": theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode",
+              "aria-label": theme === "dark" ? "Current theme: Dark. Switch to Light Mode" : "Current theme: Light. Switch to Dark Mode",
               title:
                 theme === "dark"
-                  ? "Activate Solar Light Mode"
-                  : "Activate Robotic Dark Mode"
+                  ? "Switch to Light Mode"
+                  : "Switch to Dark Mode"
             },
-            h("span", { className: "theme-toggle-led" }),
             h(
               "span",
               { className: "theme-toggle-icon-box", "aria-hidden": "true" },
-              theme === "dark" ? "☀️" : "🌙"
+              h(
+                "svg",
+                {
+                  width: "12",
+                  height: "12",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "#E85D3B",
+                  strokeWidth: "2.5",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round"
+                },
+                h("circle", { cx: "12", cy: "12", r: "4", fill: "#E85D3B" }),
+                h("path", { d: "M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" })
+              )
             ),
             h(
               "span",
               { className: "theme-toggle-label" },
-              theme === "dark" ? "Light" : "Dark"
+              theme === "dark" ? "DARK" : "LIGHT"
             )
           ),
           h(
@@ -712,7 +724,7 @@ function PortfolioApp() {
               onClick: () => navigateToSection("contact")
             },
             h("span", { className: "talk-arrow", "aria-hidden": "true" }, "→"),
-            h("span", null, "Let's Talk")
+            h("span", { className: "talk-text" }, "LET'S TALK")
           ),
           h(
             "button",
