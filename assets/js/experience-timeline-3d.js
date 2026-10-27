@@ -747,37 +747,6 @@ export function ExperienceTimelineSection({ onExploreInternship }) {
                 "p",
                 { className: "exp-short-desc" },
                 "Built and evaluated machine-learning ranking systems for content-refresh prioritization using large-scale search performance data."
-              ),
-
-              // Three Compact Achievement Highlights
-              h(
-                "div",
-                { className: "exp-highlights-stack", role: "list", "aria-label": "Internship Achievement Highlights" },
-                h(
-                  "div",
-                  { className: "exp-highlight-pill", role: "listitem" },
-                  h("strong", null, "0.78 Precision@50"),
-                  h("span", null, "— versus a 0.30 fixed-rule baseline.")
-                ),
-                h(
-                  "div",
-                  { className: "exp-highlight-pill", role: "listitem" },
-                  h("strong", null, "78.8M rows"),
-                  h("span", null, "— explored using DuckDB.")
-                ),
-                h(
-                  "div",
-                  { className: "exp-highlight-pill", role: "listitem" },
-                  h("strong", null, "12 notebooks + research paper"),
-                  h("span", null, "— ML capstone deliverables.")
-                )
-              ),
-
-              // Preserved evaluation context note
-              h(
-                "div",
-                { className: "exp-holdout-context" },
-                "Evaluated on a client-grouped holdout across 9,961 candidate pages."
               )
             ),
 
