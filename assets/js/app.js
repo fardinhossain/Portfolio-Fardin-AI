@@ -845,7 +845,7 @@ function PortfolioApp() {
                       h(
                         "span",
                         null,
-                        "New: Explore My Interactive 4-Month FlyRank AI Journey (0.78 P@50) →"
+                        "Explore My Interactive 4-Month FlyRank AI Journey →"
                       )
                     )
                   ),
@@ -1556,13 +1556,12 @@ function PortfolioApp() {
                 h(
                   "span",
                   null,
-                  `© ${new Date().getFullYear()} Md. Fardin Hossain. Built with React, Tailwind & Bot F-01.`
+                  `© ${new Date().getFullYear()} Md. Fardin Hossain. All rights reserved.`
                 ),
                 h(
                   "span",
-                  { className: "site-footer-status" },
-                  h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                  "All systems operational · Unit F-01 on standby"
+                  null,
+                  "Built with React & Tailwind CSS"
                 )
               )
             )
