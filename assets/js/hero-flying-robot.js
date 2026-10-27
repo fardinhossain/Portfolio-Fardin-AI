@@ -258,40 +258,37 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
   scene.add(trailPoints);
 
   // --- 3D FLIGHT PATH SPLINE ---
-  // Sequence:
-  // Phase B: Enters from offscreen right, flies left across headline (Hossain -> Fardin -> Md.)
-  // Phase D: Curves upward along left side, dives behind head, orbits upper halo,
-  //          glides past right shoulder without covering face, and rests beside portrait.
+  // Sequence (PORTIX Asymmetrical Composition):
+  // Phase B: Enters from offscreen right, flies left across bottom name (Hossain -> Fardin -> Md.)
+  // Phase D: Curves upward along left side, dives behind head & halo (3D depth),
+  //          emerges along right halo orbit, glides past right shoulder, and rests beside portrait.
   const isMobile = window.innerWidth < 768;
   const curvePoints = isMobile
     ? [
-        new THREE.Vector3(6.8, -1.35, 3.0),   // 0. Offscreen right
-        new THREE.Vector3(3.2, -1.35, 2.5),   // 1. Entering headline
-        new THREE.Vector3(1.8, -1.35, 2.2),   // 2. Over 'Hossain'
-        new THREE.Vector3(0.0, -1.35, 2.2),   // 3. Over 'Fardin'
-        new THREE.Vector3(-1.8, -1.35, 2.2),  // 4. Over 'Md.'
-        new THREE.Vector3(-3.2, -0.8, 1.8),   // 5. Left sweep past name
-        new THREE.Vector3(-3.0, 1.8, 0.2),    // 6. Upward along left side
-        new THREE.Vector3(-2.0, 3.8, -3.2),   // 7. Behind upper left
-        new THREE.Vector3(0.0, 4.5, -4.5),    // 8. Deep behind head top
-        new THREE.Vector3(2.0, 3.8, -2.5),    // 9. Behind upper right
-        new THREE.Vector3(3.0, 2.8, 0.5),     // 10. Emerging at right orbital
-        new THREE.Vector3(2.8, 1.8, 1.2)      // 11. Resting hover beside portrait
+        new THREE.Vector3(5.6, -4.2, 2.6),   // 0. Offscreen right
+        new THREE.Vector3(2.5, -4.2, 2.2),   // 1. Over 'Hossain'
+        new THREE.Vector3(0.0, -4.2, 2.2),   // 2. Over 'Fardin'
+        new THREE.Vector3(-2.4, -4.2, 2.2),  // 3. Over 'Md.'
+        new THREE.Vector3(-3.5, -2.5, 1.6),  // 4. Sweep up left
+        new THREE.Vector3(-2.8, 1.2, 0.2),   // 5. Upward left
+        new THREE.Vector3(-1.2, 3.4, -2.0),  // 6. Upward towards halo
+        new THREE.Vector3(0.0, 4.0, -3.8),   // 7. Diving behind head/halo
+        new THREE.Vector3(1.6, 3.2, -1.8),   // 8. Emerging right
+        new THREE.Vector3(2.4, 2.0, 0.8),    // 9. Past right shoulder
+        new THREE.Vector3(2.2, 1.2, 1.2)     // 10. Resting hover
       ]
     : [
-        new THREE.Vector3(12.5, -1.35, 3.2),  // 0. Offscreen right entry
-        new THREE.Vector3(8.0, -1.35, 2.8),   // 1. Entering headline space
-        new THREE.Vector3(3.8, -1.35, 2.4),   // 2. Over 'Hossain'
-        new THREE.Vector3(0.0, -1.35, 2.4),   // 3. Over 'Fardin'
-        new THREE.Vector3(-3.8, -1.35, 2.4),  // 4. Over 'Md.'
-        new THREE.Vector3(-6.2, -0.8, 1.8),   // 5. Left sweep past name
-        new THREE.Vector3(-5.5, 2.0, 0.4),    // 6. Curving upward along left side
-        new THREE.Vector3(-4.2, 4.2, -3.2),   // 7. Diving behind upper left
-        new THREE.Vector3(-1.0, 5.2, -5.0),   // 8. Deep behind head top
-        new THREE.Vector3(2.4, 4.8, -4.5),    // 9. Behind upper right
-        new THREE.Vector3(4.8, 3.6, -0.8),    // 10. Emerging along right orbital ring
-        new THREE.Vector3(4.8, 2.4, 0.8),     // 11. Gliding past right shoulder
-        new THREE.Vector3(4.5, 1.8, 1.5)      // 12. Resting hover position
+        new THREE.Vector3(11.0, -4.6, 3.0),  // 0. Offscreen right entry
+        new THREE.Vector3(4.8, -4.6, 2.4),   // 1. Over 'Hossain'
+        new THREE.Vector3(0.0, -4.6, 2.4),   // 2. Over 'Fardin'
+        new THREE.Vector3(-4.8, -4.6, 2.4),  // 3. Over 'Md.'
+        new THREE.Vector3(-7.5, -2.2, 1.8),  // 4. Left sweep past bottom
+        new THREE.Vector3(-6.8, 0.8, 0.6),   // 5. Curving upward along left
+        new THREE.Vector3(-3.2, 3.8, -1.5),  // 6. Moving across towards halo
+        new THREE.Vector3(2.2, 4.6, -4.2),   // 7. Diving deep behind head top & halo
+        new THREE.Vector3(4.8, 3.8, -2.0),   // 8. Emerging along right orbital ring
+        new THREE.Vector3(5.4, 2.2, 0.8),    // 9. Gliding past right shoulder
+        new THREE.Vector3(5.0, 1.2, 1.4)     // 10. Resting hover position
       ];
 
   const flightCurve = new THREE.CatmullRomCurve3(curvePoints);
@@ -334,13 +331,13 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
     const t = Math.min(1.0, animProgress);
     const pos = flightCurve.getPointAt(t);
 
-    // Word Reveal Triggers along right-to-left flight
+    // Word Reveal Triggers along right-to-left flight across bottom name
     if (flightActive && onWordPass) {
-      const hossainThreshold = isMobile ? 2.0 : 4.0;
-      const fardinThreshold = isMobile ? 0.1 : 0.2;
-      const mdThreshold = isMobile ? -2.0 : -3.6;
+      const hossainThreshold = isMobile ? 2.5 : 5.0;
+      const fardinThreshold = isMobile ? 0.1 : 0.1;
+      const mdThreshold = isMobile ? -2.0 : -4.5;
 
-      if (!triggeredWords.hossain && pos.x <= hossainThreshold && pos.y < 0.2) {
+      if (!triggeredWords.hossain && pos.x <= hossainThreshold && pos.y < -3.0) {
         triggeredWords.hossain = true;
         onWordPass("hossain");
         // Particle burst
@@ -354,7 +351,7 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
         }
       }
 
-      if (!triggeredWords.fardin && pos.x <= fardinThreshold && pos.y < 0.2) {
+      if (!triggeredWords.fardin && pos.x <= fardinThreshold && pos.y < -3.0) {
         triggeredWords.fardin = true;
         onWordPass("fardin");
         // Particle burst
@@ -368,7 +365,7 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
         }
       }
 
-      if (!triggeredWords.md && pos.x <= mdThreshold && pos.y < 0.2) {
+      if (!triggeredWords.md && pos.x <= mdThreshold && pos.y < -3.0) {
         triggeredWords.md = true;
         onWordPass("md");
         // Particle burst

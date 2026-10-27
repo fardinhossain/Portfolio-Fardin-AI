@@ -22,6 +22,7 @@ export function createHeroIntroTimeline({
     haloAura,
     telemetryBadge,
     portraitContainer,
+    headlineRef,
     wordMd,
     wordFardin,
     wordHossain,
@@ -44,6 +45,7 @@ export function createHeroIntroTimeline({
         haloAura,
         telemetryBadge,
         portraitContainer,
+        headlineRef,
         labelBadge,
         taglineText,
         ctaRow,
@@ -68,6 +70,7 @@ export function createHeroIntroTimeline({
   gsap.set(telemetryBadge, { opacity: 0, y: -6 });
   // Portrait starts subdued (Phase A)
   gsap.set(portraitContainer, { opacity: 0.35, scale: 0.97 });
+  if (headlineRef) gsap.set(headlineRef, { opacity: 0, y: 16 });
 
   // Each word starts hidden from right to left
   words.forEach((w) => {
@@ -121,9 +124,11 @@ export function createHeroIntroTimeline({
   tl.to(bgLayer, { opacity: 1, duration: 0.5 }, 0.05);
   if (haloAura) tl.to(haloAura, { opacity: 0.85, scale: 1.0, duration: 0.6 }, 0.1);
   tl.to(telemetryBadge, { opacity: 1, y: 0, duration: 0.45 }, 0.15);
+  if (labelBadge) tl.to(labelBadge, { opacity: 1, y: 0, duration: 0.45 }, 0.2);
+  if (headlineRef) tl.to(headlineRef, { opacity: 1, y: 0, duration: 0.6 }, 0.28);
   if (skipBtn) tl.to(skipBtn, { opacity: 1, duration: 0.35 }, 0.25);
 
-  // --- Phase B: Launch 3D Flying Robot from Right across Headline (0.4s) ---
+  // --- Phase B: Launch 3D Flying Robot across Bottom Name (0.4s) ---
   tl.call(
     () => {
       if (robotRef && robotRef.current) {
@@ -135,12 +140,11 @@ export function createHeroIntroTimeline({
   );
 
   // Fallback programmatic reveal triggers in case WebGL triggers don't fire
-  // (Ensures guaranteed progression across all environments)
   tl.call(() => revealWord("hossain"), null, 1.15);
   tl.call(() => revealWord("fardin"), null, 1.85);
   tl.call(() => revealWord("md"), null, 2.55);
 
-  // --- Phase C: Portrait Emerges into Full Clarity (2.8s) ---
+  // --- Phase C: Portrait Emerges into Full Photographic Clarity (2.8s) ---
   tl.to(
     portraitContainer,
     {
@@ -152,11 +156,10 @@ export function createHeroIntroTimeline({
     2.8
   );
 
-  // --- Phase E: Supporting Text, Professional Label, & CTAs (3.2s - 3.8s) ---
-  tl.to(labelBadge, { opacity: 1, y: 0, duration: 0.45 }, 3.2);
-  tl.to(taglineText, { opacity: 1, y: 0, duration: 0.45 }, 3.4);
-  tl.to(ctaRow, { opacity: 1, y: 0, duration: 0.45 }, 3.6);
-  tl.to(scrollHint, { opacity: 1, duration: 0.45 }, 3.8);
+  // --- Phase E: Supporting Text, Tagline & CTAs (3.0s - 3.6s) ---
+  tl.to(taglineText, { opacity: 1, y: 0, duration: 0.45 }, 3.1);
+  tl.to(ctaRow, { opacity: 1, y: 0, duration: 0.45 }, 3.3);
+  tl.to(scrollHint, { opacity: 1, duration: 0.45 }, 3.6);
 
   // Skip Function — Immediate graceful settle
   function skip() {
@@ -173,6 +176,7 @@ export function createHeroIntroTimeline({
         haloAura,
         telemetryBadge,
         portraitContainer,
+        headlineRef,
         labelBadge,
         taglineText,
         ctaRow,

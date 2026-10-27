@@ -1,18 +1,18 @@
 // ==========================================================================
-// FARDIN.AI — CINEMATIC FULL-SCREEN HERO SECTION ORCHESTRATOR
-// Inspired by PORTIX portfolio & Cinematic Robot Animation:
-// 1. Dual-theme portraits (fardin_portrait_dark.jpg & fardin_portrait_light.jpg)
-// 2. 3D Robot flies from Right to Left, revealing words: Hossain -> Fardin -> Md.
-// 3. Robot curves up, dives behind head (depth), and orbits upper halo
-// 4. Portrait focuses from subtle halftone to sharp photograph
-// 5. Absolute user manual scroll priority (never hijacked)
+// FARDIN.AI — EDITORIAL ASYMMETRICAL CINEMATIC HERO SECTION
+// Designed to match the exact PORTIX reference composition:
+// 1. Asymmetrical 2-column layout: Left headline stack (~45%), Right portrait (~55%)
+// 2. Pure cutout portrait (fardin_portrait_cutout.png) over independent warm circular halo
+// 3. Oversized 'MD. FARDIN HOSSAIN' across bottom width overlapping lower torso
+// 4. Subtle, secondary 3D robot flight looping behind head/halo, resting on outer shoulder
+// 5. Dense neural network background removed for clean photographic & typographic impact
+// 6. 100% natural scroll priority (never locked or hijacked)
 // ==========================================================================
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { PortraitLayer } from "./hero-portrait-layer.js";
 import { createFlyingRobot3D } from "./hero-flying-robot.js";
 import { createHeroIntroTimeline } from "./hero-intro-timeline.js";
-import { HeroNeuralScene } from "./three-scenes.js";
 import { getCurrentTheme, subscribeTheme } from "./theme-manager.js";
 import { PROFILE_DATA } from "./data.js";
 
@@ -34,30 +34,28 @@ export function CinematicHeroSection({
   const shaderInstanceRef = useRef(null);
   const introTimelineRef = useRef(null);
 
-  // DOM element refs for intro sequence
+  // DOM element refs for intro sequence & scroll dynamics
   const bgLayerRef = useRef(null);
   const haloAuraRef = useRef(null);
   const telemetryRef = useRef(null);
+  const leftColRef = useRef(null);
+  const labelBadgeRef = useRef(null);
+  const headlineRef = useRef(null);
+  const taglineRef = useRef(null);
+  const ctaRowRef = useRef(null);
+  const portraitStageRef = useRef(null);
   const nameContainerRef = useRef(null);
-  const nameFillRef = useRef(null);
   const wordMdRef = useRef(null);
   const wordFardinRef = useRef(null);
   const wordHossainRef = useRef(null);
-  const portraitStageRef = useRef(null);
-  const labelBadgeRef = useRef(null);
-  const taglineRef = useRef(null);
-  const ctaRowRef = useRef(null);
   const skipBtnRef = useRef(null);
   const scrollHintRef = useRef(null);
 
   const [theme, setTheme] = useState(() => getCurrentTheme());
   const [introFinished, setIntroFinished] = useState(false);
 
-  // Dual theme portrait source
-  const portraitSrc =
-    theme === "dark"
-      ? "assets/images/fardin_portrait_dark.jpg"
-      : "assets/images/fardin_portrait_light.jpg";
+  // Clean transparent cutout portrait
+  const portraitCutoutSrc = "assets/images/fardin_portrait_cutout.png";
 
   // Subscribe to theme changes
   useEffect(() => {
@@ -111,6 +109,7 @@ export function CinematicHeroSection({
       haloAura: haloAuraRef.current,
       telemetryBadge: telemetryRef.current,
       portraitContainer: portraitStageRef.current,
+      headlineRef: headlineRef.current,
       wordMd: wordMdRef.current,
       wordFardin: wordFardinRef.current,
       wordHossain: wordHossainRef.current,
@@ -132,7 +131,6 @@ export function CinematicHeroSection({
 
     introTimelineRef.current = tl;
 
-    // Small timeout to allow shader & robot canvases to mount cleanly
     const startTimer = setTimeout(() => {
       tl.play();
     }, 120);
@@ -160,7 +158,7 @@ export function CinematicHeroSection({
     const updateScrollDynamics = () => {
       const scrollY = window.scrollY || window.pageYOffset || 0;
 
-      // If user scrolls during the intro sequence, auto-complete intro safely
+      // If user scrolls during opening sequence, auto-complete intro safely
       if (!introFinished && scrollY > 25) {
         handleSkipIntro();
       }
@@ -180,23 +178,30 @@ export function CinematicHeroSection({
 
         // Portrait floats upward and slightly scales down
         const portraitY = -progress * (isMobile ? 22 : 44);
-        const portraitScale = 1.0 - progress * (isMobile ? 0.03 : 0.05);
-
+        const portraitScale = 1.0 - progress * (isMobile ? 0.02 : 0.04);
         if (portraitStageRef.current) {
           portraitStageRef.current.style.transform = `translate3d(0, ${portraitY.toFixed(1)}px, 0) scale(${portraitScale.toFixed(4)})`;
         }
 
-        // Foreground Name shifts with differential depth
-        const nameY = -progress * (isMobile ? 30 : 58);
+        // Halo floats with gentle differential parallax
+        const haloY = -progress * (isMobile ? 14 : 28);
+        if (haloAuraRef.current) {
+          haloAuraRef.current.style.transform = `translate(-50%, calc(-50% + ${haloY.toFixed(1)}px))`;
+        }
+
+        // Left column content fades out gently as visitor leaves hero
+        const contentOpacity = Math.max(0, 1.0 - progress * 1.6);
+        if (leftColRef.current) {
+          leftColRef.current.style.opacity = contentOpacity.toFixed(2);
+        }
+
+        // Bottom name shifts slightly
+        const nameY = -progress * (isMobile ? 18 : 36);
         if (nameContainerRef.current) {
           nameContainerRef.current.style.transform = `translate3d(0, ${nameY.toFixed(1)}px, 0)`;
         }
 
-        // Action row fades out gently as user leaves hero
-        const contentOpacity = Math.max(0, 1.0 - progress * 1.8);
-        if (ctaRowRef.current) {
-          ctaRowRef.current.style.opacity = contentOpacity.toFixed(2);
-        }
+        // Scroll hint fades out
         if (scrollHintRef.current) {
           scrollHintRef.current.style.opacity = Math.max(0, 1.0 - progress * 3.5).toFixed(2);
         }
@@ -237,25 +242,16 @@ export function CinematicHeroSection({
     },
 
     // ------------------------------------------------------------------------
-    // LAYER 1: BACKGROUND GRID, ORBITAL RINGS & TELEMETRY
+    // LAYER 1: FRAME BORDER & TECHNICAL BACKGROUND GRID
     // ------------------------------------------------------------------------
+    h("div", { className: "portix-hero-frame-border", "aria-hidden": "true" }),
+
     h(
       "div",
       { ref: bgLayerRef, className: "cinematic-hero-bg", "aria-hidden": "true" },
-      // Interactive 3D Neural Nodes & Orbital Rings Scene
-      h(HeroNeuralScene, null),
-
-      // Architectural Technical Grid Overlay
+      // Clean architectural technical grid
       h("div", { className: "cinematic-grid-pattern" }),
-
-      // Warm Circular Halo Aura (Inspired by PORTIX reference)
-      h("div", { ref: haloAuraRef, className: "cinematic-halo-aura" }),
-
-      // Concentric Orbital Rings
-      h("div", { className: "cinematic-orbital-ring ring-1" }),
-      h("div", { className: "cinematic-orbital-ring ring-2" }),
-
-      // Radial Ambient Vignette
+      // Radial ambient vignette
       h("div", { className: "cinematic-vignette-layer" })
     ),
 
@@ -288,7 +284,7 @@ export function CinematicHeroSection({
     ),
 
     // ------------------------------------------------------------------------
-    // LAYER 2: 3D FLYING ROBOT CANVAS (Behind Portrait Layer)
+    // LAYER 2: 3D FLYING ROBOT CANVAS (Behind Portrait & Across Screen)
     // ------------------------------------------------------------------------
     h("canvas", {
       ref: robotCanvasRef,
@@ -297,107 +293,54 @@ export function CinematicHeroSection({
     }),
 
     // ------------------------------------------------------------------------
-    // LAYER 3 & 4: CENTRAL STAGE (Portrait + Foreground Content Stack)
+    // LAYER 3: ASYMMETRICAL EDITORIAL GRID (Left Headline + Right Portrait)
     // ------------------------------------------------------------------------
     h(
       "div",
-      { className: "cinematic-hero-stage" },
+      { className: "portix-hero-grid" },
 
-      // Central Dual-Theme Portrait & Halftone Shader
+      // === LEFT COLUMN (~40-45% width): BOLD EDITORIAL HEADLINE STACK ===
       h(
         "div",
-        { ref: portraitStageRef, className: "cinematic-portrait-wrapper" },
-        h(PortraitLayer, {
-          key: portraitSrc,
-          src: portraitSrc,
-          alt: "Md. Fardin Hossain — Aspiring AI Engineer & Full-Stack Developer",
-          onShaderReady: handleShaderReady
-        })
-      ),
+        { ref: leftColRef, className: "portix-left-col" },
 
-      // Foreground Editorial Content (Overlapping Portrait Lower Torso)
-      h(
-        "div",
-        { className: "cinematic-foreground-stage" },
-
-        // Professional Label Badge (Above Name, PORTIX-inspired)
+        // Kicker Pill / Role Badge
         h(
           "div",
-          { ref: labelBadgeRef, className: "cinematic-role-badge" },
-          h("span", { className: "role-bullet-square", "aria-hidden": "true" }, "■"),
-          h(
-            "span",
-            { className: "role-text" },
-            "ASPIRING AI ENGINEER · MACHINE LEARNING · FULL-STACK DEVELOPER"
-          )
+          { ref: labelBadgeRef, className: "portix-kicker-badge" },
+          h("span", { className: "kicker-square", "aria-hidden": "true" }, "■"),
+          h("span", { className: "kicker-text" }, "AI ENGINEER & FULL-STACK DEVELOPER")
         ),
 
-        // Oversized Editorial Name with Word-by-Word Robot Reveal
+        // Large Condensed Bold Headline inspired by PORTIX reference
         h(
-          "div",
-          {
-            ref: nameContainerRef,
-            className: "cinematic-name-wrap",
-            "aria-label": "Md. Fardin Hossain"
-          },
-          h(
-            "h1",
-            {
-              ref: nameFillRef,
-              className: "cinematic-hero-name"
-            },
-            h(
-              "span",
-              {
-                ref: wordMdRef,
-                className: "hero-name-word word-md",
-                "data-word": "md"
-              },
-              "Md."
-            ),
-            h("span", { className: "hero-name-space" }, " "),
-            h(
-              "span",
-              {
-                ref: wordFardinRef,
-                className: "hero-name-word word-fardin",
-                "data-word": "fardin"
-              },
-              "Fardin"
-            ),
-            h("span", { className: "hero-name-space" }, " "),
-            h(
-              "span",
-              {
-                ref: wordHossainRef,
-                className: "hero-name-word word-hossain",
-                "data-word": "hossain"
-              },
-              "Hossain"
-            )
-          )
+          "h1",
+          { ref: headlineRef, className: "portix-headline" },
+          h("span", { className: "hl-line hl-line-white" }, "BUILDING"),
+          h("span", { className: "hl-line hl-line-muted" }, "INTELLIGENT SYSTEMS"),
+          h("span", { className: "hl-line hl-line-white" }, "THAT CREATE IMPACT")
         ),
 
-        // Compact Tagline (Below Name)
+        // Concise Editorial Description
         h(
           "p",
-          { ref: taglineRef, className: "cinematic-tagline" },
-          "“Building intelligent systems. Turning ideas into real-world impact.”"
+          { ref: taglineRef, className: "portix-description" },
+          "Engineering intelligent systems and full-stack products for real-world impact."
         ),
 
-        // Primary Actions
+        // Primary Action Buttons
         h(
           "div",
-          { ref: ctaRowRef, className: "cinematic-actions-row" },
+          { ref: ctaRowRef, className: "portix-cta-row" },
           h(
             "button",
             {
               type: "button",
-              className: "btn-pill-dark cinematic-cta-primary",
+              className: "portix-btn-primary",
               onClick: onNavigateProjects
             },
             h("span", null, "Explore My Work"),
-            h("span", { className: "btn-trailing-circle", "aria-hidden": "true" }, "→")
+            h("span", { className: "btn-arrow", "aria-hidden": "true" }, "→")
           ),
           h(
             "a",
@@ -406,31 +349,95 @@ export function CinematicHeroSection({
               download: "Fardin_Hossain_Resume.pdf",
               target: "_blank",
               rel: "noopener",
-              className: "btn-pill-light cinematic-cta-secondary"
+              className: "portix-btn-secondary"
             },
-            h("span", { "aria-hidden": "true" }, "↓"),
+            h("span", { className: "btn-arrow", "aria-hidden": "true" }, "↓"),
             h("span", null, "Download Resume")
           ),
           h(
             "button",
             {
               type: "button",
-              className: "hero-journey-shortcut cinematic-journey-pill",
+              className: "portix-btn-journey",
               onClick: onOpenJourney
             },
-            h("span", { className: "yellow-dot" }),
+            h("span", { className: "journey-yellow-dot", "aria-hidden": "true" }),
             h("span", null, "4-Month FlyRank AI Journey →")
           )
-        ),
+        )
+      ),
 
-        // Bottom Scroll Indicator Hint
+      // === RIGHT COLUMN (~55% width): INDEPENDENT HALO & PORTRAIT CUTOUT ===
+      h(
+        "div",
+        { className: "portix-right-col" },
+
+        // Independent Warm Orange-to-Maroon Circular Halo
+        h("div", { ref: haloAuraRef, className: "portix-halo-circle", "aria-hidden": "true" }),
+
+        // Subtle Concentric Orbital Ring
+        h("div", { className: "portix-halo-ring", "aria-hidden": "true" }),
+
+        // Portrait Cutout Container (Transparent background, chocolate-brown shirt, crisp clarity)
         h(
           "div",
-          { ref: scrollHintRef, className: "cinematic-scroll-hint", "aria-hidden": "true" },
-          h("span", { className: "scroll-hint-text" }, "SCROLL TO EXPLORE"),
-          h("div", { className: "scroll-hint-bar" })
+          { ref: portraitStageRef, className: "portix-portrait-container" },
+          h(PortraitLayer, {
+            src: portraitCutoutSrc,
+            alt: "Md. Fardin Hossain — Aspiring AI Engineer & Full-Stack Developer",
+            onShaderReady: handleShaderReady
+          })
         )
       )
+    ),
+
+    // ------------------------------------------------------------------------
+    // LAYER 4: OVERSIZED BOTTOM NAME (Overlapping Lower Torso Across Width)
+    // ------------------------------------------------------------------------
+    h(
+      "div",
+      { ref: nameContainerRef, className: "portix-bottom-name-wrap" },
+      h(
+        "h2",
+        { className: "portix-bottom-name", "aria-label": "Md. Fardin Hossain" },
+        h(
+          "span",
+          {
+            ref: wordMdRef,
+            className: "hero-name-word word-md",
+            "data-word": "md"
+          },
+          "MD."
+        ),
+        h("span", { className: "hero-name-space" }, " "),
+        h(
+          "span",
+          {
+            ref: wordFardinRef,
+            className: "hero-name-word word-fardin",
+            "data-word": "fardin"
+          },
+          "FARDIN"
+        ),
+        h("span", { className: "hero-name-space" }, " "),
+        h(
+          "span",
+          {
+            ref: wordHossainRef,
+            className: "hero-name-word word-hossain",
+            "data-word": "hossain"
+          },
+          "HOSSAIN"
+        )
+      )
+    ),
+
+    // Scroll Down Indicator Hint
+    h(
+      "div",
+      { ref: scrollHintRef, className: "cinematic-scroll-hint", "aria-hidden": "true" },
+      h("span", { className: "scroll-hint-text" }, "SCROLL TO EXPLORE"),
+      h("div", { className: "scroll-hint-bar" })
     )
   );
 }
