@@ -482,6 +482,18 @@ export function createCertificationRobot3D(options = {}) {
 }
 
 // --------------------------------------------------------------------------
+// ANIMATION LIFECYCLE STATE CONSTANTS
+// Explicit, unidirectional state machine ensuring user manual scrolling always
+// takes absolute priority over animations without fighting or pulling the viewport.
+// --------------------------------------------------------------------------
+export const ANIM_LIFECYCLE = {
+  IDLE: "IDLE",
+  PLAYING: "PLAYING",
+  INTERRUPTED: "INTERRUPTED",
+  COMPLETED: "COMPLETED"
+};
+
+// --------------------------------------------------------------------------
 // 3. DUAL ROBOT DELIVERY WEBGL SCENE (`DualRobotDeliveryScene`)
 // --------------------------------------------------------------------------
 export function DualRobotDeliveryScene({
@@ -489,13 +501,14 @@ export function DualRobotDeliveryScene({
   slotRefsMap,
   certifications,
   runCount,
+  controllerRef: externalControllerRef,
   onTargetRow,
   onRowDelivered,
   onAllDelivered,
   onTelemetryUpdate
 }) {
   const mountRef = useRef(null);
-  const controllerRef = useRef(null);
+  const internalControllerRef = useRef(null);
 
   const latestPropsRef = useRef({
     certifications,
@@ -708,12 +721,16 @@ export function DualRobotDeliveryScene({
       // Inbound flight animation
       await new Promise((resolve) => {
         const flightObj = { progress: 0 };
-        gsap.to(flightObj, {
+        const tw = gsap.to(flightObj, {
           progress: 1,
           duration: isMobile ? 0.62 : 0.78,
           ease: "power2.inOut",
           onUpdate: () => {
-            if (abortSignal.aborted) return;
+            if (abortSignal.aborted) {
+              tw.kill();
+              resolve();
+              return;
+            }
             evalCubicBezier3D(p0, c1, c2, p3, flightObj.progress, currentBot.root.position);
             const bankAngle = Math.sin(flightObj.progress * Math.PI) * 0.25 * (-sideMultiplier);
             currentBot.bodyPivot.rotation.z = bankAngle;
@@ -722,6 +739,11 @@ export function DualRobotDeliveryScene({
           },
           onComplete: resolve
         });
+
+        abortSignal.addEventListener("abort", () => {
+          tw.kill();
+          resolve();
+        }, { once: true });
       });
 
       if (abortSignal.aborted) return;
@@ -752,12 +774,16 @@ export function DualRobotDeliveryScene({
 
       const exitPromise = new Promise((resolve) => {
         const exitObj = { progress: 0 };
-        gsap.to(exitObj, {
+        const tw = gsap.to(exitObj, {
           progress: 1,
           duration: isMobile ? 0.42 : 0.52,
           ease: "power2.in",
           onUpdate: () => {
-            if (abortSignal.aborted) return;
+            if (abortSignal.aborted) {
+              tw.kill();
+              resolve();
+              return;
+            }
             evalCubicBezier3D(exitP0, exitP1, exitP2, exitP2, exitObj.progress, currentBot.root.position);
             currentBot.bodyPivot.rotation.z = -0.2 * sideMultiplier;
             spawnParticle(currentBot.root.position, isRobotBTurn ? 0xf59e0b : 0xe11d48);
@@ -767,13 +793,56 @@ export function DualRobotDeliveryScene({
             resolve();
           }
         });
+
+        abortSignal.addEventListener("abort", () => {
+          tw.kill();
+          resolve();
+        }, { once: true });
       });
 
       // Smooth cadence before next robot starts
       await Promise.race([
         exitPromise,
-        new Promise((r) => setTimeout(r, 450))
+        new Promise((r) => {
+          const timer = setTimeout(r, 450);
+          abortSignal.addEventListener("abort", () => {
+            clearTimeout(timer);
+            r();
+          }, { once: true });
+        })
       ]);
+    }
+
+    function stopAllTweens() {
+      try {
+        gsap.killTweensOf(robotA.root.position);
+        gsap.killTweensOf(robotB.root.position);
+        gsap.killTweensOf(robotA.bodyPivot.rotation);
+        gsap.killTweensOf(robotB.bodyPivot.rotation);
+      } catch (_e) {}
+    }
+
+    function resetRobotsToRest() {
+      robotA.cargoPivot.visible = false;
+      robotB.cargoPivot.visible = false;
+      robotA.scanBeamGroup.visible = false;
+      robotB.scanBeamGroup.visible = false;
+      if (robotA.leftArmParts && robotA.leftArmParts.gripperPivot) {
+        robotA.leftArmParts.gripperPivot.rotation.z = 0;
+      }
+      if (robotB.leftArmParts && robotB.leftArmParts.gripperPivot) {
+        robotB.leftArmParts.gripperPivot.rotation.z = 0;
+      }
+      if (robotA.rightArmParts && robotA.rightArmParts.gripperPivot) {
+        robotA.rightArmParts.gripperPivot.rotation.z = 0;
+      }
+      if (robotB.rightArmParts && robotB.rightArmParts.gripperPivot) {
+        robotB.rightArmParts.gripperPivot.rotation.z = 0;
+      }
+      robotA.bodyPivot.rotation.set(0, 0, 0);
+      robotB.bodyPivot.rotation.set(0, 0, 0);
+      robotA.root.position.copy(restPosA);
+      robotB.root.position.copy(restPosB);
     }
 
     async function buildDeliverySequence() {
@@ -798,18 +867,19 @@ export function DualRobotDeliveryScene({
       isRunning = true;
 
       // Reset both robots
-      robotA.cargoPivot.visible = false;
-      robotB.cargoPivot.visible = false;
-      robotA.scanBeamGroup.visible = false;
-      robotB.scanBeamGroup.visible = false;
-      robotA.root.position.copy(restPosA);
-      robotB.root.position.copy(restPosB);
+      resetRobotsToRest();
 
       for (let idx = 0; idx < certs.length; idx++) {
         if (abortSignal.aborted) break;
         await deliverOneCard(certs[idx], idx, certs.length, abortSignal);
         if (abortSignal.aborted) break;
-        await new Promise((r) => setTimeout(r, 80));
+        await new Promise((r) => {
+          const timer = setTimeout(r, 80);
+          abortSignal.addEventListener("abort", () => {
+            clearTimeout(timer);
+            r();
+          }, { once: true });
+        });
       }
 
       if (!abortSignal.aborted) {
@@ -827,7 +897,7 @@ export function DualRobotDeliveryScene({
       }
     }
 
-    controllerRef.current = {
+    const controller = {
       startDelivery: () => {
         buildDeliverySequence();
       },
@@ -837,6 +907,9 @@ export function DualRobotDeliveryScene({
           currentDeliveryAbort = null;
         }
         isRunning = false;
+        stopAllTweens();
+        resetRobotsToRest();
+
         const certs = latestPropsRef.current.certifications || [];
         certs.forEach((c) => {
           if (latestPropsRef.current.onRowDelivered) {
@@ -846,12 +919,13 @@ export function DualRobotDeliveryScene({
         if (latestPropsRef.current.onAllDelivered) {
           latestPropsRef.current.onAllDelivered();
         }
-        robotA.cargoPivot.visible = false;
-        robotB.cargoPivot.visible = false;
-        robotA.root.position.copy(restPosA);
-        robotB.root.position.copy(restPosB);
       }
     };
+
+    internalControllerRef.current = controller;
+    if (externalControllerRef) {
+      externalControllerRef.current = controller;
+    }
 
     // Render loop
     let rafId = null;
@@ -910,16 +984,20 @@ export function DualRobotDeliveryScene({
     return () => {
       if (rafId) cancelAnimationFrame(rafId);
       if (currentDeliveryAbort) currentDeliveryAbort.abort();
+      stopAllTweens();
       io.disconnect();
       window.removeEventListener("resize", onResize);
       renderer.dispose();
+      if (externalControllerRef) {
+        externalControllerRef.current = null;
+      }
     };
   }, []);
 
   // Trigger delivery on runCount increment (> 0)
   useEffect(() => {
-    if (runCount > 0 && controllerRef.current) {
-      controllerRef.current.startDelivery();
+    if (runCount > 0 && internalControllerRef.current) {
+      internalControllerRef.current.startDelivery();
     }
   }, [runCount]);
 
@@ -941,6 +1019,7 @@ export function CertificationRow({
   isDelivered,
   isActiveTarget,
   isJustLanded,
+  isInstant = false,
   slotRefCallback,
   onOpenModal,
   onOpenCertWall,
@@ -956,8 +1035,8 @@ export function CertificationRow({
       className: `cert-row-slot ${isActiveTarget ? "is-active-target" : ""}`,
       id: `cert-slot-${cert.id}`
     },
-    // Shockwave pulse ring upon card landing
-    isJustLanded && h("div", { className: "card-landing-pulse", "aria-hidden": "true" }),
+    // Shockwave pulse ring upon card landing (suppressed during quick reveal)
+    !isInstant && isJustLanded && h("div", { className: "card-landing-pulse", "aria-hidden": "true" }),
 
     // Slot placeholder while awaiting robot delivery
     !isDelivered
@@ -969,16 +1048,18 @@ export function CertificationRow({
             className: `cert-row-card cert-list-tile is-tile-settled ${
               isLeftOrigin ? "delivered-from-left" : "delivered-from-right"
             }`,
-            initial: { opacity: 0, scale: 0.95, y: -10 },
+            initial: isInstant ? false : { opacity: 0, scale: 0.95, y: -10 },
             animate: {
               opacity: 1,
-              scale: [0.95, 1.018, 1],
-              y: [-10, 2, 0]
+              scale: isInstant ? 1 : [0.95, 1.018, 1],
+              y: isInstant ? 0 : [-10, 2, 0]
             },
-            transition: {
-              duration: 0.44,
-              ease: [0.16, 1, 0.3, 1]
-            }
+            transition: isInstant
+              ? { duration: 0 }
+              : {
+                  duration: 0.44,
+                  ease: [0.16, 1, 0.3, 1]
+                }
           },
           // Left side: Callsign Badge + Issuer Logo + Title & Meta
           h(
@@ -1101,7 +1182,11 @@ export function CertificationShowcase({
   const stageRef = useRef(null);
   const sectionRef = useRef(null);
   const slotRefsMap = useRef(new Map());
-  const hasTriggeredRef = useRef(false);
+  const controllerRef = useRef(null);
+  const lifecycleRef = useRef(ANIM_LIFECYCLE.IDLE);
+
+  const [lifecycle, setLifecycle] = useState(ANIM_LIFECYCLE.IDLE);
+  const [isQuickReveal, setIsQuickReveal] = useState(false);
 
   // Delivered card state tracking
   const [deliveredIds, setDeliveredIds] = useState(() =>
@@ -1148,29 +1233,106 @@ export function CertificationShowcase({
   const handleAllDelivered = useCallback(() => {
     setDeliveredIds(new Set(certifications.map((c) => c.id)));
     setActiveTargetId(null);
+    lifecycleRef.current = ANIM_LIFECYCLE.COMPLETED;
+    setLifecycle(ANIM_LIFECYCLE.COMPLETED);
   }, [certifications]);
 
   const handleTelemetryUpdate = useCallback((tState) => {
     setTelemetry(tState);
   }, []);
 
-  // Trigger delivery on scroll into view
+  // Safe interruption: Immediately stops in-flight work and settles rows silently
+  const interruptSequence = useCallback(
+    (_reason = "manual-scroll") => {
+      if (lifecycleRef.current !== ANIM_LIFECYCLE.PLAYING) return;
+      lifecycleRef.current = ANIM_LIFECYCLE.INTERRUPTED;
+      setLifecycle(ANIM_LIFECYCLE.INTERRUPTED);
+      setIsQuickReveal(true);
+
+      if (controllerRef.current && typeof controllerRef.current.skipAll === "function") {
+        controllerRef.current.skipAll();
+      }
+
+      setDeliveredIds(new Set(certifications.map((c) => c.id)));
+      setActiveTargetId(null);
+      setJustLandedId(null);
+
+      setTelemetry({
+        active: false,
+        chip: "7/7 DELIVERED · STANDBY",
+        text: "DUAL BOTS MISSION COMPLETE · All 7 verified credential rows locked in place"
+      });
+
+      lifecycleRef.current = ANIM_LIFECYCLE.COMPLETED;
+      setLifecycle(ANIM_LIFECYCLE.COMPLETED);
+    },
+    [certifications]
+  );
+
+  // Manual scroll interruption listener during PLAYING state
+  // Absolute user priority: any wheel, touch swipe, or scroll key immediately interrupts
+  useEffect(() => {
+    if (lifecycle !== ANIM_LIFECYCLE.PLAYING) return;
+
+    const onUserScrollAction = (e) => {
+      if (lifecycleRef.current !== ANIM_LIFECYCLE.PLAYING) return;
+      if (e.type === "wheel") {
+        if (Math.abs(e.deltaY) < 3 && Math.abs(e.deltaX) < 3) return;
+      }
+      if (e.type === "keydown") {
+        const scrollKeys = [
+          "ArrowDown", "ArrowUp", "PageDown", "PageUp",
+          "Space", "End", "Home"
+        ];
+        if (!scrollKeys.includes(e.code) && !scrollKeys.includes(e.key)) return;
+      }
+      interruptSequence("manual-scroll");
+    };
+
+    window.addEventListener("wheel", onUserScrollAction, { passive: true });
+    window.addEventListener("touchmove", onUserScrollAction, { passive: true });
+    window.addEventListener("keydown", onUserScrollAction, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", onUserScrollAction);
+      window.removeEventListener("touchmove", onUserScrollAction);
+      window.removeEventListener("keydown", onUserScrollAction);
+    };
+  }, [lifecycle, interruptSequence]);
+
+  // Initial trigger on arrival into view (ONE TIME ONLY)
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
     if (prefersReducedMotion() || !checkWebGLSupport()) {
+      lifecycleRef.current = ANIM_LIFECYCLE.COMPLETED;
+      setLifecycle(ANIM_LIFECYCLE.COMPLETED);
       setDeliveredIds(new Set(certifications.map((c) => c.id)));
       return;
     }
 
     const triggerIfArrived = () => {
-      if (hasTriggeredRef.current) return;
+      if (lifecycleRef.current !== ANIM_LIFECYCLE.IDLE) return;
       if (window.scrollY < 200) return;
+
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 800;
+
+      // If user has already scrolled past Certifications, complete immediately without animation
+      if (rect.bottom < 0) {
+        lifecycleRef.current = ANIM_LIFECYCLE.COMPLETED;
+        setLifecycle(ANIM_LIFECYCLE.COMPLETED);
+        setIsQuickReveal(true);
+        setDeliveredIds(new Set(certifications.map((c) => c.id)));
+        return;
+      }
+
+      // If section has arrived in comfortable view
       if (rect.top <= vh * 0.65 && rect.bottom >= vh * 0.2) {
-        hasTriggeredRef.current = true;
+        lifecycleRef.current = ANIM_LIFECYCLE.PLAYING;
+        setLifecycle(ANIM_LIFECYCLE.PLAYING);
+        setIsQuickReveal(false);
         setDeliveredIds(new Set());
         setRunCount((r) => r + 1);
       }
@@ -1198,6 +1360,9 @@ export function CertificationShowcase({
   }, [certifications]);
 
   const handleReplayDelivery = () => {
+    lifecycleRef.current = ANIM_LIFECYCLE.PLAYING;
+    setLifecycle(ANIM_LIFECYCLE.PLAYING);
+    setIsQuickReveal(false);
     setDeliveredIds(new Set());
     setActiveTargetId(null);
     setJustLandedId(null);
@@ -1337,6 +1502,7 @@ export function CertificationShowcase({
           slotRefsMap,
           certifications,
           runCount,
+          controllerRef,
           onTargetRow: handleTargetRow,
           onRowDelivered: handleRowDelivered,
           onAllDelivered: handleAllDelivered,
@@ -1372,6 +1538,7 @@ export function CertificationShowcase({
               isDelivered: deliveredIds.has(cert.id),
               isActiveTarget: activeTargetId === cert.id,
               isJustLanded: justLandedId === cert.id,
+              isInstant: isQuickReveal || prefersReducedMotion(),
               slotRefCallback: registerSlotRef,
               onOpenModal,
               onOpenCertWall: onOpenJourneyExperience,

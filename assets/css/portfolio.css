@@ -2549,9 +2549,10 @@ body {
 
 .cert-row-slot {
   position: relative;
-  min-height: 54px;
+  min-height: 62px;
   border-radius: 13px;
   transition: box-shadow 0.28s ease, outline-color 0.28s ease, background 0.28s ease;
+  overflow-anchor: none;
 }
 
 .cert-row-slot.is-active-target {
@@ -2563,7 +2564,7 @@ body {
 }
 
 .cert-slot-placeholder {
-  min-height: 52px;
+  min-height: 62px;
   border-radius: 13px;
   border: 1px dashed rgba(15, 23, 42, 0.12);
   background: rgba(248, 250, 252, 0.65);
@@ -2571,6 +2572,7 @@ body {
   align-items: center;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .cert-slot-placeholder::after {
@@ -2621,6 +2623,7 @@ body {
   gap: 0.55rem;
   position: relative;
   z-index: 12;
+  overflow-anchor: none;
 }
 
 .cert-list-tile {
@@ -2637,6 +2640,8 @@ body {
   border: 1px solid var(--border-light);
   box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
   min-width: 0;
+  min-height: 62px;
+  box-sizing: border-box;
   will-change: transform, opacity;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
@@ -2761,14 +2766,15 @@ body {
 
 @media (max-width: 680px) {
   .cert-row-slot {
-    min-height: 76px;
+    min-height: 118px;
   }
 
   .cert-slot-placeholder {
-    min-height: 74px;
+    min-height: 118px;
   }
 
   .cert-list-tile {
+    min-height: 118px;
     flex-direction: column;
     align-items: stretch;
     gap: 0.45rem;
@@ -3528,19 +3534,20 @@ body {
   }
 
   .cert-row-slot {
-    min-height: 76px;
+    min-height: 118px;
     max-width: 440px;
     margin-inline: auto;
     width: 100%;
   }
 
   .cert-slot-placeholder {
-    min-height: 74px;
+    min-height: 118px;
     max-width: 440px;
     margin-inline: auto;
   }
 
   .cert-list-tile {
+    min-height: 118px;
     padding: 0.6rem 0.75rem;
     max-width: 440px;
     margin-inline: auto;
@@ -3694,7 +3701,6 @@ body {
   }
 
   .exp-internship-card,
-  .cert-list-tile,
   .about-profile-card,
   .contact-form-card {
     padding: 1rem 0.8rem;
