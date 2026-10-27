@@ -22,7 +22,7 @@ export const PROFILE_DATA = {
   paperWebUrl: "https://fardinhossain.github.io/FlyRankAI-ML-Internship-Task/",
   flyrankVerifyUrl: "https://internship.flyrank.ai/verify?id=FR-D1-T668H-R789R&first_name=Fardin",
   flyrankCredentialId: "FR-D1-T668H-R789R",
-  heroPortrait: "assets/images/fardin_hero_editorial.jpg",
+  heroPortrait: "assets/images/fardin_portrait_cutout.png",
   aboutPortrait: "assets/images/fardin_profile.jpg"
 };
 

@@ -5071,3 +5071,451 @@ body,
     scroll-behavior: auto !important;
   }
 }
+
+/* ==========================================================================
+   FULL-SCREEN CINEMATIC HERO REDESIGN (100svh)
+   One cohesive, borderless viewport experience with multi-layer 3D depth
+   ========================================================================== */
+.cinematic-hero-section {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-surface);
+  transition: background-color 0.4s ease;
+  padding: 0;
+  margin: 0;
+  z-index: 1;
+}
+
+[data-theme="dark"] .cinematic-hero-section {
+  background: #0B0E14;
+}
+
+/* Layer 1: Background Canvas, Grids & Vignette */
+.cinematic-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cinematic-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .cinematic-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
+.cinematic-vignette-layer {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, transparent 35%, rgba(0, 0, 0, 0.12) 100%);
+  pointer-events: none;
+}
+
+[data-theme="dark"] .cinematic-vignette-layer {
+  background: radial-gradient(circle at 50% 45%, transparent 30%, rgba(5, 7, 11, 0.7) 100%);
+}
+
+/* Telemetry Header Bar */
+.cinematic-telemetry-bar {
+  position: absolute;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1360px;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.cinematic-telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  pointer-events: auto;
+}
+
+[data-theme="dark"] .cinematic-telemetry-badge {
+  background: rgba(18, 21, 29, 0.85);
+  border-color: rgba(255, 255, 255, 0.09);
+  color: #94A3B8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.telemetry-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 10px #10B981;
+  animation: telemetryPulse 2s infinite ease-in-out;
+}
+
+@keyframes telemetryPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.85); }
+}
+
+.telemetry-sep {
+  opacity: 0.35;
+}
+
+.cinematic-skip-intro-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.38rem 0.95rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.22s ease;
+  pointer-events: auto;
+}
+
+.cinematic-skip-intro-btn:hover {
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .cinematic-skip-intro-btn {
+  background: rgba(18, 21, 29, 0.88);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .cinematic-skip-intro-btn:hover {
+  background: #F8FAFC;
+  color: #0F172A;
+}
+
+/* Layer 2: 3D Flying Robot Canvas (Behind Portrait) */
+.cinematic-hero-robot-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Layer 3: Central Portrait Stage (Cutout + Shader Canvas) */
+.cinematic-portrait-wrapper {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  pointer-events: none;
+  margin-top: -30px;
+  will-change: transform;
+}
+
+.cinematic-portrait-stage {
+  position: relative;
+  width: clamp(300px, 31vw, 440px);
+  aspect-ratio: 768 / 1024;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.cinematic-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity 0.2s ease;
+}
+
+.cinematic-portrait-img.is-shader-active {
+  opacity: 0;
+}
+
+.cinematic-portrait-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.cinematic-portrait-canvas.is-ready {
+  opacity: 1;
+}
+
+/* Layer 4: Foreground Typography, Tagline & Action Row (Overlapping in Front) */
+.cinematic-foreground-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: clamp(1.75rem, 4.8vh, 3.5rem);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.cinematic-name-wrap {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  margin-bottom: 0.65rem;
+  will-change: transform;
+}
+
+.cinematic-hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 6.8vw, 6.2rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0;
+  padding: 0 1rem;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.cinematic-hero-name .name-first {
+  color: #0F172A;
+  transition: color 0.3s ease;
+}
+
+.cinematic-hero-name .name-last {
+  color: var(--accent-red);
+  transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .cinematic-hero-name .name-first {
+  color: #F8FAFC;
+}
+
+[data-theme="dark"] .cinematic-hero-name .name-last {
+  color: #FF304F;
+  text-shadow: 0 0 35px rgba(255, 48, 79, 0.45);
+}
+
+.cinematic-name-tracer {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  box-shadow: 0 0 16px var(--accent-red), 0 0 28px var(--accent-red);
+  pointer-events: none;
+  transform: translateY(-50%);
+  opacity: 0;
+}
+
+.cinematic-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.95rem;
+  border-radius: var(--radius-pill);
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  font-family: var(--font-mono);
+  font-size: clamp(0.72rem, 1vw, 0.82rem);
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.12em;
+  margin-bottom: 0.45rem;
+  pointer-events: auto;
+}
+
+[data-theme="dark"] .cinematic-role-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #CBD5E1;
+}
+
+.cinematic-role-badge .role-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-red);
+}
+
+.cinematic-tagline {
+  font-size: clamp(0.95rem, 1.25vw, 1.12rem);
+  color: var(--text-secondary);
+  max-width: 580px;
+  text-align: center;
+  margin: 0 0 1.25rem 0;
+  line-height: 1.5;
+  padding: 0 1rem;
+}
+
+.cinematic-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  pointer-events: auto;
+  will-change: opacity;
+}
+
+.cinematic-cta-primary {
+  padding: 0.72rem 1.6rem;
+}
+
+.cinematic-cta-secondary {
+  padding: 0.72rem 1.45rem;
+}
+
+.cinematic-journey-pill {
+  margin: 0;
+}
+
+.cinematic-scroll-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  opacity: 0.75;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-hint-text {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.scroll-hint-bar {
+  width: 1px;
+  height: 18px;
+  background: linear-gradient(180deg, var(--accent-red) 0%, transparent 100%);
+  animation: scrollBarAnim 2s infinite ease-in-out;
+}
+
+@keyframes scrollBarAnim {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  50.1% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* Mobile & Tablet Adaptation */
+@media (max-width: 767px) {
+  .cinematic-telemetry-bar {
+    top: 64px;
+    padding: 0 1rem;
+  }
+
+  .cinematic-telemetry-coords {
+    display: none;
+  }
+
+  .cinematic-telemetry-sep {
+    display: none;
+  }
+
+  .cinematic-portrait-wrapper {
+    margin-top: -55px;
+  }
+
+  .cinematic-portrait-stage {
+    width: clamp(230px, 58vw, 290px);
+  }
+
+  .cinematic-foreground-stage {
+    padding-bottom: 1.5rem;
+  }
+
+  .cinematic-hero-name {
+    font-size: clamp(2.1rem, 8.8vw, 2.9rem);
+    white-space: normal;
+  }
+
+  .cinematic-role-badge {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    padding: 0.28rem 0.75rem;
+    text-align: center;
+  }
+
+  .cinematic-tagline {
+    font-size: 0.88rem;
+    margin-bottom: 0.95rem;
+  }
+
+  .cinematic-actions-row {
+    gap: 0.55rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .cinematic-cta-primary,
+  .cinematic-cta-secondary {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.84rem;
+  }
+
+  .cinematic-journey-pill {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .cinematic-scroll-hint {
+    display: none;
+  }
+}

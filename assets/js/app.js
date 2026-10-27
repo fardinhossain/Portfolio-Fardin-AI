@@ -39,7 +39,7 @@ import {
   resetIntroSeen,
   prefersReducedMotion
 } from "./portfolio-intro.js";
-import { HeroHalftonePortrait } from "./hero-halftone-portrait.js";
+import { CinematicHeroSection } from "./cinematic-hero-section.js";
 
 const h = React.createElement;
 
@@ -353,12 +353,8 @@ function PortfolioApp() {
   const [activeNav, setActiveNav] = useState("home");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Robotic Entrance Animation State (Only show if not yet seen in session and on homepage)
-  const [showIntro, setShowIntro] = useState(() => {
-    if (typeof window === "undefined") return false;
-    if (isJourneyRouteFromLocation()) return false;
-    return !hasSeenIntro() && !prefersReducedMotion();
-  });
+  // Robotic Entrance Animation State (The full-screen cinematic hero is the primary entrance)
+  const [showIntro, setShowIntro] = useState(false);
 
   // Theme State synced with Theme Manager
   const [theme, setTheme] = useState(() => getCurrentTheme());
@@ -846,114 +842,30 @@ function PortfolioApp() {
             onSelectCertModal: setSelectedCertModal
           })
         : h(
-            "div",
-            { className: "page-shell" },
+            React.Fragment,
+            null,
 
             // ================================================================
-            // 1. HERO SECTION (#home)
+            // 1. FULL-SCREEN CINEMATIC HERO SECTION (100svh)
             // ================================================================
+            h(CinematicHeroSection, {
+              onNavigateProjects: () => navigateToSection("projects"),
+              onOpenJourney: () => openJourneyExperience(),
+              resumeUrl: PROFILE_DATA.resumeUrl
+            }),
+
             h(
-              "section",
-              { id: "home", className: "bezel-outer hero-card-outer" },
+              "div",
+              { className: "page-shell" },
+
+              // ================================================================
+              // 2. ABOUT ME & TECHNICAL STACK SECTION (#about)
+              // Placed directly after Hero (Home -> About -> Experience -> Projects -> Certifications -> Contact)
+              // Strictly general profile & technical stack — ZERO FlyRank task metrics here.
+              // ================================================================
               h(
-                "div",
-                { className: "bezel-inner hero-stage-inner" },
-                // Three.js Interactive 3D Neural Network & Orbital Rings
-                h(HeroNeuralScene),
-
-                h(
-                  "div",
-                  { className: "hero-grid" },
-                  // Left Column: Headline, Supporting Copy & Primary Actions
-                  h(
-                    motion.div,
-                    {
-                      initial: { opacity: 0, y: 18 },
-                      animate: { opacity: 1, y: 0 },
-                      transition: { duration: 0.5 }
-                    },
-                    h(
-                      "div",
-                      { className: "hero-eyebrow" },
-                      h("span", null, PROFILE_DATA.roleLine),
-                      h("span", { className: "red-dot" })
-                    ),
-                    h(
-                      "h1",
-                      {
-                        className: "hero-headline",
-                        "aria-label": "Building Intelligent Solutions."
-                      },
-                      "Building ",
-                      h("br", { "aria-hidden": "true" }),
-                      h("span", { className: "text-red" }, "Intelligent Solutions.")
-                    ),
-                    h("p", { className: "hero-subtext" }, PROFILE_DATA.heroSupportingText),
-
-                    // Primary & Secondary CTA Buttons
-                    h(
-                      "div",
-                      { className: "hero-cta-row" },
-                      h(
-                        "button",
-                        {
-                          type: "button",
-                          className: "btn-pill-dark",
-                          onClick: () => navigateToSection("projects")
-                        },
-                        h("span", null, "Explore My Work"),
-                        h("span", { className: "btn-trailing-circle", "aria-hidden": "true" }, "→")
-                      ),
-                      h(
-                        "a",
-                        {
-                          href: PROFILE_DATA.resumeUrl,
-                          download: "Fardin_Hossain_Resume.pdf",
-                          target: "_blank",
-                          rel: "noopener",
-                          className: "btn-pill-light"
-                        },
-                        h("span", { "aria-hidden": "true" }, "↓"),
-                        h("span", null, "Download Resume")
-                      )
-                    ),
-
-                    // Direct Shortcut to the 4-Month Interactive Journey
-                    h(
-                      "button",
-                      {
-                        type: "button",
-                        className: "hero-journey-shortcut",
-                        onClick: () => openJourneyExperience()
-                      },
-                      h("span", { className: "yellow-dot" }),
-                      h(
-                        "span",
-                        null,
-                        "Explore My Interactive 4-Month FlyRank AI Journey →"
-                      )
-                    )
-                  ),
-
-                  // Right Column: Uploaded Professional Editorial Portrait with Scroll-Driven Halftone Transformation
-                  h(HeroHalftonePortrait, {
-                    src: PROFILE_DATA.heroPortrait,
-                    alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
-                    annotation: "Md. Fardin Hossain",
-                    pillars: ["IDEAS", "CODE", "MODELS", "PRODUCTS", "IMPACT"]
-                  })
-                )
-              )
-            ),
-
-            // ================================================================
-            // 2. ABOUT ME & TECHNICAL STACK SECTION (#about)
-            // Placed directly after Hero (Home -> About -> Experience -> Projects -> Certifications -> Contact)
-            // Strictly general profile & technical stack — ZERO FlyRank task metrics here.
-            // ================================================================
-            h(
-              "section",
-              { id: "about", ref: aboutSectionRef, className: "section-block" },
+                "section",
+                { id: "about", ref: aboutSectionRef, className: "section-block" },
               h(
                 "div",
                 { className: "section-header-bar" },
@@ -1621,8 +1533,11 @@ function PortfolioApp() {
                   {
                     type: "button",
                     className: "replay-entrance-btn",
-                    onClick: () => setShowIntro(true),
-                    "aria-label": "Replay 3D robotic entrance animation"
+                    onClick: () => {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                      setTimeout(() => window.location.reload(), 300);
+                    },
+                    "aria-label": "Replay 3D cinematic hero entrance animation"
                   },
                   "↺ Replay Entrance"
                 ),
@@ -1634,6 +1549,7 @@ function PortfolioApp() {
               )
             )
           )
+        )
     ),
 
     // ========================================================================
