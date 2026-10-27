@@ -1,7 +1,7 @@
 // ==========================================================================
 // FARDIN.AI — CENTRAL PORTRAIT LAYER COMPONENT
 // Composites the high-resolution cutout portrait with the WebGL
-// Halftone and edge silhouette dissolve shader canvas.
+// fine halftone & edge silhouette dissolve shader canvas.
 // ==========================================================================
 
 import React, { useEffect, useRef, useState } from "react";
@@ -46,17 +46,17 @@ export function PortraitLayer({
       className: "cinematic-portrait-stage",
       "aria-label": "Md. Fardin Hossain — AI Engineer & Full-Stack Developer Editorial Visual"
     },
-    // Base Photographic Cutout Image (Guarantees zero layout shift, SEO, accessibility)
+    // Base Photographic Cutout Image (Guarantees zero layout shift, SEO, accessibility, 100% natural color & detail)
     React.createElement("img", {
       ref: imgRef,
       src: src,
       alt: alt,
-      className: `cinematic-portrait-img ${webglActive ? "is-shader-active" : ""}`,
+      className: "cinematic-portrait-img",
       loading: "eager",
       fetchPriority: "high"
     }),
 
-    // WebGL Halftone & Dissolve Shader Canvas (Active layer)
+    // WebGL Halftone & Dissolve Shader Canvas (Active on scroll)
     React.createElement("canvas", {
       ref: canvasRef,
       className: `cinematic-portrait-canvas ${webglActive ? "is-ready" : ""}`,

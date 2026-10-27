@@ -5241,6 +5241,26 @@ body,
   z-index: 2;
 }
 
+/* Layer 3 & 4: Central Cohesive Stage (Portrait + Foreground Content Stack) */
+.cinematic-hero-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1240px;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: clamp(68px, 9.5vh, 96px);
+  padding-bottom: clamp(24px, 3.5vh, 44px);
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  box-sizing: border-box;
+  z-index: 3;
+  pointer-events: none;
+}
+
 /* Layer 3: Central Portrait Stage (Cutout + Shader Canvas) */
 .cinematic-portrait-wrapper {
   position: relative;
@@ -5250,18 +5270,20 @@ body,
   justify-content: center;
   width: 100%;
   pointer-events: none;
-  margin-top: -30px;
+  margin-bottom: clamp(-52px, -5.2vw, -78px);
   will-change: transform;
 }
 
 .cinematic-portrait-stage {
   position: relative;
-  width: clamp(300px, 31vw, 440px);
+  width: clamp(230px, 22vw, 315px);
   aspect-ratio: 768 / 1024;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, rgba(0, 0, 0, 0.4) 85%, transparent 98%);
+  mask-image: linear-gradient(to bottom, black 65%, rgba(0, 0, 0, 0.4) 85%, transparent 98%);
 }
 
 .cinematic-portrait-img {
@@ -5272,6 +5294,8 @@ body,
   user-select: none;
   -webkit-user-drag: none;
   transition: opacity 0.2s ease;
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, rgba(0, 0, 0, 0.4) 85%, transparent 98%);
+  mask-image: linear-gradient(to bottom, black 65%, rgba(0, 0, 0, 0.4) 85%, transparent 98%);
 }
 
 .cinematic-portrait-img.is-shader-active {
@@ -5293,17 +5317,14 @@ body,
   opacity: 1;
 }
 
-/* Layer 4: Foreground Typography, Tagline & Action Row (Overlapping in Front) */
+/* Layer 4: Foreground Typography, Tagline & Action Row (Overlapping Lower Torso) */
 .cinematic-foreground-stage {
-  position: absolute;
-  inset: 0;
+  position: relative;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: clamp(1.75rem, 4.8vh, 3.5rem);
+  justify-content: flex-start;
   z-index: 10;
   pointer-events: none;
 }
@@ -5312,30 +5333,38 @@ body,
   position: relative;
   display: inline-block;
   text-align: center;
-  margin-bottom: 0.65rem;
+  margin-bottom: 0.55rem;
   will-change: transform;
 }
 
 .cinematic-hero-name {
-  font-family: var(--font-display);
-  font-size: clamp(2.75rem, 6.8vw, 6.2rem);
-  font-weight: 900;
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(3.2rem, 7.8vw, 7.2rem);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
   margin: 0;
   padding: 0 1rem;
   user-select: none;
   white-space: nowrap;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.08);
 }
 
 .cinematic-hero-name .name-first {
   color: #0F172A;
+  font-style: normal;
   transition: color 0.3s ease;
 }
 
 .cinematic-hero-name .name-last {
   color: var(--accent-red);
+  font-style: italic;
+  font-weight: 400;
   transition: color 0.3s ease;
+}
+
+[data-theme="dark"] .cinematic-hero-name {
+  text-shadow: 0 4px 32px rgba(0, 0, 0, 0.75);
 }
 
 [data-theme="dark"] .cinematic-hero-name .name-first {
@@ -5349,7 +5378,7 @@ body,
 
 .cinematic-name-tracer {
   position: absolute;
-  top: 50%;
+  top: 52%;
   left: 0;
   width: 8px;
   height: 8px;
@@ -5365,12 +5394,12 @@ body,
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.32rem 0.95rem;
+  padding: 0.35rem 0.95rem;
   border-radius: var(--radius-pill);
   background: rgba(15, 23, 42, 0.04);
   border: 1px solid rgba(15, 23, 42, 0.08);
   font-family: var(--font-mono);
-  font-size: clamp(0.72rem, 1vw, 0.82rem);
+  font-size: clamp(0.72rem, 0.95vw, 0.82rem);
   font-weight: 600;
   color: var(--text-secondary);
   letter-spacing: 0.12em;
@@ -5392,11 +5421,11 @@ body,
 }
 
 .cinematic-tagline {
-  font-size: clamp(0.95rem, 1.25vw, 1.12rem);
+  font-size: clamp(0.92rem, 1.2vw, 1.08rem);
   color: var(--text-secondary);
   max-width: 580px;
   text-align: center;
-  margin: 0 0 1.25rem 0;
+  margin: 0 0 1.15rem 0;
   line-height: 1.5;
   padding: 0 1rem;
 }
@@ -5407,7 +5436,7 @@ body,
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.15rem;
   pointer-events: auto;
   will-change: opacity;
 }
@@ -5457,8 +5486,13 @@ body,
 
 /* Mobile & Tablet Adaptation */
 @media (max-width: 767px) {
+  .cinematic-hero-stage {
+    padding-top: 64px;
+    padding-bottom: 1.5rem;
+  }
+
   .cinematic-telemetry-bar {
-    top: 64px;
+    top: 60px;
     padding: 0 1rem;
   }
 
@@ -5471,48 +5505,48 @@ body,
   }
 
   .cinematic-portrait-wrapper {
-    margin-top: -55px;
+    margin-bottom: -32px;
   }
 
   .cinematic-portrait-stage {
-    width: clamp(230px, 58vw, 290px);
-  }
-
-  .cinematic-foreground-stage {
-    padding-bottom: 1.5rem;
+    width: clamp(190px, 48vw, 240px);
   }
 
   .cinematic-hero-name {
-    font-size: clamp(2.1rem, 8.8vw, 2.9rem);
+    font-size: clamp(2.35rem, 9.6vw, 3.4rem);
+    letter-spacing: -0.035em;
     white-space: normal;
+    line-height: 1.02;
   }
 
   .cinematic-role-badge {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
     letter-spacing: 0.08em;
-    padding: 0.28rem 0.75rem;
+    padding: 0.26rem 0.7rem;
     text-align: center;
+    max-width: 92vw;
   }
 
   .cinematic-tagline {
-    font-size: 0.88rem;
-    margin-bottom: 0.95rem;
+    font-size: 0.85rem;
+    margin-bottom: 0.85rem;
+    max-width: 90vw;
   }
 
   .cinematic-actions-row {
-    gap: 0.55rem;
-    margin-bottom: 0.85rem;
+    gap: 0.5rem;
+    margin-bottom: 0.65rem;
   }
 
   .cinematic-cta-primary,
   .cinematic-cta-secondary {
-    padding: 0.65rem 1.25rem;
-    font-size: 0.84rem;
+    padding: 0.62rem 1.15rem;
+    font-size: 0.82rem;
   }
 
   .cinematic-journey-pill {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.85rem;
+    font-size: 0.74rem;
+    padding: 0.48rem 0.8rem;
   }
 
   .cinematic-scroll-hint {

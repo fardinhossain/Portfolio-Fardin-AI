@@ -1,16 +1,13 @@
 // ==========================================================================
 // FARDIN.AI — CINEMATIC HERO OPENING SEQUENCE TIMELINE
-// Coordinates Phase A (Quiet Hero) -> Phase B (Name writes itself) ->
-// Phase C (Portrait emerges through dots) -> Phase D (Robot flight) ->
-// Phase E (Tagline & Actions reveal).
-// Supports instant Skip Intro and passive scroll interruption.
+// Coordinates: NAME REVEAL -> PORTRAIT EMERGES -> ROBOT FLIGHT -> READY FOR SCROLL
+// Clean, predictable architecture with zero viewport hijacking.
 // ==========================================================================
 
 import gsap from "gsap";
 
 export function createHeroIntroTimeline({
   elements,
-  shaderRef,
   robotRef,
   onComplete,
   isReducedMotion = false
@@ -18,7 +15,6 @@ export function createHeroIntroTimeline({
   const {
     bgLayer,
     telemetryBadge,
-    nameStroke,
     nameFill,
     nameTracer,
     nameContainer,
@@ -31,10 +27,6 @@ export function createHeroIntroTimeline({
   } = elements;
 
   if (isReducedMotion) {
-    // Instant static resolution for users who prefer reduced motion
-    if (shaderRef && shaderRef.current) {
-      shaderRef.current.setIntroProgress(1.0);
-    }
     if (robotRef && robotRef.current) {
       robotRef.current.skipFlight();
     }
@@ -63,45 +55,47 @@ export function createHeroIntroTimeline({
 
   // Initial State Setup
   gsap.set(bgLayer, { opacity: 0 });
-  gsap.set(telemetryBadge, { opacity: 0, y: -8 });
+  gsap.set(telemetryBadge, { opacity: 0, y: -6 });
+  gsap.set(portraitContainer, { opacity: 0, scale: 0.98 });
   gsap.set(nameContainer, { opacity: 1 });
   gsap.set(nameFill, { clipPath: "polygon(0 0, 0% 0, 0% 100%, 0 100%)", opacity: 0 });
   gsap.set(nameTracer, { opacity: 0, x: 0 });
-  gsap.set(labelBadge, { opacity: 0, y: 14 });
-  gsap.set(taglineText, { opacity: 0, y: 14 });
-  gsap.set(ctaRow, { opacity: 0, y: 16 });
+  gsap.set(labelBadge, { opacity: 0, y: 12 });
+  gsap.set(taglineText, { opacity: 0, y: 12 });
+  gsap.set(ctaRow, { opacity: 0, y: 14 });
   gsap.set(scrollHint, { opacity: 0 });
   if (skipBtn) gsap.set(skipBtn, { opacity: 0 });
-
-  if (shaderRef && shaderRef.current) {
-    shaderRef.current.setIntroProgress(0.0);
-  }
 
   const tl = gsap.timeline({
     paused: true,
     defaults: { ease: "power2.out" },
     onComplete: () => {
-      if (skipBtn) gsap.to(skipBtn, { opacity: 0, duration: 0.3, onComplete: () => gsap.set(skipBtn, { display: "none" }) });
+      if (skipBtn) {
+        gsap.to(skipBtn, {
+          opacity: 0,
+          duration: 0.3,
+          onComplete: () => gsap.set(skipBtn, { display: "none" })
+        });
+      }
       if (onComplete) onComplete();
     }
   });
 
-  // --- Phase A: Clean quiet hero, subtle background geometry & indicator fade in ---
-  tl.to(bgLayer, { opacity: 1, duration: 0.65 }, 0.05);
-  tl.to(telemetryBadge, { opacity: 1, y: 0, duration: 0.5 }, 0.2);
-  if (skipBtn) tl.to(skipBtn, { opacity: 1, duration: 0.4 }, 0.3);
+  // --- Phase A: Clean quiet hero, subtle background geometry fades in ---
+  tl.to(bgLayer, { opacity: 1, duration: 0.5 }, 0.05);
+  tl.to(telemetryBadge, { opacity: 1, y: 0, duration: 0.45 }, 0.15);
+  if (skipBtn) tl.to(skipBtn, { opacity: 1, duration: 0.35 }, 0.25);
 
-  // --- Phase B: Name writes itself onto the screen ---
-  // A glowing red tracer dot leads the reveal as the name glyphs draw across
-  tl.set(nameFill, { opacity: 1 }, 0.45);
-  tl.to(nameTracer, { opacity: 1, duration: 0.2 }, 0.45);
+  // --- Phase B: Name writes itself onto the screen in front of portrait ---
+  tl.set(nameFill, { opacity: 1 }, 0.35);
+  tl.to(nameTracer, { opacity: 1, duration: 0.15 }, 0.35);
 
   const tracerProxy = { p: 0 };
   tl.to(
     tracerProxy,
     {
       p: 100,
-      duration: 1.25,
+      duration: 1.15,
       ease: "power2.inOut",
       onUpdate: () => {
         const val = tracerProxy.p;
@@ -109,34 +103,29 @@ export function createHeroIntroTimeline({
           nameFill.style.clipPath = `polygon(0 0, ${val}% 0, ${val}% 100%, 0 100%)`;
         }
         if (nameTracer && nameContainer) {
-          const width = nameContainer.clientWidth || 600;
+          const width = nameContainer.clientWidth || 550;
           nameTracer.style.transform = `translate3d(${(val / 100) * width}px, 0, 0)`;
         }
       }
     },
-    0.5
+    0.4
   );
 
-  tl.to(nameTracer, { opacity: 0, scale: 0.5, duration: 0.35 }, 1.7);
+  tl.to(nameTracer, { opacity: 0, scale: 0.5, duration: 0.25 }, 1.55);
 
-  // --- Phase C: Portrait emerges through halftone particles into clarity ---
-  const shaderProxy = { intro: 0.0 };
+  // --- Phase C: Portrait emerges smoothly into full focus and clarity ---
   tl.to(
-    shaderProxy,
+    portraitContainer,
     {
-      intro: 1.0,
-      duration: 1.35,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        if (shaderRef && shaderRef.current) {
-          shaderRef.current.setIntroProgress(shaderProxy.intro);
-        }
-      }
+      opacity: 1,
+      scale: 1,
+      duration: 0.85,
+      ease: "power2.out"
     },
-    1.4
+    0.95
   );
 
-  // --- Phase D: Tiny White 3D Robot flies around portrait ---
+  // --- Phase D: Tiny White 3D Robot flies along curved path behind portrait ---
   tl.call(
     () => {
       if (robotRef && robotRef.current) {
@@ -144,21 +133,18 @@ export function createHeroIntroTimeline({
       }
     },
     null,
-    2.1
+    1.7
   );
 
-  // --- Phase E: Tagline, professional label, and CTAs fade in ---
-  tl.to(labelBadge, { opacity: 1, y: 0, duration: 0.55 }, 2.5);
-  tl.to(taglineText, { opacity: 1, y: 0, duration: 0.55 }, 2.7);
-  tl.to(ctaRow, { opacity: 1, y: 0, duration: 0.6 }, 2.9);
-  tl.to(scrollHint, { opacity: 1, duration: 0.6 }, 3.2);
+  // --- Phase E: Supporting text, professional label, and CTAs fade in ---
+  tl.to(labelBadge, { opacity: 1, y: 0, duration: 0.45 }, 2.0);
+  tl.to(taglineText, { opacity: 1, y: 0, duration: 0.45 }, 2.15);
+  tl.to(ctaRow, { opacity: 1, y: 0, duration: 0.5 }, 2.3);
+  tl.to(scrollHint, { opacity: 1, duration: 0.5 }, 2.5);
 
   // Skip function
   function skip() {
     tl.pause();
-    if (shaderRef && shaderRef.current) {
-      shaderRef.current.setIntroProgress(1.0);
-    }
     if (robotRef && robotRef.current) {
       robotRef.current.skipFlight();
     }
@@ -176,7 +162,7 @@ export function createHeroIntroTimeline({
         ctaRow,
         scrollHint
       ],
-      { opacity: 1, y: 0 }
+      { opacity: 1, y: 0, scale: 1 }
     );
     if (skipBtn) gsap.set(skipBtn, { display: "none" });
     if (onComplete) onComplete();

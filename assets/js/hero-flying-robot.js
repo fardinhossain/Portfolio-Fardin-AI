@@ -256,23 +256,23 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
   const isMobile = window.innerWidth < 768;
   const curvePoints = isMobile
     ? [
-        new THREE.Vector3(8, 9, -7),
-        new THREE.Vector3(3.5, 4.5, -4),
-        new THREE.Vector3(0.5, 3.2, -3.5),
-        new THREE.Vector3(-2.2, 3.8, -2.5),
-        new THREE.Vector3(-2.8, 0.8, 1.2),
-        new THREE.Vector3(2.5, 1.2, 1.8),
-        new THREE.Vector3(2.7, 2.0, 1.6)
+        new THREE.Vector3(7, 8, -6),
+        new THREE.Vector3(3.0, 4.5, -5),
+        new THREE.Vector3(0.0, 4.8, -4.5),  // behind head top
+        new THREE.Vector3(-2.8, 3.8, -3.5), // upper left behind
+        new THREE.Vector3(-3.2, 2.2, -1.0), // beside left ear/shoulder
+        new THREE.Vector3(0.0, 4.2, -3.0),  // arc across behind upper head
+        new THREE.Vector3(3.2, 2.4, 1.2)   // resting spot on right shoulder
       ]
     : [
-        new THREE.Vector3(14, 10, -8),     // 0. Offscreen entry
-        new THREE.Vector3(7, 5, -5),       // 1. Descending curve
-        new THREE.Vector3(1.2, 3.8, -4.5), // 2. Dipping behind portrait
-        new THREE.Vector3(-3.4, 4.8, -3.0),// 3. Looping up behind head
-        new THREE.Vector3(-4.8, 0.6, 1.5), // 4. Emerging past left shoulder
-        new THREE.Vector3(-1.2, -1.0, 2.2),// 5. Dipping gracefully across
-        new THREE.Vector3(4.5, 0.8, 2.2),  // 6. Banking up to the right
-        new THREE.Vector3(4.8, 2.0, 2.0)   // 7. Final resting position beside portrait
+        new THREE.Vector3(13, 9, -8),     // 0. Offscreen entry
+        new THREE.Vector3(6.5, 5.5, -6),   // 1. Descending curve
+        new THREE.Vector3(1.5, 4.5, -5),   // 2. Dipping behind portrait
+        new THREE.Vector3(-3.8, 4.6, -4),  // 3. Looping behind head on left
+        new THREE.Vector3(-4.6, 2.2, -1.5),// 4. Emerging beside left shoulder
+        new THREE.Vector3(-1.0, 4.8, -3.5),// 5. Gliding behind upper head to the right
+        new THREE.Vector3(4.2, 3.0, 1.2),  // 6. Banking smoothly toward right shoulder
+        new THREE.Vector3(4.5, 2.0, 1.5)   // 7. Settle resting spot beside portrait
       ];
 
   const flightCurve = new THREE.CatmullRomCurve3(curvePoints);

@@ -1,7 +1,9 @@
 // ==========================================================================
-// FARDIN.AI — CINEMATIC HALFTONE & SILHOUETTE DISSOLVE SHADER ENGINE
-// 45-degree angled stipple matrix, organic micro-jitter dispersion,
-// intro stipple emergence, and scroll-driven edge particle dissolve.
+// FARDIN.AI — HIGH-PRECISION FINE-ART HALFTONE & DISSOLVE SHADER
+// Inspired by Sarthak Sharma reference portfolio.
+// Fine micro-dot pitch (2.4px), smooth circular dot coverage, zero pixelation,
+// preserves eyes, nose, lips, facial contours, hairstyle, and brown shirt.
+// Only transforms as visitor scrolls; 100% clean original photograph at scroll 0.
 // ==========================================================================
 
 import { getCurrentTheme, subscribeTheme } from "./theme-manager.js";
@@ -34,16 +36,10 @@ precision highp float;
 
 uniform sampler2D u_texture;
 uniform vec2 u_resolution;
-uniform float u_introProgress;  // 0.0 (stipple) -> 1.0 (photo)
-uniform float u_scrollProgress; // 0.0 (photo) -> 1.0 (halftone & dissolve)
-uniform float u_isDark;         // 1.0 = Dark, 0.0 = Light
-uniform float u_dotScale;       // Grid cell spacing
+uniform float u_scrollProgress; // 0.0 = clean original photo -> 1.0 = fine halftone stipple
+uniform float u_isDark;         // 1.0 = Dark Mode, 0.0 = Light Mode
+uniform float u_dotPitch;       // Fine micro-dot pitch (2.4px)
 varying vec2 vUv;
-
-// High-precision pseudo-random dispersion for organic stipple quality
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
-}
 
 void main() {
   vec4 origColor = texture2D(u_texture, vUv);
@@ -54,34 +50,36 @@ void main() {
     return;
   }
 
+  // At top of page (scroll 0): output 100% crisp original photograph with zero modification
+  if (u_scrollProgress <= 0.005) {
+    gl_FragColor = origColor;
+    return;
+  }
+
   // 1. Rec. 709 Luminance
   float lum = dot(origColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 
-  // Detect signature red accents in the portrait
+  // Red accent extraction for subtle graphic warmth
   float redDelta = origColor.r - max(origColor.g, origColor.b);
-  float redAccentWeight = clamp(redDelta * 2.8, 0.0, 1.0);
+  float redAccentWeight = clamp(redDelta * 2.5, 0.0, 1.0);
 
-  // 2. 45-Degree Rotated Halftone Grid
+  // 2. 45-Degree Halftone Matrix (Standard editorial print angle)
   vec2 pixelPos = vUv * u_resolution;
   mat2 rot = mat2(0.70710678, -0.70710678, 0.70710678, 0.70710678);
   vec2 rotPos = rot * pixelPos;
 
-  float cellSize = u_dotScale;
-  vec2 cellIndex = floor(rotPos / cellSize);
-  float cellHash = hash(cellIndex);
-
-  // 3. Tonal Contrast Curve
-  float contrastFactor = mix(1.0, 1.42, u_scrollProgress);
-  float contrastedLum = clamp((lum - 0.48) * contrastFactor + 0.5, 0.0, 1.0);
-
-  // Organic micro-jitter
-  float jitter = (cellHash - 0.5) * 0.14 * mix(1.0 - u_introProgress, 1.0, u_scrollProgress);
+  float cellSize = u_dotPitch;
   vec2 cellUv = fract(rotPos / cellSize) - 0.5;
   float dist = length(cellUv);
 
-  float coverage = clamp((1.0 - contrastedLum) + jitter, 0.0, 1.0);
-  float targetRadius = sqrt(coverage) * 0.707 * 0.95;
-  float edge = 1.25 / cellSize;
+  // 3. Tonal S-Curve: gentle contrast enhancement that preserves facial contours
+  float contrast = mix(1.0, 1.25, u_scrollProgress);
+  float contrastedLum = clamp((lum - 0.49) * contrast + 0.5, 0.0, 1.0);
+
+  // Smooth circular dot coverage (no square pixels, no diamond crosshatching)
+  float coverage = 1.0 - contrastedLum;
+  float targetRadius = sqrt(clamp(coverage, 0.0, 1.0)) * 0.707 * 0.94;
+  float edge = 1.2 / cellSize;
   float dotMask = 1.0 - smoothstep(targetRadius - edge, targetRadius + edge, dist);
 
   // 4. Color Palettes
@@ -90,37 +88,39 @@ void main() {
   float renderMask;
 
   if (u_isDark > 0.5) {
-    // Dark Theme: deep elevated graphite ground with platinum highlights & ruby stipple
-    groundColor = vec3(0.043, 0.055, 0.078); // #0B0E14
-    dotColor = mix(vec3(0.96, 0.97, 0.99), vec3(1.0, 0.22, 0.35), redAccentWeight * 0.9);
+    // Dark Mode: deep graphite ground (#0B0E14) with platinum highlights (#F8FAFC) & ruby accents (#FF304F)
+    groundColor = vec3(0.043, 0.055, 0.078);
+    dotColor = mix(vec3(0.96, 0.97, 0.99), vec3(1.0, 0.22, 0.35), redAccentWeight * 0.85);
     renderMask = 1.0 - dotMask;
   } else {
-    // Light Theme: crisp white paper ground with carbon ink dots & vivid crimson
-    groundColor = vec3(0.99, 0.99, 1.0);
+    // Light Mode: crisp white paper ground (#FFFFFF) with carbon ink dots (#0F172A) & crimson accents (#E11D48)
+    groundColor = vec3(0.995, 0.995, 1.0);
     dotColor = mix(vec3(0.06, 0.08, 0.14), vec3(0.88, 0.11, 0.25), redAccentWeight * 0.8);
     renderMask = dotMask;
   }
 
-  vec3 halftoneColor = mix(groundColor, dotColor, renderMask);
+  vec3 pureHalftone = mix(groundColor, dotColor, renderMask);
 
-  // Phase C: Intro emergence from stipple to full photo
-  vec3 colorAtIntro = mix(halftoneColor, origColor.rgb, smoothstep(0.0, 1.0, u_introProgress));
+  // 5. Smooth Progressive Scroll Transformation:
+  // - Desaturate smoothly from 0% to 70% scroll
+  // - Blend in the fine halftone stippling smoothly from 5% to 85% scroll
+  float desatAmount = smoothstep(0.0, 0.75, u_scrollProgress);
+  vec3 grayPhoto = vec3(lum);
+  vec3 intermediatePhoto = mix(origColor.rgb, grayPhoto, desatAmount);
 
-  // Phase 6: Scroll-driven transformation into halftone
-  float scrollDesat = smoothstep(0.0, 0.6, u_scrollProgress);
-  vec3 intermediateScroll = mix(colorAtIntro, vec3(lum), scrollDesat);
-  float scrollHalftoneMix = smoothstep(0.08, 0.85, u_scrollProgress);
-  vec3 finalColor = mix(intermediateScroll, halftoneColor, scrollHalftoneMix);
+  float halftoneMix = smoothstep(0.05, 0.90, u_scrollProgress);
+  vec3 finalColor = mix(intermediatePhoto, pureHalftone, halftoneMix);
 
-  // Particle Alpha Dissolve along silhouette during scrolling
-  float edgeDist = 1.0 - origColor.a;
-  float dissolveCutoff = cellHash + edgeDist * 0.8;
+  // 6. Silhouette Edge Particle Dissolve (starts only at deeper scroll > 35%)
   float finalAlpha = origColor.a;
-
-  if (u_scrollProgress > 0.12) {
-    float dissolveTrigger = u_scrollProgress * 1.35;
-    float dissolveFade = smoothstep(dissolveCutoff - 0.25, dissolveCutoff + 0.1, dissolveTrigger);
-    finalAlpha *= (1.0 - dissolveFade);
+  if (u_scrollProgress > 0.35) {
+    vec2 cellIndex = floor(rotPos / cellSize);
+    float cellHash = fract(sin(dot(cellIndex, vec2(12.9898, 78.233))) * 43758.5453);
+    float edgeDist = 1.0 - origColor.a;
+    float dissolveCutoff = cellHash + edgeDist * 0.75;
+    float dissolveTrigger = (u_scrollProgress - 0.35) * 1.5;
+    float fade = smoothstep(dissolveCutoff - 0.2, dissolveCutoff + 0.1, dissolveTrigger);
+    finalAlpha *= (1.0 - fade);
   }
 
   gl_FragColor = vec4(finalColor, finalAlpha);
@@ -174,10 +174,9 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
 
   const uTexLoc = gl.getUniformLocation(prog, "u_texture");
   const uResLoc = gl.getUniformLocation(prog, "u_resolution");
-  const uIntroLoc = gl.getUniformLocation(prog, "u_introProgress");
   const uScrollLoc = gl.getUniformLocation(prog, "u_scrollProgress");
   const uDarkLoc = gl.getUniformLocation(prog, "u_isDark");
-  const uDotLoc = gl.getUniformLocation(prog, "u_dotScale");
+  const uDotLoc = gl.getUniformLocation(prog, "u_dotPitch");
 
   const tex = gl.createTexture();
   const img = new Image();
@@ -185,7 +184,6 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
   img.src = imageSrc;
 
   let textureReady = false;
-  let introProgress = 0.0;
   let scrollProgress = 0.0;
 
   img.onload = () => {
@@ -206,8 +204,8 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
     if (!textureReady || !canvas) return;
     const rect = canvas.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(rect.width * dpr) || 540;
-    const h = Math.round(rect.height * dpr) || 720;
+    const w = Math.round(rect.width * dpr) || 600;
+    const h = Math.round(rect.height * dpr) || 800;
 
     if (canvas.width !== w || canvas.height !== h) {
       canvas.width = w;
@@ -218,7 +216,6 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
     gl.useProgram(prog);
     gl.uniform1i(uTexLoc, 0);
     gl.uniform2f(uResLoc, w, h);
-    gl.uniform1f(uIntroLoc, introProgress);
     gl.uniform1f(uScrollLoc, scrollProgress);
 
     const isDark =
@@ -226,9 +223,10 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
       getCurrentTheme() === "dark";
     gl.uniform1f(uDarkLoc, isDark ? 1.0 : 0.0);
 
+    // Fine-art micro-stipple pitch: 2.4px physical
     const isMobile = window.innerWidth < 768;
-    const baseDot = isMobile ? 3.2 : 3.8;
-    gl.uniform1f(uDotLoc, baseDot * dpr);
+    const basePitch = isMobile ? 2.2 : 2.5;
+    gl.uniform1f(uDotLoc, basePitch * dpr);
 
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -241,10 +239,6 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
   });
 
   return {
-    setIntroProgress(val) {
-      introProgress = Math.min(1, Math.max(0, val));
-      render();
-    },
     setScrollProgress(val) {
       scrollProgress = Math.min(1, Math.max(0, val));
       render();

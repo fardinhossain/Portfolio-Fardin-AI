@@ -268,113 +268,117 @@ export function CinematicHeroSection({
     }),
 
     // ------------------------------------------------------------------------
-    // LAYER 3: CENTRAL CUTOUT PORTRAIT & HALFTONE SHADER
+    // LAYER 3 & 4: CENTRAL STAGE (Portrait + Foreground Content Stack)
     // ------------------------------------------------------------------------
     h(
       "div",
-      { ref: portraitStageRef, className: "cinematic-portrait-wrapper" },
-      h(PortraitLayer, {
-        src: "assets/images/fardin_portrait_cutout.png",
-        alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
-        onShaderReady: handleShaderReady
-      })
-    ),
+      { className: "cinematic-hero-stage" },
 
-    // ------------------------------------------------------------------------
-    // LAYER 4: FOREGROUND EDITORIAL NAME, TAGLINE & PRIMARY ACTIONS
-    // ------------------------------------------------------------------------
-    h(
-      "div",
-      { className: "cinematic-foreground-stage" },
-
-      // Oversized Editorial Name with Write-In Tracer
+      // Central Cutout Portrait & Halftone Shader
       h(
         "div",
-        {
-          ref: nameContainerRef,
-          className: "cinematic-name-wrap",
-          "aria-label": "Md. Fardin Hossain"
-        },
-        h(
-          "h1",
-          {
-            ref: nameFillRef,
-            className: "cinematic-hero-name"
-          },
-          h("span", { className: "name-first" }, "Md. Fardin "),
-          h("span", { className: "name-last" }, "Hossain")
-        ),
-        // Glowing tracer dot following the lead edge as the name writes itself
-        h("div", {
-          ref: nameTracerRef,
-          className: "cinematic-name-tracer",
-          "aria-hidden": "true"
+        { ref: portraitStageRef, className: "cinematic-portrait-wrapper" },
+        h(PortraitLayer, {
+          src: "assets/images/fardin_portrait_cutout.png",
+          alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
+          onShaderReady: handleShaderReady
         })
       ),
 
-      // Professional Label Badge
+      // Foreground Editorial Content (Overlapping Portrait Lower Torso)
       h(
         "div",
-        { ref: labelBadgeRef, className: "cinematic-role-badge" },
-        h("span", { className: "role-bullet" }),
-        h(
-          "span",
-          { className: "role-text" },
-          "AI ENGINEER · MACHINE LEARNING · FULL-STACK DEVELOPER"
-        )
-      ),
+        { className: "cinematic-foreground-stage" },
 
-      // Compact Tagline
-      h(
-        "p",
-        { ref: taglineRef, className: "cinematic-tagline" },
-        "“Building intelligent systems. Turning ideas into real-world impact.”"
-      ),
-
-      // Primary Actions & Interactive 4-Month Journey Shortcut
-      h(
-        "div",
-        { ref: ctaRowRef, className: "cinematic-actions-row" },
+        // Oversized Editorial Name with Write-In Tracer
         h(
-          "button",
+          "div",
           {
-            type: "button",
-            className: "btn-pill-dark cinematic-cta-primary",
-            onClick: onNavigateProjects
+            ref: nameContainerRef,
+            className: "cinematic-name-wrap",
+            "aria-label": "Md. Fardin Hossain"
           },
-          h("span", null, "Explore My Work"),
-          h("span", { className: "btn-trailing-circle", "aria-hidden": "true" }, "→")
+          h(
+            "h1",
+            {
+              ref: nameFillRef,
+              className: "cinematic-hero-name"
+            },
+            h("span", { className: "name-first" }, "Md. Fardin "),
+            h("em", { className: "name-last" }, "Hossain")
+          ),
+          // Glowing tracer dot following the lead edge as the name writes itself
+          h("div", {
+            ref: nameTracerRef,
+            className: "cinematic-name-tracer",
+            "aria-hidden": "true"
+          })
         ),
-        h(
-          "a",
-          {
-            href: resumeUrl,
-            download: "Fardin_Hossain_Resume.pdf",
-            target: "_blank",
-            rel: "noopener",
-            className: "btn-pill-light cinematic-cta-secondary"
-          },
-          h("span", { "aria-hidden": "true" }, "↓"),
-          h("span", null, "Download Resume")
-        ),
-        h(
-          "button",
-          {
-            type: "button",
-            className: "hero-journey-shortcut cinematic-journey-pill",
-            onClick: onOpenJourney
-          },
-          h("span", { className: "yellow-dot" }),
-          h("span", null, "4-Month FlyRank AI Journey →")
-        )
-      ),
 
-      // Bottom Scroll Indicator Hint
-      h(
-        "div",
-        { ref: scrollHintRef, className: "cinematic-scroll-hint", "aria-hidden": "true" },
-        h("span", { className: "scroll-hint-text" }, "SCROLL TO EXPLORE"),
-        h("div", { className: "scroll-hint-bar" })
+        // Professional Label Badge
+        h(
+          "div",
+          { ref: labelBadgeRef, className: "cinematic-role-badge" },
+          h("span", { className: "role-bullet" }),
+          h(
+            "span",
+            { className: "role-text" },
+            "AI ENGINEER · MACHINE LEARNING · FULL-STACK DEVELOPER"
+          )
+        ),
+
+        // Compact Tagline
+        h(
+          "p",
+          { ref: taglineRef, className: "cinematic-tagline" },
+          "“Building intelligent systems. Turning ideas into real-world impact.”"
+        ),
+
+        // Primary Actions & Interactive 4-Month Journey Shortcut
+        h(
+          "div",
+          { ref: ctaRowRef, className: "cinematic-actions-row" },
+          h(
+            "button",
+            {
+              type: "button",
+              className: "btn-pill-dark cinematic-cta-primary",
+              onClick: onNavigateProjects
+            },
+            h("span", null, "Explore My Work"),
+            h("span", { className: "btn-trailing-circle", "aria-hidden": "true" }, "→")
+          ),
+          h(
+            "a",
+            {
+              href: resumeUrl,
+              download: "Fardin_Hossain_Resume.pdf",
+              target: "_blank",
+              rel: "noopener",
+              className: "btn-pill-light cinematic-cta-secondary"
+            },
+            h("span", { "aria-hidden": "true" }, "↓"),
+            h("span", null, "Download Resume")
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "hero-journey-shortcut cinematic-journey-pill",
+              onClick: onOpenJourney
+            },
+            h("span", { className: "yellow-dot" }),
+            h("span", null, "4-Month FlyRank AI Journey →")
+          )
+        ),
+
+        // Bottom Scroll Indicator Hint
+        h(
+          "div",
+          { ref: scrollHintRef, className: "cinematic-scroll-hint", "aria-hidden": "true" },
+          h("span", { className: "scroll-hint-text" }, "SCROLL TO EXPLORE"),
+          h("div", { className: "scroll-hint-bar" })
+        )
       )
     )
   );
