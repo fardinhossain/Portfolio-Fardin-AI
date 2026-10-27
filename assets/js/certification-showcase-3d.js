@@ -627,7 +627,7 @@ export function DualRobotDeliveryScene({
 
     function computeScale() {
       const { cW, pxPerUnit } = getVisibleBounds();
-      const desiredPx = cW < 680 ? 28 : 42;
+      const desiredPx = cW < 680 ? 46 : 66;
       return desiredPx / Math.max(20, pxPerUnit);
     }
 
@@ -637,8 +637,8 @@ export function DualRobotDeliveryScene({
 
     // Initial Off-Screen Positions
     const { vW, vH } = getVisibleBounds();
-    const restPosA = new THREE.Vector3(-vW * 0.65, vH * 0.45, 0);
-    const restPosB = new THREE.Vector3(vW * 0.65, vH * 0.45, 0);
+    const restPosA = new THREE.Vector3(-vW * 0.65, vH * 0.45, 0.6);
+    const restPosB = new THREE.Vector3(vW * 0.65, vH * 0.45, 0.6);
     robotA.root.position.copy(restPosA);
     robotB.root.position.copy(restPosB);
 
@@ -690,11 +690,14 @@ export function DualRobotDeliveryScene({
       currentBot.leftArmParts.gripperPivot.rotation.z = 0.22;
       currentBot.rightArmParts.gripperPivot.rotation.z = -0.22;
 
-      // Positions for smooth Bézier approach
-      const p0 = new THREE.Vector3(startX, slotPos.y + 0.8, 0);
-      const c1 = new THREE.Vector3(sideMultiplier * (vW * 0.28), slotPos.y + 1.2, 0.4);
-      const c2 = new THREE.Vector3(sideMultiplier * (vW * 0.1), slotPos.y + 0.4, 0.2);
-      const p3 = new THREE.Vector3(0, slotPos.y + 0.08, 0); // precise row center
+      // Vertical offset so the carried tile aligns exactly with the row center
+      const targetTileOffsetY = 0.9 * baseScale;
+
+      // Positions for smooth 3D Bézier approach (clearly in front with z > 0.6)
+      const p0 = new THREE.Vector3(startX, slotPos.y + targetTileOffsetY + 0.6, 0.6);
+      const c1 = new THREE.Vector3(sideMultiplier * (vW * 0.28), slotPos.y + targetTileOffsetY + 1.2, 1.5);
+      const c2 = new THREE.Vector3(sideMultiplier * (vW * 0.1), slotPos.y + targetTileOffsetY + 0.35, 1.1);
+      const p3 = new THREE.Vector3(0, slotPos.y + targetTileOffsetY, 0.85); // precise alignment in front
 
       currentBot.root.position.copy(p0);
 
@@ -738,10 +741,10 @@ export function DualRobotDeliveryScene({
         ease: "power1.inOut"
       });
 
-      // Arc away off-screen
+      // Arc away off-screen in front
       const exitP0 = currentBot.root.position.clone();
-      const exitP1 = new THREE.Vector3(sideMultiplier * (vW * 0.32), exitP0.y + 0.9, 0);
-      const exitP2 = new THREE.Vector3(sideMultiplier * (vW * 0.68), exitP0.y + 1.4, 0);
+      const exitP1 = new THREE.Vector3(sideMultiplier * (vW * 0.32), exitP0.y + 0.9, 1.2);
+      const exitP2 = new THREE.Vector3(sideMultiplier * (vW * 0.68), exitP0.y + 1.5, 0.6);
 
       const exitPromise = new Promise((resolve) => {
         const exitObj = { progress: 0 };

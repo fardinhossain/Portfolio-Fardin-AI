@@ -419,7 +419,7 @@ function PortfolioApp() {
         ...prev,
         active: true,
         chip: "STEP 3 · 4 DOMAINS LOADED",
-        text: "4 DOMAINS LOADED · 20/20 certificates · 6 live projects · 2 internship tracks..."
+        text: "4 DOMAINS LOADED · 7 certifications · 6 live projects · 1 internship completed..."
       }));
     }, 1700);
 
@@ -1109,9 +1109,9 @@ function PortfolioApp() {
                           "div",
                           { className: "about-stat-pill", role: "listitem" },
                           h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                          h("strong", null, "20/20"),
+                          h("strong", null, "7"),
                           " ",
-                          h("span", null, "certificates earned")
+                          h("span", null, "certifications earned")
                         ),
                         h(
                           "div",
@@ -1125,9 +1125,9 @@ function PortfolioApp() {
                           "div",
                           { className: "about-stat-pill", role: "listitem" },
                           h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                          h("strong", null, "2"),
+                          h("strong", null, "1"),
                           " ",
-                          h("span", null, "internship tracks completed (ML + AI Fluency)")
+                          h("span", null, "internship completed")
                         )
                       ),
 
