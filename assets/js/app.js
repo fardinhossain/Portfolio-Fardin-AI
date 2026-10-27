@@ -629,7 +629,7 @@ function PortfolioApp() {
       { className: "navbar-wrapper" },
       h(
         "nav",
-        { className: "navbar-glass", "aria-label": "Primary Navigation" },
+        { className: "navbar-glass portix-navbar", "aria-label": "Primary Navigation" },
         // Brand Logo: fardin.ai •
         h(
           "a",
@@ -642,7 +642,7 @@ function PortfolioApp() {
             }
           },
           h("span", { className: "brand-icon-circle", "aria-hidden": "true" }, "✦"),
-          h("span", null, "fardin.ai"),
+          h("span", { className: "brand-name-text" }, "fardin.ai"),
           h("span", { className: "red-dot", "aria-hidden": "true" })
         ),
 
@@ -689,8 +689,8 @@ function PortfolioApp() {
               "aria-label": theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode",
               title:
                 theme === "dark"
-                  ? "Activate Solar Light Mode (Bot Assistant)"
-                  : "Activate Robotic Dark Mode (Bot Assistant)"
+                  ? "Activate Solar Light Mode"
+                  : "Activate Robotic Dark Mode"
             },
             h("span", { className: "theme-toggle-led" }),
             h(
@@ -708,11 +708,11 @@ function PortfolioApp() {
             "button",
             {
               type: "button",
-              className: "btn-pill-dark",
+              className: "nav-btn-talk",
               onClick: () => navigateToSection("contact")
             },
-            h("span", null, "Let's Talk"),
-            h("span", { className: "btn-trailing-circle", "aria-hidden": "true" }, "→")
+            h("span", { className: "talk-arrow", "aria-hidden": "true" }, "→"),
+            h("span", null, "Let's Talk")
           ),
           h(
             "button",

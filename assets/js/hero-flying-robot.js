@@ -11,6 +11,12 @@ import { getCurrentTheme, subscribeTheme } from "./theme-manager.js";
 export function createFlyingRobot3D(canvasElement, options = {}) {
   if (!canvasElement) return null;
 
+  const {
+    onWordPass = null,
+    onNameComplete = null,
+    onFlightComplete = null
+  } = options;
+
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({
@@ -252,27 +258,40 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
   scene.add(trailPoints);
 
   // --- 3D FLIGHT PATH SPLINE ---
-  // Travels: Offscreen -> Behind Portrait -> Up around head -> Emerging at left shoulder -> Resting spot beside portrait
+  // Sequence:
+  // Phase B: Enters from offscreen right, flies left across headline (Hossain -> Fardin -> Md.)
+  // Phase D: Curves upward along left side, dives behind head, orbits upper halo,
+  //          glides past right shoulder without covering face, and rests beside portrait.
   const isMobile = window.innerWidth < 768;
   const curvePoints = isMobile
     ? [
-        new THREE.Vector3(7, 8, -6),
-        new THREE.Vector3(3.0, 4.5, -5),
-        new THREE.Vector3(0.0, 4.8, -4.5),  // behind head top
-        new THREE.Vector3(-2.8, 3.8, -3.5), // upper left behind
-        new THREE.Vector3(-3.2, 2.2, -1.0), // beside left ear/shoulder
-        new THREE.Vector3(0.0, 4.2, -3.0),  // arc across behind upper head
-        new THREE.Vector3(3.2, 2.4, 1.2)   // resting spot on right shoulder
+        new THREE.Vector3(6.8, -1.35, 3.0),   // 0. Offscreen right
+        new THREE.Vector3(3.2, -1.35, 2.5),   // 1. Entering headline
+        new THREE.Vector3(1.8, -1.35, 2.2),   // 2. Over 'Hossain'
+        new THREE.Vector3(0.0, -1.35, 2.2),   // 3. Over 'Fardin'
+        new THREE.Vector3(-1.8, -1.35, 2.2),  // 4. Over 'Md.'
+        new THREE.Vector3(-3.2, -0.8, 1.8),   // 5. Left sweep past name
+        new THREE.Vector3(-3.0, 1.8, 0.2),    // 6. Upward along left side
+        new THREE.Vector3(-2.0, 3.8, -3.2),   // 7. Behind upper left
+        new THREE.Vector3(0.0, 4.5, -4.5),    // 8. Deep behind head top
+        new THREE.Vector3(2.0, 3.8, -2.5),    // 9. Behind upper right
+        new THREE.Vector3(3.0, 2.8, 0.5),     // 10. Emerging at right orbital
+        new THREE.Vector3(2.8, 1.8, 1.2)      // 11. Resting hover beside portrait
       ]
     : [
-        new THREE.Vector3(13, 9, -8),     // 0. Offscreen entry
-        new THREE.Vector3(6.5, 5.5, -6),   // 1. Descending curve
-        new THREE.Vector3(1.5, 4.5, -5),   // 2. Dipping behind portrait
-        new THREE.Vector3(-3.8, 4.6, -4),  // 3. Looping behind head on left
-        new THREE.Vector3(-4.6, 2.2, -1.5),// 4. Emerging beside left shoulder
-        new THREE.Vector3(-1.0, 4.8, -3.5),// 5. Gliding behind upper head to the right
-        new THREE.Vector3(4.2, 3.0, 1.2),  // 6. Banking smoothly toward right shoulder
-        new THREE.Vector3(4.5, 2.0, 1.5)   // 7. Settle resting spot beside portrait
+        new THREE.Vector3(12.5, -1.35, 3.2),  // 0. Offscreen right entry
+        new THREE.Vector3(8.0, -1.35, 2.8),   // 1. Entering headline space
+        new THREE.Vector3(3.8, -1.35, 2.4),   // 2. Over 'Hossain'
+        new THREE.Vector3(0.0, -1.35, 2.4),   // 3. Over 'Fardin'
+        new THREE.Vector3(-3.8, -1.35, 2.4),  // 4. Over 'Md.'
+        new THREE.Vector3(-6.2, -0.8, 1.8),   // 5. Left sweep past name
+        new THREE.Vector3(-5.5, 2.0, 0.4),    // 6. Curving upward along left side
+        new THREE.Vector3(-4.2, 4.2, -3.2),   // 7. Diving behind upper left
+        new THREE.Vector3(-1.0, 5.2, -5.0),   // 8. Deep behind head top
+        new THREE.Vector3(2.4, 4.8, -4.5),    // 9. Behind upper right
+        new THREE.Vector3(4.8, 3.6, -0.8),    // 10. Emerging along right orbital ring
+        new THREE.Vector3(4.8, 2.4, 0.8),     // 11. Gliding past right shoulder
+        new THREE.Vector3(4.5, 1.8, 1.5)      // 12. Resting hover position
       ];
 
   const flightCurve = new THREE.CatmullRomCurve3(curvePoints);
@@ -282,6 +301,7 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
   let flightActive = false;
   let isResting = isReduced;
   const trailHistory = [];
+  const triggeredWords = { hossain: false, fardin: false, md: false, completed: false };
 
   // Theme Sync
   const unsubscribeTheme = subscribeTheme((newTheme) => {
@@ -300,16 +320,69 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
 
     // Update flight progress
     if (flightActive && animProgress < 1.0) {
-      animProgress += 0.0042; // ~4 seconds of graceful flight
+      // Dynamic pacing: deliberate glide during name reveal (t < 0.45), smooth acceleration on orbit
+      const step = animProgress < 0.45 ? 0.0034 : 0.0042;
+      animProgress += step;
       if (animProgress >= 1.0) {
         animProgress = 1.0;
         flightActive = false;
         isResting = true;
+        if (onFlightComplete) onFlightComplete();
       }
     }
 
     const t = Math.min(1.0, animProgress);
     const pos = flightCurve.getPointAt(t);
+
+    // Word Reveal Triggers along right-to-left flight
+    if (flightActive && onWordPass) {
+      const hossainThreshold = isMobile ? 2.0 : 4.0;
+      const fardinThreshold = isMobile ? 0.1 : 0.2;
+      const mdThreshold = isMobile ? -2.0 : -3.6;
+
+      if (!triggeredWords.hossain && pos.x <= hossainThreshold && pos.y < 0.2) {
+        triggeredWords.hossain = true;
+        onWordPass("hossain");
+        // Particle burst
+        for (let b = 0; b < 12; b++) {
+          trailHistory.unshift({
+            x: pos.x + (Math.random() - 0.5) * 0.4,
+            y: pos.y - 0.35 + (Math.random() - 0.5) * 0.3,
+            z: pos.z + (Math.random() - 0.5) * 0.4,
+            life: 1.2
+          });
+        }
+      }
+
+      if (!triggeredWords.fardin && pos.x <= fardinThreshold && pos.y < 0.2) {
+        triggeredWords.fardin = true;
+        onWordPass("fardin");
+        // Particle burst
+        for (let b = 0; b < 12; b++) {
+          trailHistory.unshift({
+            x: pos.x + (Math.random() - 0.5) * 0.4,
+            y: pos.y - 0.35 + (Math.random() - 0.5) * 0.3,
+            z: pos.z + (Math.random() - 0.5) * 0.4,
+            life: 1.2
+          });
+        }
+      }
+
+      if (!triggeredWords.md && pos.x <= mdThreshold && pos.y < 0.2) {
+        triggeredWords.md = true;
+        onWordPass("md");
+        // Particle burst
+        for (let b = 0; b < 16; b++) {
+          trailHistory.unshift({
+            x: pos.x + (Math.random() - 0.5) * 0.5,
+            y: pos.y - 0.35 + (Math.random() - 0.5) * 0.4,
+            z: pos.z + (Math.random() - 0.5) * 0.5,
+            life: 1.4
+          });
+        }
+        if (onNameComplete) onNameComplete();
+      }
+    }
 
     if (isResting) {
       // Gentle floating hover & slight bobbing
@@ -374,17 +447,34 @@ export function createFlyingRobot3D(canvasElement, options = {}) {
       if (isReduced) {
         animProgress = 1.0;
         isResting = true;
+        if (onWordPass) {
+          onWordPass("hossain");
+          onWordPass("fardin");
+          onWordPass("md");
+        }
+        if (onNameComplete) onNameComplete();
+        if (onFlightComplete) onFlightComplete();
         return;
       }
       animProgress = 0.0;
       flightActive = true;
       isResting = false;
+      triggeredWords.hossain = false;
+      triggeredWords.fardin = false;
+      triggeredWords.md = false;
     },
     skipFlight() {
       animProgress = 1.0;
       flightActive = false;
       isResting = true;
       trailHistory.length = 0;
+      if (onWordPass) {
+        if (!triggeredWords.hossain) { triggeredWords.hossain = true; onWordPass("hossain"); }
+        if (!triggeredWords.fardin) { triggeredWords.fardin = true; onWordPass("fardin"); }
+        if (!triggeredWords.md) { triggeredWords.md = true; onWordPass("md"); }
+      }
+      if (onNameComplete) onNameComplete();
+      if (onFlightComplete) onFlightComplete();
     },
     resize() {
       handleResize();

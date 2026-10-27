@@ -228,6 +228,8 @@ export function initHalftonePortraitShader(canvas, imageSrc) {
     const basePitch = isMobile ? 2.2 : 2.5;
     gl.uniform1f(uDotLoc, basePitch * dpr);
 
+    canvas.style.opacity = scrollProgress > 0.005 ? "1" : "0";
+
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
