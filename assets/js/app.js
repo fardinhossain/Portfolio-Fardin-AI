@@ -1771,11 +1771,48 @@ function PortfolioApp() {
               )
             ),
             selectedCertModal.certificateImage &&
-              h("img", {
-                src: selectedCertModal.certificateImage,
-                alt: selectedCertModal.title,
-                style: { width: "100%", borderRadius: "14px", border: "1px solid var(--border-light)" }
-              })
+              h(
+                "div",
+                { style: { display: "flex", flexDirection: "column", gap: "0.85rem" } },
+                selectedCertModal.verifyUrl
+                  ? h(
+                      "a",
+                      {
+                        href: selectedCertModal.verifyUrl,
+                        target: "_blank",
+                        rel: "noopener",
+                        title: "Click to open official verification page",
+                        style: { display: "block", cursor: "pointer" }
+                      },
+                      h("img", {
+                        src: selectedCertModal.certificateImage,
+                        alt: selectedCertModal.title,
+                        style: { width: "100%", borderRadius: "14px", border: "1px solid var(--border-light)", transition: "opacity 0.2s ease" }
+                      })
+                    )
+                  : h("img", {
+                      src: selectedCertModal.certificateImage,
+                      alt: selectedCertModal.title,
+                      style: { width: "100%", borderRadius: "14px", border: "1px solid var(--border-light)" }
+                    }),
+                selectedCertModal.verifyUrl &&
+                  h(
+                    "div",
+                    { style: { display: "flex", justifyContent: "flex-end", gap: "0.6rem" } },
+                    h(
+                      "a",
+                      {
+                        href: selectedCertModal.verifyUrl,
+                        target: "_blank",
+                        rel: "noopener",
+                        className: "btn-pill-dark",
+                        style: { textDecoration: "none", fontSize: "0.82rem", padding: "0.45rem 1rem" }
+                      },
+                      h("span", null, "Verify Credential"),
+                      h("span", { className: "btn-trailing-circle" }, "↗")
+                    )
+                  )
+              )
           )
         )
     )

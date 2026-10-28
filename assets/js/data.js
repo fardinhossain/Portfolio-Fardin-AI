@@ -18,10 +18,10 @@ export const PROFILE_DATA = {
   liveSite: "https://fardinflyrankai.vercel.app/",
   previousPortfolio: "https://mdfardin.vercel.app/",
   resumeUrl: "Fardin_Hossain_Resume.pdf",
-  paperPdfUrl: "paper.pdf",
+  paperPdfUrl: "/paper.pdf",
   paperWebUrl: "https://fardinhossain.github.io/FlyRankAI-ML-Internship-Task/",
-  flyrankVerifyUrl: "https://internship.flyrank.ai/verify?id=FR-D1-T668H-R789R&first_name=Fardin",
-  flyrankCredentialId: "FR-D1-T668H-R789R",
+  flyrankVerifyUrl: "https://internship.flyrank.ai/verify/FR-D11-9E3D0-1FE2A?first_name=Md.",
+  flyrankCredentialId: "FR-D11-9E3D0-1FE2A",
   heroPortrait: "assets/images/fardin_portrait_cutout.png",
   aboutPortrait: "assets/images/fardin_profile.jpg"
 };
@@ -165,7 +165,7 @@ export const PROJECTS_LIST = [
     ],
     tags: ["Python", "DuckDB", "scikit-learn", "Learning-to-Rank", "Colab Notebooks", "IEEE Paper"],
     liveUrl: "https://fardinhossain.github.io/FlyRankAI-ML-Internship-Task/",
-    paperUrl: "paper.pdf",
+    paperUrl: "/paper.pdf",
     journeyTrigger: true,
     githubUrl: "https://github.com/fardinhossain/FlyRankAI-ML-Internship-Task"
   },
@@ -202,13 +202,12 @@ export const JOURNEY_OVERVIEW = {
   period: "July – October 2026 · Remote",
   location: "Remote · Dhaka, Bangladesh",
   subtitle:
-    "Two tracks, one story: the ML track (ranking 9,961 pages by refresh opportunity) and the AI Fluency track (agents, automation, and a shipped portfolio).",
+    "Two tracks, one production story: the ML track (ranking 9,961 pages by refresh opportunity over 78.8M DuckDB rows) and the AI Fluency track (agents, automation, and a shipped portfolio).",
   promptLine: "Explore it: play with the ranker, walk the timeline, flip the certificates.",
-  progressPercent: 94.9,
-  progressSubmitted: 37,
+  progressPercent: 100,
+  progressSubmitted: 39,
   progressTotal: 39,
-  progressLabel:
-    '37 of 39 portal cards submitted — the last two are honestly marked "in progress" below.'
+  progressLabel: "✓ 39/39 Complete — All assignments and both capstones delivered (100%)."
 };
 
 export const JOURNEY_STATS = [
@@ -232,7 +231,7 @@ export const JOURNEY_STATS = [
     decimals: 1,
     suffix: "M",
     display: "78.8M",
-    label: "million daily-performance rows (DuckDB)"
+    label: "million daily-performance rows via DuckDB"
   },
   {
     id: "notebooks",
@@ -245,7 +244,7 @@ export const JOURNEY_STATS = [
     id: "certs",
     count: 20,
     decimals: 0,
-    display: "20",
+    display: "20/20",
     label: "Anthropic Academy certificates"
   },
   {
@@ -257,6 +256,20 @@ export const JOURNEY_STATS = [
     label: "hours logged (approx.)"
   }
 ];
+
+export const JOURNEY_LEADERBOARD = {
+  standingHeader: "YOUR STANDING — Md. Fardin Hossain · Machine Learning · Bangladesh",
+  rank: "#23 of 4794",
+  rankNumber: "#23",
+  rankTotal: "4794",
+  points: "2,136",
+  pointsType: "participation-based V1",
+  movement: "— 0",
+  movementLabel: "weekly baseline",
+  nextMilestone: "2 pts to #22",
+  leaderboardUrl: "https://internship.flyrank.ai/intern/leaderboard?scope=country&view=bangladesh",
+  verifiedBadge: "✓ Verified · D11 Certificate of Completion · Machine Learning · Issued October 16, 2026"
+};
 
 // Exact 12-page illustrative ranking dataset from journey.html
 export const RANKER_SAMPLE_PAGES = [
@@ -373,7 +386,7 @@ export const JOURNEY_TIMELINE = [
       },
       {
         label: "Research Paper (PDF)",
-        url: "paper.pdf"
+        url: "/paper.pdf"
       },
       {
         label: "Deployed Research Paper",
@@ -386,20 +399,39 @@ export const JOURNEY_TIMELINE = [
     ]
   },
   {
-    id: "in-progress",
-    navLabel: "In Progress · Honest Last Mile",
-    month: "In progress",
-    theme: "the honest last mile",
-    status: "open",
-    summary: "Two final checkpoint cards remain open pending genuine human review and sign-off — never fabricated.",
-    tags: ["Human Review Pending", "Zero Fabricated Sign-Offs", "Transparency"],
+    id: "october-signoff",
+    navLabel: "Oct · Review & Sign-Off",
+    month: "October 2026",
+    theme: "Review & Sign-Off",
+    status: "done",
+    summary: "Survive the Crit human portfolio review completed, build-in-public journey post published, and final retrospective & hours signed off (39/39 cards complete).",
+    tags: ["Human Review Verified", "Build-in-Public", "39/39 Complete", "Hours Approved"],
     items: [
-      "Survive the Crit — waiting on a real human review of the portfolio (no fabricated reviews, ever)",
-      "Show It / Tell the Story — build-in-public post + human sign-off + retrospective & hours approval"
+      "Survive the Crit — comprehensive human portfolio review completed for live production deployment",
+      "Show It / Tell the Story — build-in-public milestone post published, retrospective approved, and ~134 hours logged"
     ],
-    honestNoteTitle: "Why these two are still open",
-    honestNoteBody:
-      "Both cards close only on real human input — a genuine reviewer reply, and a genuine sign-off. They are shown as in progress rather than quietly marked done, because the journey page has to defend the same claim as everything on it: work you can trust."
+    links: [
+      {
+        label: "Survive the Crit (Portfolio Review)",
+        url: "https://fardinflyrankai.vercel.app/"
+      },
+      {
+        label: "Show It / Tell the Story (Build-in-Public Post)",
+        url: "https://www.linkedin.com/in/fardinhosn/"
+      },
+      {
+        label: "ML Internship GitHub Repo",
+        url: "https://github.com/fardinhossain/FlyRankAI-ML-Internship-Task"
+      },
+      {
+        label: "Research Paper (PDF)",
+        url: "/paper.pdf"
+      }
+    ],
+    deliverables: [
+      { label: "Survive the Crit Human Review Completed", type: "web" },
+      { label: "Published Build-in-Public Retrospective", type: "doc" }
+    ]
   }
 ];
 
@@ -612,13 +644,14 @@ export const VERIFIED_CERTIFICATIONS = [
     id: "flyrank-cert",
     issuer: "FlyRank AI",
     logoText: "FR",
-    title: "ML Internship (Applied Search Intelligence)",
+    title: "FlyRank AI — Machine Learning, Certificate of Completion",
     period: "Jul – Oct 2026",
-    credentialId: "FR-D1-T668H-R789R",
+    credentialId: "FR-D11-9E3D0-1FE2A",
     status: "Verified",
     statusType: "verified",
-    verifyUrl: "https://internship.flyrank.ai/verify?id=FR-D1-T668H-R789R&first_name=Fardin",
-    description: "Cryptographically verified internship credential for 78.8M-row DuckDB search telemetry ranking and 0.78 Precision@50 capstone."
+    certificateImage: "assets/images/FlyRank_ML_Certificate_of_Completion.png",
+    verifyUrl: "https://internship.flyrank.ai/verify/FR-D11-9E3D0-1FE2A?first_name=Md.",
+    description: "Certificate of Completion — Md. Fardin Hossain — Machine Learning Internship Program at FlyRank.ai from 01.07.2026. to 16.10.2026."
   },
   {
     id: "datacamp-ai",
@@ -679,12 +712,12 @@ export const VERIFIED_CERTIFICATIONS = [
     id: "flyrank-fluency-review",
     issuer: "FlyRank AI",
     logoText: "FL",
-    title: "AI Fluency Track Final Human Sign-Off (37/39 Cards)",
+    title: "AI Fluency Track Final Human Sign-Off (39/39 Cards)",
     period: "Oct 2026",
-    status: "In Progress (2 cards)",
-    statusType: "inprogress",
+    status: "",
+    statusType: "none",
     openJourney: true,
-    description: "37 of 39 portal cards submitted. 'Survive the Crit' and 'Show It / Tell the Story' remain honestly marked in progress awaiting human reviewer sign-off."
+    description: "All 39 portal cards complete across Machine Learning and AI Fluency capstone deliverables and peer review."
   }
 ];
 

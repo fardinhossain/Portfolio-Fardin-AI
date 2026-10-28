@@ -1171,16 +1171,17 @@ export function CertificationRow({
           h(
             "div",
             { className: "cert-tile-right" },
-            h(
-              "span",
-              {
-                className:
-                  cert.statusType === "verified"
-                    ? "verified-pill"
-                    : "inprogress-pill"
-              },
-              cert.statusType === "verified" ? `✓ ${cert.status}` : `⏳ ${cert.status}`
-            ),
+            Boolean(cert.status && cert.statusType !== "none") &&
+              h(
+                "span",
+                {
+                  className:
+                    cert.statusType === "verified"
+                      ? "verified-pill"
+                      : "inprogress-pill"
+                },
+                cert.statusType === "verified" ? `✓ ${cert.status}` : `⏳ ${cert.status}`
+              ),
             cert.verifyUrl &&
               h(
                 "a",
