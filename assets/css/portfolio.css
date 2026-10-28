@@ -5620,18 +5620,22 @@ body,
   white-space: nowrap;
 }
 
+.hl-strong,
 .hl-line-white {
   color: #FFFFFF;
 }
 
+[data-theme="light"] .hl-strong,
 [data-theme="light"] .hl-line-white {
   color: #141414;
 }
 
+.hl-muted,
 .hl-line-muted {
-  color: #7A7A7A;
+  color: #555555;
 }
 
+[data-theme="light"] .hl-muted,
 [data-theme="light"] .hl-line-muted {
   color: #737373;
 }

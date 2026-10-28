@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  <img src="assets/images/fardin_cyber.jpg" alt="Md. Fardin Hossain - AI Systems Engineer" width="130" style="border-radius: 50%; border: 2px solid #F59E0B; box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);" />
+  <img src="assets/images/fardin-portrait-brown-tee.jpg" alt="Md. Fardin Hossain - AI Systems Engineer" width="130" style="border-radius: 50%; border: 2px solid #F59E0B; box-shadow: 0 0 25px rgba(245, 158, 11, 0.35);" />
 
   <h3><strong>Md. Fardin Hossain</strong></h3>
   <p><em>AI & Machine Learning Systems Engineer • Full-Stack Software Engineer</em></p>

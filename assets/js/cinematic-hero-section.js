@@ -1,18 +1,22 @@
 // ==========================================================================
 // FARDIN.AI — EDITORIAL FULL-WIDTH HERO SECTION
-// Matches the reference design with:
+// Precisely recreates the reference design:
 // 1. Two-column composition within a full-viewport hero section
-// 2. Left column: Role label with orange-red square, bold condensed headline
-//    (BUILDING / INTELLIGENT SYSTEMS / THAT CREATE IMPACT), and description
+// 2. Left column: Role label with orange-red square, condensed display headline
+//    - "BUILDING THAT" (BUILDING is bright white, THAT is muted gray)
+//    - "CREATES INTELLIGENT" (muted gray)
+//    - "IMPACT" (muted gray)
+//    and supporting description
 // 3. Right column: Large stationary circular orange-to-dark gradient behind
-//    Fardin's real portrait photo (assets/images/fardin_portrait_cutout.png)
+//    Fardin's real portrait photo (wearing chocolate-brown T-shirt)
 // 4. Oversized condensed uppercase 'MD. FARDIN HOSSAIN' along the bottom
 //    partially overlapping the lower portrait
-// 5. Static background & stable scroll behavior (portrait never disappears)
+// 5. Stable scroll behavior: portrait never disappears or jumps
 // ==========================================================================
 
 import React, { useEffect, useRef } from "react";
 import { createHeroIntroTimeline } from "./hero-intro-timeline.js";
+import { PROFILE_DATA } from "./data.js";
 
 const h = React.createElement;
 
@@ -34,9 +38,6 @@ export function CinematicHeroSection() {
   const wordMdRef = useRef(null);
   const wordFardinRef = useRef(null);
   const wordHossainRef = useRef(null);
-
-  // Real portrait asset from project (clean transparent cutout of Fardin's real photo)
-  const portraitCutoutSrc = "assets/images/fardin_portrait_cutout.png";
 
   // One-time entrance animation on initial page load
   useEffect(() => {
@@ -118,9 +119,15 @@ export function CinematicHeroSection() {
         h(
           "h1",
           { ref: headlineRef, className: "portix-headline" },
-          h("span", { className: "hl-line hl-line-white" }, "BUILDING"),
-          h("span", { className: "hl-line hl-line-muted" }, "INTELLIGENT SYSTEMS"),
-          h("span", { className: "hl-line hl-line-muted" }, "THAT CREATE IMPACT")
+          h(
+            "span",
+            { className: "hl-line" },
+            h("span", { className: "hl-strong" }, "BUILDING"),
+            " ",
+            h("span", { className: "hl-muted" }, "THAT")
+          ),
+          h("span", { className: "hl-line hl-muted" }, "CREATES INTELLIGENT"),
+          h("span", { className: "hl-line hl-muted" }, "IMPACT")
         ),
 
         // Supporting Description
@@ -143,15 +150,18 @@ export function CinematicHeroSection() {
           "aria-hidden": "true"
         }),
 
-        // Real Portrait Cutout (Preserves original facial features, hairstyle, skin tone, clothing)
+        // Real Portrait (Brown T-shirt photo cutout, natural skin tone, arms crossed)
         h(
           "div",
           { ref: portraitStageRef, className: "portix-portrait-container" },
           h("img", {
-            src: portraitCutoutSrc,
-            alt: "Md. Fardin Hossain",
+            src: PROFILE_DATA.heroPortrait,
+            alt: "Md. Fardin Hossain wearing a brown T-shirt",
             className: "portix-portrait-img",
+            width: 768,
+            height: 1024,
             loading: "eager",
+            fetchpriority: "high",
             decoding: "async",
             draggable: false
           })
