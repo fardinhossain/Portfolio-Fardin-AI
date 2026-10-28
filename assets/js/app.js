@@ -40,6 +40,7 @@ import {
   prefersReducedMotion
 } from "./portfolio-intro.js";
 import { CinematicHeroSection } from "./cinematic-hero-section.js";
+import { AboutScrollStory } from "./about-scroll-story.js";
 
 const h = React.createElement;
 
@@ -381,21 +382,10 @@ function PortfolioApp() {
   const [certWallFilter, setCertWallFilter] = useState("all");
   const [flippedWallCards, setFlippedWallCards] = useState({});
 
-  // Bot F-01 Section Telemetry States (About Profile Scan)
-  const [aboutBotState, setAboutBotState] = useState({
-    active: false,
-    chip: "UNIT F-01 · STANDBY",
-    text: "SCANNING PROFILE… / SKILLS VERIFIED / 4 DOMAINS LOADED · Standing by beside photo card",
-    runCount: 0
-  });
-
   // Contact Form & Copy Email State
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [contactForm, setContactForm] = useState({ name: "", email: "", message: "" });
   const [contactStatus, setContactStatus] = useState({ state: "idle", message: "" });
-
-  const aboutSectionRef = useRef(null);
-  const hasScannedAboutRef = useRef(false);
 
   // Sync browser back/forward button
   useEffect(() => {
@@ -425,76 +415,6 @@ function PortfolioApp() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, [view]);
-
-  // Scripted Bot F-01 "Scans Profile" sequence for About section
-  const triggerAboutBotScan = useCallback(() => {
-    setAboutBotState((prev) => ({
-      active: true,
-      chip: "STEP 1 · SCANNING PROFILE…",
-      text: "SCANNING PROFILE… Verifying Southeast University CSE profile & engineering focus...",
-      runCount: prev.runCount + 1
-    }));
-
-    const t1 = setTimeout(() => {
-      setAboutBotState((prev) => ({
-        ...prev,
-        active: true,
-        chip: "STEP 2 · SKILLS VERIFIED",
-        text: "SKILLS VERIFIED · Cross-checking ML, LLM/MCP, Full-Stack & Security stack..."
-      }));
-    }, 850);
-
-    const t2 = setTimeout(() => {
-      setAboutBotState((prev) => ({
-        ...prev,
-        active: true,
-        chip: "STEP 3 · 4 DOMAINS LOADED",
-        text: "4 DOMAINS LOADED · 7 certifications · 6 live projects · 1 internship completed..."
-      }));
-    }, 1700);
-
-    const t3 = setTimeout(() => {
-      setAboutBotState((prev) => ({
-        ...prev,
-        active: false,
-        chip: "UNIT F-01 · STANDBY",
-        text: "SCANNING PROFILE… / SKILLS VERIFIED / 4 DOMAINS LOADED"
-      }));
-    }, 2600);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, []);
-
-  // Trigger About scan on scroll when the user reaches the About section
-  useEffect(() => {
-    if (view !== "home") return;
-    const aboutEl = aboutSectionRef.current;
-    if (!aboutEl) return;
-
-    const checkAboutScroll = () => {
-      if (hasScannedAboutRef.current) return;
-      // Do not trigger on initial page load when user is near top of hero
-      if (window.scrollY < 100) return;
-
-      const rect = aboutEl.getBoundingClientRect();
-      const vh = window.innerHeight || 800;
-      if (rect.top <= vh * 0.55 && rect.bottom >= vh * 0.15) {
-        hasScannedAboutRef.current = true;
-        triggerAboutBotScan();
-      }
-    };
-
-    window.addEventListener("scroll", checkAboutScroll, { passive: true });
-    checkAboutScroll();
-
-    return () => {
-      window.removeEventListener("scroll", checkAboutScroll);
-    };
-  }, [view, triggerAboutBotScan]);
 
   // Filtered 20 Anthropic Academy Certificates (All / AI Fluency / ML & Backend)
   const filteredAnthropicCerts = useMemo(() => {
@@ -870,291 +790,15 @@ function PortfolioApp() {
               "div",
               { className: "page-shell" },
 
-              // ================================================================
-              // 2. ABOUT ME & TECHNICAL STACK SECTION (#about)
-              // Placed directly after Hero (Home -> About -> Experience -> Projects -> Certifications -> Contact)
-              // Strictly general profile & technical stack — ZERO FlyRank task metrics here.
-              // ================================================================
-              h(
-                "section",
-                { id: "about", ref: aboutSectionRef, className: "section-block" },
-              h(
-                "div",
-                { className: "section-header-bar" },
-                h(
-                  "div",
-                  { className: "section-title-group" },
-                  h("span", { className: "section-red-bar" }),
-                  h(
-                    "h2",
-                    { className: "section-heading" },
-                    "About Me & Technical Stack",
-                    h("span", { className: "red-dot" })
-                  )
-                ),
-                h(
-                  "a",
-                  {
-                    href: PROFILE_DATA.resumeUrl,
-                    target: "_blank",
-                    rel: "noopener",
-                    className: "project-action-pill"
-                  },
-                  "📄 Full Resume PDF ↗"
-                )
-              ),
-
-              // Bot F-01 "Scans Profile" Telemetry & Control Bar (Exact same Bot F-01 component & bar pattern)
-              h(
-                "div",
-                {
-                  className: "robot-telemetry-bar",
-                  role: "region",
-                  "aria-label": "Bot F-01 Profile Scanner Controls"
-                },
-                h(
-                  "div",
-                  { className: "robot-telemetry-left" },
-                  h(
-                    "span",
-                    {
-                      className: `robot-holopad-dock bot-f01-dock-stage ${
-                        aboutBotState.active ? "is-bot-scanning" : "is-bot-docked"
-                      }`,
-                      title: "Bot F-01 Profile Scanner Dock"
-                    },
-                    h(
-                      motion.span,
-                      {
-                        key: `about-bot-${aboutBotState.runCount}`,
-                        initial: { x: -44, y: -6, rotate: -12, opacity: 0.4 },
-                        animate: aboutBotState.active
-                          ? { x: [-44, 14, -4, 0], y: [-6, -4, 0, -2], rotate: [-12, 8, -4, 0], opacity: 1 }
-                          : { x: 0, y: 0, rotate: 0, opacity: 1 },
-                        transition: { duration: 1.35, ease: [0.16, 1, 0.3, 1] },
-                        style: { display: "inline-flex", alignItems: "center", justifyContent: "center" }
-                      },
-                      h(BotF01MascotSvg, { isActive: aboutBotState.active, size: 36 })
-                    )
-                  ),
-                  h(
-                    "span",
-                    { className: "robot-unit-badge" },
-                    h("span", { className: "robot-unit-led" }),
-                    h("span", null, "BOT F-01")
-                  ),
-                  h(
-                    "span",
-                    {
-                      className: `robot-state-chip ${
-                        !aboutBotState.active ? "state-idle" : ""
-                      }`
-                    },
-                    aboutBotState.chip
-                  ),
-                  h(
-                    "span",
-                    { className: "robot-status-text" },
-                    aboutBotState.text
-                  )
-                ),
-                h(
-                  "div",
-                  { className: "robot-telemetry-actions" },
-                  h(
-                    "button",
-                    {
-                      type: "button",
-                      className: "robot-control-btn primary-replay",
-                      onClick: triggerAboutBotScan,
-                      title: "Replay Bot F-01 profile scan"
-                    },
-                    "Replay Scan ↻"
-                  ),
-                  h(
-                    "a",
-                    {
-                      href: PROFILE_DATA.resumeUrl,
-                      target: "_blank",
-                      rel: "noopener",
-                      className: "robot-control-btn"
-                    },
-                    "Full Resume PDF ↗"
-                  )
-                )
-              ),
-
-              // 2-Column Upgraded About Me Card
-              h(
-                "div",
-                { className: "bezel-outer" },
-                h(
-                  "div",
-                  { className: "bezel-inner about-stage-inner" },
-                  h(
-                    "div",
-                    { className: "about-two-col-grid" },
-                    // LEFT COLUMN: Photo Card with floating IDEAS / CODE / MODELS / PRODUCTS / IMPACT chip + Bot F-01 Standby Perch
-                    h(
-                      "div",
-                      { className: "about-photo-col" },
-                      h(
-                        "div",
-                        {
-                          className: `about-photo-card-wrap ${
-                            aboutBotState.active ? "is-being-scanned" : ""
-                          }`
-                        },
-                        aboutBotState.active &&
-                          h("div", { className: "about-scan-laser-line", "aria-hidden": "true" }),
-                        h(
-                          "div",
-                          { className: "about-photo-card" },
-                          h("img", {
-                            src: PROFILE_DATA.aboutPortrait,
-                            alt: "Md. Fardin Hossain — AI Engineer & Full-Stack Developer",
-                            className: "about-portrait-img",
-                            loading: "lazy"
-                          })
-                        ),
-                        // Floating IDEAS / CODE / MODELS / PRODUCTS / IMPACT chip matching hero photo card style
-                        h(
-                          "div",
-                          {
-                            className: "hero-pillars-float about-pillars-float",
-                            "aria-label": "Engineering workflow pillars"
-                          },
-                          h("span", null, "IDEAS"),
-                          h("span", null, "CODE"),
-                          h("span", null, "MODELS"),
-                          h("span", null, "PRODUCTS"),
-                          h("span", null, "IMPACT")
-                        )
-                      ),
-
-                      // Name, Red Role Line & Bot F-01 Settled Companion Badge beside Photo Card
-                      h(
-                        "div",
-                        { className: "about-identity-meta" },
-                        h(
-                          "div",
-                          null,
-                          h("h3", { className: "about-person-name" }, PROFILE_DATA.name),
-                          h(
-                            "div",
-                            { className: "about-person-role" },
-                            "AI Engineer & Full-Stack Developer · Dhaka, Bangladesh"
-                          )
-                        ),
-                        h(
-                          "div",
-                          {
-                            className: `about-bot-perch-badge ${
-                              aboutBotState.active ? "is-scanning" : "is-standby"
-                            }`,
-                            title: "Bot F-01 settled beside photo card"
-                          },
-                          h(BotF01MascotSvg, { isActive: aboutBotState.active, size: 28 }),
-                          h(
-                            "div",
-                            { className: "about-bot-perch-meta" },
-                            h("span", { className: "about-bot-perch-unit" }, "BOT F-01"),
-                            h(
-                              "span",
-                              { className: "about-bot-perch-status" },
-                              aboutBotState.active ? "SCANNING…" : "STANDBY"
-                            )
-                          )
-                        )
-                      )
-                    ),
-
-                    // RIGHT COLUMN: 3-4 Sentence General Story Bio + Neutral Stat Strip + 4-Group Skills Chip Grid
-                    h(
-                      "div",
-                      { className: "about-bio-col" },
-                      h(
-                        "div",
-                        { className: "about-story-bio" },
-                        h(
-                          "p",
-                          null,
-                          "I am a Computer Science & Engineering student at Southeast University in Dhaka, Bangladesh, passionate about building ML-powered applications, LLM-based developer tools, and full-stack web and mobile products. My work spans end-to-end machine learning workflows, computer vision and natural language applications, and agentic systems built with the Claude API and Model Context Protocol (MCP). Across web and native mobile platforms, I focus on clean architecture, automated testing, and responsive interfaces that turn complex models into reliable everyday software. I am actively seeking Machine Learning Engineer, AI Engineer, and Full-Stack Developer roles and internships where I can ship high-impact products."
-                        )
-                      ),
-
-                      // Small Neutral Stat Strip under Bio (Strictly general stats — zero FlyRank task metrics)
-                      h(
-                        "div",
-                        { className: "about-neutral-stat-strip", role: "list", "aria-label": "Portfolio Summary Highlights" },
-                        h(
-                          "div",
-                          { className: "about-stat-pill", role: "listitem" },
-                          h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                          h("strong", null, "7"),
-                          " ",
-                          h("span", null, "certifications earned")
-                        ),
-                        h(
-                          "div",
-                          { className: "about-stat-pill", role: "listitem" },
-                          h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                          h("strong", null, "6"),
-                          " ",
-                          h("span", null, "projects live on this site")
-                        ),
-                        h(
-                          "div",
-                          { className: "about-stat-pill", role: "listitem" },
-                          h("span", { className: "red-dot", style: { width: 6, height: 6 } }),
-                          h("strong", null, "1"),
-                          " ",
-                          h("span", null, "internship completed")
-                        )
-                      ),
-
-                      // 4-Group Skills Chip Grid
-                      h(
-                        "div",
-                        { className: "about-skills-grid" },
-                        SKILL_GROUPS.map((group) =>
-                          h(
-                            "div",
-                            { key: group.category, className: "about-skill-group-card" },
-                            h(
-                              "div",
-                              { className: "about-skill-group-title" },
-                              h("span", {
-                                className: group.accent === "red" ? "red-dot" : "yellow-dot",
-                                style: { width: 6, height: 6 }
-                              }),
-                              h("span", null, group.category)
-                            ),
-                            h(
-                              "div",
-                              { className: "about-skill-chips-wrap" },
-                              group.items.map((skill) =>
-                                h(
-                                  "span",
-                                  {
-                                    key: skill,
-                                    className: "tech-chip",
-                                    style: { fontWeight: 600 }
-                                  },
-                                  skill
-                                )
-                              )
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-            ),
-
+                          // ================================================================
+            // 2. ABOUT ME & INTERACTIVE SCROLL STORY (#about)
+            // Placed directly after Hero (Home -> About -> Experience -> Projects -> Certifications -> Contact)
+            // 4 Chapters: Identity, Capabilities, Value, Delivery Roadmap
+            // Guided by Bot F-01 Interactive Companion
             // ================================================================
+            h(AboutScrollStory, null),
+
+// ================================================================
             // 3. EXPERIENCE SECTION (#experience)
             // Robot-Guided FlyRank AI Vertical Career Timeline
             // ================================================================
