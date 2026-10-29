@@ -1765,6 +1765,7 @@ export function FeaturedProjects({
   const perchRef = useRef(null);
   const slotRefsMap = useRef(new Map());
   const hasTriggeredInitialRef = useRef(false);
+  const delayTimerRef = useRef(null);
 
   const registerSlotRef = useCallback((projectId, el) => {
     if (el) {
@@ -1810,6 +1811,7 @@ export function FeaturedProjects({
 
       // If user has already scrolled past Projects, complete immediately without blocking
       if (rect.bottom < 0) {
+        if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
         hasTriggeredInitialRef.current = true;
         setDeliveredIds(new Set(projectsList.map((p) => p.id)));
         return;
@@ -1817,9 +1819,15 @@ export function FeaturedProjects({
 
       if (rect.top <= vh * 0.68 && rect.bottom >= vh * 0.2) {
         hasTriggeredInitialRef.current = true;
-        setDeliveredIds(new Set());
-        setSkipRequested(false);
-        setDeliveryRunId((r) => r + 1);
+        if (prefersReducedMotion()) {
+          setDeliveredIds(new Set(projectsList.map((p) => p.id)));
+          return;
+        }
+        delayTimerRef.current = setTimeout(() => {
+          setDeliveredIds(new Set());
+          setSkipRequested(false);
+          setDeliveryRunId((r) => r + 1);
+        }, 1000);
       }
     };
 
@@ -1841,6 +1849,7 @@ export function FeaturedProjects({
     return () => {
       io.disconnect();
       window.removeEventListener("scroll", checkProjScroll);
+      if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
     };
   }, [projectsList]);
 

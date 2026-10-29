@@ -1246,6 +1246,7 @@ export function CertificationShowcase({
   const slotRefsMap = useRef(new Map());
   const controllerRef = useRef(null);
   const lifecycleRef = useRef(ANIM_LIFECYCLE.IDLE);
+  const delayTimerRef = useRef(null);
 
   const [lifecycle, setLifecycle] = useState(ANIM_LIFECYCLE.IDLE);
   const [isQuickReveal, setIsQuickReveal] = useState(false);
@@ -1371,6 +1372,7 @@ export function CertificationShowcase({
 
       // If user has already scrolled past Certifications, complete immediately without animation
       if (rect.bottom < 0) {
+        if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
         lifecycleRef.current = ANIM_LIFECYCLE.COMPLETED;
         setLifecycle(ANIM_LIFECYCLE.COMPLETED);
         setIsQuickReveal(true);
@@ -1380,11 +1382,20 @@ export function CertificationShowcase({
 
       // If section has arrived in comfortable view
       if (rect.top <= vh * 0.65 && rect.bottom >= vh * 0.2) {
-        lifecycleRef.current = ANIM_LIFECYCLE.PLAYING;
-        setLifecycle(ANIM_LIFECYCLE.PLAYING);
-        setIsQuickReveal(false);
-        setDeliveredIds(new Set());
-        setRunCount((r) => r + 1);
+        if (prefersReducedMotion()) {
+          lifecycleRef.current = ANIM_LIFECYCLE.COMPLETED;
+          setLifecycle(ANIM_LIFECYCLE.COMPLETED);
+          setDeliveredIds(new Set(certifications.map((c) => c.id)));
+          return;
+        }
+        lifecycleRef.current = "PENDING_DELAY";
+        delayTimerRef.current = setTimeout(() => {
+          lifecycleRef.current = ANIM_LIFECYCLE.PLAYING;
+          setLifecycle(ANIM_LIFECYCLE.PLAYING);
+          setIsQuickReveal(false);
+          setDeliveredIds(new Set());
+          setRunCount((r) => r + 1);
+        }, 1000);
       }
     };
 
@@ -1406,6 +1417,7 @@ export function CertificationShowcase({
     return () => {
       io.disconnect();
       window.removeEventListener("scroll", triggerIfArrived);
+      if (delayTimerRef.current) clearTimeout(delayTimerRef.current);
     };
   }, [certifications]);
 

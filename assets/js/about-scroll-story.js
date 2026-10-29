@@ -1,63 +1,54 @@
 // ==========================================================================
-// FARDIN.AI — INTERACTIVE SCROLL-DRIVEN ABOUT STORYTELLING EXPERIENCE
-// Section: #about
-// 4 Chapters:
-//   01 — Who Am I? (Identity, philosophy, photo, circular text, friendly welcome)
-//   02 — What Can I Do? (AI/ML, Full-Stack, Problem Solving with connected arrows)
-//   03 — Why Work With Me? (3 core principles with sequential focus)
-//   04 — From Idea to Delivery (5-step connected roadmap with animated path)
-// Visual Guide: Bot F-01 Interactive Mascot with 6 reactive states
-// Responsiveness:
-//   - Desktop: Sticky scroll stage with seamless bidirectional scrubbing
-//   - Mobile: Natural vertical narrative flow (zero scroll traps)
+// FARDIN.AI — REDESIGNED ABOUT ME SECTION (#about)
+// Clean Editorial Narrative for CSE Student & Full-Stack Developer
+// Integrated directly with unified page background (No giant enclosing box)
+// 4 Clear Topics:
+//   01 — Who I Am: CSE Student & Software Builder (Southeast University, Dhaka)
+//   02 — What I Build: Responsive Web Applications & Full-Stack Systems
+//   03 — My CS Foundation: Core Computer Science Theory & Practice
+//   04 — How I Work: Disciplined, Thoughtful Engineering Process
+// Guided by Bot F-01 Interactive Companion
+// Smooth bidirectional scroll interaction on desktop & natural flow on mobile
 // ==========================================================================
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { PROFILE_DATA, SKILL_GROUPS } from "./data.js";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { PROFILE_DATA } from "./data.js";
 
 const h = React.createElement;
 
 // --------------------------------------------------------------------------
-// BOT F-01 INTERACTIVE CHARACTER (6 EXPRESSIVE STATES)
-// porcelain dome head, obsidian visor, reactive LED eyes, ear pods,
+// BOT F-01 INTERACTIVE CHARACTER COMPANION
+// Porcelain dome head, obsidian visor, reactive LED eyes, ear pods,
 // antenna beacon, AI core, articulated arms, and thruster glow.
 // --------------------------------------------------------------------------
 export function StoryBotGuide({ state = "welcome", size = 110, className = "" }) {
-  // Eye expression variants based on current chapter
   const getEyeConfig = () => {
     switch (state) {
-      case "welcome": // Happy, curved friendly eyes
+      case "welcome":
         return {
           left: h("path", { d: "M21 21 Q25 16 29 21", stroke: "#E11D48", strokeWidth: "3.2", strokeLinecap: "round", fill: "none" }),
           right: h("path", { d: "M35 21 Q39 16 43 21", stroke: "#E11D48", strokeWidth: "3.2", strokeLinecap: "round", fill: "none" }),
           glint: true
         };
-      case "thinking": // One arched eyebrow, tilted gaze
+      case "thinking":
         return {
           left: h("rect", { x: "22", y: "17", width: "6.8", height: "4.6", rx: "2.3", fill: "#E11D48" }),
           right: h("rect", { x: "36", y: "15.5", width: "7.2", height: "3.8", rx: "1.9", fill: "#E11D48" }),
           glint: true
         };
-      case "explaining": // Alert, wide focused eyes
-        return {
-          left: h("circle", { cx: "25", cy: "19", r: "3.4", fill: "#E11D48" }),
-          right: h("circle", { cx: "39", cy: "19", r: "3.4", fill: "#E11D48" }),
-          glint: true
-        };
-      case "analyzing": // Visor scan line with narrow focused slit eyes
+      case "analyzing":
         return {
           left: h("line", { x1: "21", y1: "19", x2: "29", y2: "19", stroke: "#E11D48", strokeWidth: "2.8", strokeLinecap: "round" }),
           right: h("line", { x1: "35", y1: "19", x2: "43", y2: "19", stroke: "#E11D48", strokeWidth: "2.8", strokeLinecap: "round" }),
           glint: false
         };
-      case "working": // Determined, focused eyes
+      case "working":
         return {
           left: h("rect", { x: "22", y: "18", width: "7", height: "4", rx: "2", fill: "#FF4D6D" }),
           right: h("rect", { x: "35", y: "18", width: "7", height: "4", rx: "2", fill: "#FF4D6D" }),
           glint: true
         };
-      case "complete": // Joyful inverted arc eyes (smiling)
+      case "complete":
         return {
           left: h("path", { d: "M21 21 Q25 15 29 21", stroke: "#10B981", strokeWidth: "3.4", strokeLinecap: "round", fill: "none" }),
           right: h("path", { d: "M35 21 Q39 15 43 21", stroke: "#10B981", strokeWidth: "3.4", strokeLinecap: "round", fill: "none" }),
@@ -74,7 +65,6 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
 
   const eyes = getEyeConfig();
 
-  // Arm positions based on state
   const leftArmTransform = state === "welcome"
     ? "rotate(-40 14 36)"
     : state === "working"
@@ -83,9 +73,7 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
     ? "rotate(-45 14 36)"
     : "rotate(10 14 36)";
 
-  const rightArmTransform = state === "explaining"
-    ? "rotate(-55 50 31)"
-    : state === "welcome"
+  const rightArmTransform = state === "welcome"
     ? "rotate(-25 50 31)"
     : state === "complete"
     ? "rotate(-45 50 31)"
@@ -110,7 +98,6 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
         className: "story-bot-svg",
         "aria-hidden": "true"
       },
-      // Soft antigravity / thruster glow
       h("ellipse", {
         cx: "32",
         cy: "59",
@@ -119,17 +106,14 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
         fill: state === "complete" ? "rgba(16, 185, 129, 0.28)" : "rgba(225, 29, 72, 0.28)",
         className: "bot-thruster-aura"
       }),
-      // Thruster flame cone
       h("path", {
         d: "M28 50 L32 59 L36 50 Z",
         fill: beaconColor,
         opacity: "0.88",
         className: "bot-thruster-flame"
       }),
-      // Hover boots
       h("rect", { x: "23", y: "46", width: "5.5", height: "6", rx: "2.7", fill: "#E2E8F0", stroke: "#0F172A", strokeWidth: "1.2" }),
       h("rect", { x: "35.5", y: "46", width: "5.5", height: "6", rx: "2.7", fill: "#E2E8F0", stroke: "#0F172A", strokeWidth: "1.2" }),
-      // Left Arm
       h(
         "g",
         { className: "bot-arm-left", style: { transformOrigin: "14px 34px", transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" } },
@@ -146,7 +130,6 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
         }),
         h("circle", { cx: state === "welcome" ? "8" : "12.5", cy: state === "welcome" ? "27" : "42.5", r: "2.2", fill: beaconColor })
       ),
-      // Right Arm
       h(
         "g",
         { className: "bot-arm-right", style: { transformOrigin: "50px 34px", transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" } },
@@ -162,13 +145,12 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
           strokeWidth: "1.4"
         }),
         h("circle", {
-          cx: state === "explaining" ? "56" : state === "complete" ? "56" : "51.5",
-          cy: state === "explaining" ? "23" : state === "complete" ? "23" : "42.5",
+          cx: state === "complete" ? "56" : "51.5",
+          cy: state === "complete" ? "23" : "42.5",
           r: "2.2",
           fill: beaconColor
         })
       ),
-      // Torso / Chassis
       h("rect", {
         x: "18.5",
         y: "29.5",
@@ -179,19 +161,14 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
         stroke: "#CBD5E1",
         strokeWidth: "1.5"
       }),
-      // Collar joint
       h("rect", { x: "23", y: "28", width: "18", height: "3", rx: "1.5", fill: "#0F172A" }),
-      // Chest AI Core Badge
       h("circle", { cx: "32", cy: "38.5", r: "4.6", fill: "rgba(225, 29, 72, 0.15)", stroke: coreColor, strokeWidth: "1.8" }),
       h("circle", { cx: "32", cy: "38.5", r: "2", fill: coreColor }),
-      // Antenna stem & beacon
       h("line", { x1: "32", y1: "5.5", x2: "32", y2: "11.5", stroke: "#94A3B8", strokeWidth: "2.2", strokeLinecap: "round" }),
       h("circle", { cx: "32", cy: "4.8", r: "3", fill: beaconColor }),
       h("circle", { cx: "31.2", cy: "4", r: "1", fill: "#FFFFFF" }),
-      // Side Ear Pods
       h("rect", { x: "9.5", y: "16", width: "4.5", height: "8.5", rx: "2.2", fill: "#E2E8F0", stroke: beaconColor, strokeWidth: "1.4" }),
       h("rect", { x: "50", y: "16", width: "4.5", height: "8.5", rx: "2.2", fill: "#E2E8F0", stroke: beaconColor, strokeWidth: "1.4" }),
-      // Dome Head
       h("rect", {
         x: "13",
         y: "10",
@@ -202,7 +179,6 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
         stroke: "#CBD5E1",
         strokeWidth: "1.6"
       }),
-      // Obsidian Visor Plate
       h("rect", {
         x: "16.5",
         y: "13.2",
@@ -211,7 +187,6 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
         rx: "6.75",
         fill: "#090D16"
       }),
-      // Analyzing Laser Scan Line (visible when analyzing)
       state === "analyzing" &&
         h("line", {
           x1: "18",
@@ -223,7 +198,6 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
           opacity: "0.85",
           className: "bot-visor-scan-laser"
         }),
-      // Dynamic LED Eyes
       eyes.left,
       eyes.right,
       eyes.glint && h("circle", { cx: "23.3", cy: "18", r: "1", fill: "#FFFFFF" }),
@@ -233,226 +207,102 @@ export function StoryBotGuide({ state = "welcome", size = 110, className = "" })
 }
 
 // --------------------------------------------------------------------------
-// CIRCULAR DECORATIVE TEXT (SVG textPath)
+// 1. TOPIC 01: WHO I AM
 // --------------------------------------------------------------------------
-function CircularDecorativeText({ text = "CURIOUS BY NATURE · BUILDER BY CHOICE ·", radius = 55 }) {
-  const size = radius * 2 + 24;
+function TopicWhoIAm() {
   return h(
-    "div",
-    { className: "circular-badge-wrap", "aria-hidden": "true" },
+    "article",
+    { className: "about-topic-card topic-who", id: "about-topic-who" },
     h(
-      "svg",
-      { width: size, height: size, viewBox: `0 0 ${size} ${size}`, className: "circular-badge-svg" },
-      h("defs", null,
-        h("path", {
-          id: "circleTextPath",
-          d: `M ${size / 2}, ${size / 2} m -${radius}, 0 a ${radius},${radius} 0 1,1 ${radius * 2},0 a ${radius},${radius} 0 1,1 -${radius * 2},0`
-        })
-      ),
-      h("circle", { cx: size / 2, cy: size / 2, r: radius, fill: "none", stroke: "rgba(232, 93, 59, 0.22)", strokeWidth: "1", strokeDasharray: "3 3" }),
+      "div",
+      { className: "topic-header" },
+      h("span", { className: "topic-eyebrow" }, "01 / WHO I AM"),
+      h("h3", { className: "topic-title" }, "CSE Student & Practical Software Engineer")
+    ),
+    h(
+      "div",
+      { className: "topic-who-layout" },
       h(
-        "text",
-        { className: "circular-text-svg" },
-        h("textPath", { href: "#circleTextPath", startOffset: "0%" }, text)
+        "div",
+        { className: "topic-photo-wrap" },
+        h("img", {
+          src: PROFILE_DATA.aboutPortrait,
+          alt: "Md. Fardin Hossain",
+          className: "topic-portrait-img",
+          width: 240,
+          height: 300,
+          loading: "lazy"
+        }),
+        h(
+          "div",
+          { className: "topic-photo-badge" },
+          h("span", { className: "status-dot-pulse", "aria-hidden": "true" }),
+          h("span", null, "Dhaka, Bangladesh · CSE Undergrad")
+        )
+      ),
+      h(
+        "div",
+        { className: "topic-narrative-wrap" },
+        h(
+          "p",
+          { className: "topic-lead-p" },
+          "I’m a Computer Science and Engineering student at Southeast University in Dhaka, Bangladesh, with a strong interest in software engineering, applied AI, and building useful digital products."
+        ),
+        h(
+          "p",
+          { className: "topic-sub-p" },
+          "I enjoy exploring how underlying systems operate, solving concrete engineering problems, and designing clean interfaces that make software approachable and dependable for real people."
+        ),
+        h(
+          "div",
+          { className: "topic-focus-pills", role: "list" },
+          h("span", { className: "focus-pill" }, "🎓 Computer Science & Engineering"),
+          h("span", { className: "focus-pill" }, "💻 Full-Stack Web"),
+          h("span", { className: "focus-pill" }, "🤖 Applied AI Integration")
+        )
       )
     )
   );
 }
 
 // --------------------------------------------------------------------------
-// CURVED ARROW SVG (Smooth accent pointer with animated dash)
+// 2. TOPIC 02: WHAT I BUILD
 // --------------------------------------------------------------------------
-function CurvedArrow({ className = "", direction = "down-right", label = "" }) {
-  return h(
-    "div",
-    { className: `curved-arrow-container dir-${direction} ${className}`, "aria-hidden": "true" },
-    h(
-      "svg",
-      { width: "90", height: "48", viewBox: "0 0 90 48", fill: "none", xmlns: "http://www.w3.org/2000/svg" },
-      h("path", {
-        d: "M6 8 C 28 6, 68 12, 80 40",
-        stroke: "#E85D3B",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeDasharray: "4 3",
-        className: "curved-arrow-path"
-      }),
-      h("path", {
-        d: "M73 34 L80 41 L85 32",
-        stroke: "#E85D3B",
-        strokeWidth: "2.2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round"
-      })
-    ),
-    label && h("span", { className: "curved-arrow-label" }, label)
-  );
-}
-
-// --------------------------------------------------------------------------
-// CHAPTER 01: WHO AM I?
-// --------------------------------------------------------------------------
-function ChapterIdentity() {
-  return h(
-    "div",
-    { className: "story-chapter chapter-identity" },
-    h(
-      "div",
-      { className: "chapter-header" },
-      h("span", { className: "chapter-eyebrow" }, "CHAPTER 01 / 04 \u00B7 IDENTITY"),
-      h("h2", { className: "chapter-title" }, "WHO AM I?"),
-      h(
-        "p",
-        { className: "chapter-subhead" },
-        "I BUILD WITH ",
-        h("span", { className: "accent-highlight" }, "CODE"),
-        ". I THINK WITH ",
-        h("span", { className: "accent-highlight" }, "AI"),
-        "."
-      )
-    ),
-    h(
-      "div",
-      { className: "identity-body-grid" },
-      // Left: Real portrait card with status
-      h(
-        "div",
-        { className: "identity-photo-stage" },
-        h(
-          "div",
-          { className: "identity-photo-card" },
-          h("img", {
-            src: PROFILE_DATA.aboutPortrait,
-            alt: "Md. Fardin Hossain wearing a brown T-shirt",
-            className: "identity-portrait-img",
-            width: 280,
-            height: 350,
-            loading: "lazy"
-          }),
-          h(
-            "div",
-            { className: "identity-photo-badge" },
-            h("span", { className: "status-dot-pulse" }),
-            h("span", null, "Dhaka \u00B7 Available for ML/Full-Stack Roles")
-          )
-        ),
-        h(CircularDecorativeText, { text: "CURIOUS BY NATURE \u00B7 BUILDER BY CHOICE \u00B7 " })
-      ),
-      // Right: Bio narrative + Quick highlights
-      h(
-        "div",
-        { className: "identity-narrative-col" },
-        h(
-          "p",
-          { className: "identity-lead-bio" },
-          "I'm ",
-          h("strong", null, "Md. Fardin Hossain"),
-          ", a Computer Science & Engineering student at Southeast University in Dhaka, Bangladesh, dedicated to building production-ready AI systems and full-stack software. I enjoy turning complex models into clean, reliable tools that solve real problems."
-        ),
-        h(
-          "p",
-          { className: "identity-secondary-bio" },
-          "My recent work spans ranking 9,961 pages over 78.8M telemetry rows with DuckDB at FlyRank AI, creating agentic tools with the Claude API and Model Context Protocol (MCP), and shipping intuitive web and mobile interfaces."
-        ),
-        // Stat pills
-        h(
-          "div",
-          { className: "identity-pill-strip", role: "list" },
-          h("span", { className: "id-pill" }, h("strong", null, "7"), " Certifications Earned"),
-          h("span", { className: "id-pill" }, h("strong", null, "6"), " Shipped Live Projects"),
-          h("span", { className: "id-pill highlight-pill" }, h("strong", null, "0.78"), " Learned Ranker P@50")
-        ),
-        h(CurvedArrow, { direction: "down-right", label: "explore capabilities below", className: "id-arrow" })
-      )
-    )
-  );
-}
-
-// --------------------------------------------------------------------------
-// CHAPTER 02: WHAT CAN I DO?
-// --------------------------------------------------------------------------
-function ChapterCapabilities() {
-  const capabilities = [
-    {
-      num: "01",
-      title: "AI & MACHINE LEARNING",
-      desc: "From raw datasets to production inference pipelines and agentic tooling.",
-      items: [
-        "Data preparation, search telemetry & feature engineering",
-        "Learning-to-Rank, classification & scikit-learn models",
-        "LLM integration, Claude API & Model Context Protocol (MCP)",
-        "Retrieval-Augmented Generation (RAG) & vector embeddings"
-      ],
-      accent: "red"
-    },
-    {
-      num: "02",
-      title: "FULL-STACK DEVELOPMENT",
-      desc: "Robust backends paired with polished, highly responsive frontends.",
-      items: [
-        "Interactive React & Next.js modern web applications",
-        "Fast REST APIs with Node.js, Express & FastAPI",
-        "Database modeling: DuckDB, PostgreSQL, MongoDB, Appwrite",
-        "Automated unit & integration testing (Vitest, 557 tests)"
-      ],
-      accent: "amber"
-    },
-    {
-      num: "03",
-      title: "ENGINEERING & PROBLEM SOLVING",
-      desc: "Structured thinking, resilient architecture, and measurable outcomes.",
-      items: [
-        "Deconstructing complex product requirements into clean milestones",
-        "Benchmarking metrics (Precision@K, latency, throughput)",
-        "Enterprise security auditing & OWASP Top 10 remediation (C|PTE certified)",
-        "Git workflows, CI/CD automation & production deployment"
-      ],
-      accent: "green"
-    }
+function TopicWhatIBuild() {
+  const stack = [
+    { cat: "Frontend", items: ["React", "JavaScript (ES6+)", "TypeScript", "Next.js", "Tailwind CSS", "HTML5/CSS3"] },
+    { cat: "Backend & APIs", items: ["Node.js", "Express.js", "Python", "RESTful APIs", "FastAPI"] },
+    { cat: "Databases", items: ["MongoDB", "PostgreSQL", "DuckDB", "SQL Schema Design"] },
+    { cat: "Tools & Core", items: ["Git", "GitHub", "Linux/Bash", "C / C++", "Automated Testing"] }
   ];
 
   return h(
-    "div",
-    { className: "story-chapter chapter-capabilities" },
+    "article",
+    { className: "about-topic-card topic-build", id: "about-topic-build" },
     h(
       "div",
-      { className: "chapter-header" },
-      h("span", { className: "chapter-eyebrow" }, "CHAPTER 02 / 04 \u00B7 CAPABILITIES"),
-      h("h2", { className: "chapter-title" }, "WHAT CAN I DO?"),
-      h(
-        "p",
-        { className: "chapter-subhead" },
-        "FROM ",
-        h("span", { className: "accent-highlight" }, "INTELLIGENT IDEAS"),
-        " TO ",
-        h("span", { className: "accent-highlight" }, "WORKING PRODUCTS"),
-        "."
-      )
+      { className: "topic-header" },
+      h("span", { className: "topic-eyebrow" }, "02 / WHAT I BUILD"),
+      h("h3", { className: "topic-title" }, "Responsive Web Applications & Full-Stack Systems")
+    ),
+    h(
+      "p",
+      { className: "topic-lead-p" },
+      "I develop end-to-end applications where frontend interactions connect seamlessly with backend services, databases, and external APIs. My focus is always on usability, responsive rendering, and clear state management."
     ),
     h(
       "div",
-      { className: "capabilities-cards-grid" },
-      capabilities.map((cap, idx) =>
+      { className: "topic-stack-grid" },
+      stack.map((group) =>
         h(
           "div",
-          { key: cap.title, className: `capability-card card-accent-${cap.accent}` },
+          { key: group.cat, className: "stack-group-box" },
+          h("h4", { className: "stack-group-title" }, group.cat),
           h(
             "div",
-            { className: "cap-card-head" },
-            h("span", { className: "cap-num-badge" }, cap.num),
-            h("h3", { className: "cap-card-title" }, cap.title)
-          ),
-          h("p", { className: "cap-card-desc" }, cap.desc),
-          h(
-            "ul",
-            { className: "cap-card-list" },
-            cap.items.map((it) =>
-              h(
-                "li",
-                { key: it },
-                h("span", { className: "cap-item-bullet", "aria-hidden": "true" }, "→"),
-                h("span", null, it)
-              )
+            { className: "stack-tag-list" },
+            group.items.map((tech) =>
+              h("span", { key: tech, className: "stack-tech-tag" }, tech)
             )
           )
         )
@@ -462,331 +312,232 @@ function ChapterCapabilities() {
 }
 
 // --------------------------------------------------------------------------
-// CHAPTER 03: WHY CHOOSE ME?
+// 3. TOPIC 03: MY CS FOUNDATION
 // --------------------------------------------------------------------------
-function ChapterValue() {
+function TopicCSFoundation() {
+  const pillars = [
+    {
+      code: "DSA",
+      name: "Data Structures & Algorithms",
+      desc: "Asymptotic complexity (Big-O), recursion, search and sorting techniques, hash tables, trees, and algorithmic problem-solving."
+    },
+    {
+      code: "OOP",
+      name: "Object-Oriented Programming",
+      desc: "Modularity, encapsulation, inheritance, polymorphism, interface segregation, and design patterns for maintainable codebases."
+    },
+    {
+      code: "DBMS",
+      name: "Database Management Systems",
+      desc: "Relational data modeling, SQL queries, normalization, ACID properties, indexing, transactions, and document-based NoSQL storage."
+    },
+    {
+      code: "SYS",
+      name: "Operating Systems & Networks",
+      desc: "Process scheduling, concurrency, memory management, client-server models, HTTP/HTTPS, TCP/IP, and network communications."
+    }
+  ];
+
+  return h(
+    "article",
+    { className: "about-topic-card topic-foundation", id: "about-topic-foundation" },
+    h(
+      "div",
+      { className: "topic-header" },
+      h("span", { className: "topic-eyebrow" }, "03 / CS FOUNDATION"),
+      h("h3", { className: "topic-title" }, "Core Computer Science Competencies")
+    ),
+    h(
+      "p",
+      { className: "topic-lead-p" },
+      "My university coursework and personal projects are grounded in fundamental computer science principles that enable me to learn new frameworks quickly and build software with architectural integrity."
+    ),
+    h(
+      "div",
+      { className: "foundation-pillars-grid" },
+      pillars.map((pil) =>
+        h(
+          "div",
+          { key: pil.code, className: "foundation-pillar-card" },
+          h("div", { className: "pillar-code-pill" }, pil.code),
+          h("h4", { className: "pillar-title" }, pil.name),
+          h("p", { className: "pillar-summary" }, pil.desc)
+        )
+      )
+    )
+  );
+}
+
+// --------------------------------------------------------------------------
+// 4. TOPIC 04: HOW I WORK
+// --------------------------------------------------------------------------
+function TopicHowIWork() {
   const principles = [
     {
       step: "01",
-      headline: "I THINK BEFORE I BUILD",
-      tagline: "Architecture First",
-      body:
-        "I work to understand the core problem, user needs, and system constraints before writing code. Choosing architectures that scale avoids expensive rewrites and keeps deliverables focused."
+      title: "Understand the Core Problem",
+      body: "Before writing code, I clarify the requirements, identify the user's actual goal, and map constraints. Understanding the problem thoroughly prevents unnecessary complexity."
     },
     {
       step: "02",
-      headline: "I CONNECT IDEAS TO IMPLEMENTATION",
-      tagline: "Full-Cycle Integration",
-      body:
-        "I bridge the gap between machine learning models and production web software. A good model is only as useful as the application delivering its insights to end users."
+      title: "Thoughtful System Architecture",
+      body: "I plan data schemas, component boundaries, and API contracts early. Clean structure makes applications easier to reason about, maintain, and expand."
     },
     {
       step: "03",
-      headline: "I ITERATE AND IMPROVE WITH DATA",
-      tagline: "Evidence-Based Engineering",
-      body:
-        "I benchmark against baselines, test edge cases, and refine based on real data — proven by ranking 9,961 candidate pages with 0.78 precision@50 over 78.8M rows."
+      title: "Disciplined Debugging & Testing",
+      body: "I reproduce issues methodically, inspect edge cases, and test across device viewports. Code should be verifiable and performant under realistic conditions."
+    },
+    {
+      step: "04",
+      title: "Continuous Learning & Iteration",
+      body: "Technology evolves continuously. I stay curious, review documentation carefully, refine based on feedback, and strive to write cleaner code with every project."
     }
   ];
 
   return h(
-    "div",
-    { className: "story-chapter chapter-value" },
+    "article",
+    { className: "about-topic-card topic-work", id: "about-topic-work" },
     h(
       "div",
-      { className: "chapter-header" },
-      h("span", { className: "chapter-eyebrow" }, "CHAPTER 03 / 04 \u00B7 VALUE"),
-      h("h2", { className: "chapter-title" }, "WHY WORK WITH ME?"),
-      h(
-        "p",
-        { className: "chapter-subhead" },
-        "THOUGHTFUL ",
-        h("span", { className: "accent-highlight" }, "ENGINEERING"),
-        ". PRACTICAL ",
-        h("span", { className: "accent-highlight" }, "EXECUTION"),
-        "."
-      )
+      { className: "topic-header" },
+      h("span", { className: "topic-eyebrow" }, "04 / HOW I WORK"),
+      h("h3", { className: "topic-title" }, "Engineering Approach & Work Ethics")
     ),
     h(
       "div",
-      { className: "principles-timeline-wrap" },
-      // Connecting spine line
-      h("div", { className: "principles-spine-line", "aria-hidden": "true" }),
-      h(
-        "div",
-        { className: "principles-list" },
-        principles.map((pr, idx) =>
-          h(
-            "div",
-            { key: pr.step, className: "principle-card" },
-            h(
-              "div",
-              { className: "principle-badge-col" },
-              h("span", { className: "principle-num" }, pr.step),
-              h("span", { className: "principle-node-dot" })
-            ),
-            h(
-              "div",
-              { className: "principle-content-col" },
-              h(
-                "div",
-                { className: "principle-title-row" },
-                h("h3", { className: "principle-headline" }, pr.headline),
-                h("span", { className: "principle-tagline" }, pr.tagline)
-              ),
-              h("p", { className: "principle-body" }, pr.body)
-            )
-          )
-        )
-      )
-    )
-  );
-}
-
-// --------------------------------------------------------------------------
-// CHAPTER 04: FROM IDEA TO DELIVERY (ROADMAP)
-// --------------------------------------------------------------------------
-function ChapterRoadmap() {
-  const steps = [
-    {
-      num: "01",
-      name: "DISCOVER",
-      summary: "Understand goals, audience, requirements, edge cases, and success metrics."
-    },
-    {
-      num: "02",
-      name: "PLAN",
-      summary: "Milestone breakdown, verified tech choices, schema design, and interface prototypes."
-    },
-    {
-      num: "03",
-      name: "BUILD",
-      summary: "Clean implementation in manageable sprints, pairing resilient backend with fluid UI."
-    },
-    {
-      num: "04",
-      name: "TEST & REFINE",
-      summary: "Automated test suites, performance profiling, security audits, and real feedback."
-    },
-    {
-      num: "05",
-      name: "DELIVER",
-      summary: "Production deployment, documented handoff, and reliable post-launch continuity."
-    }
-  ];
-
-  return h(
-    "div",
-    { className: "story-chapter chapter-roadmap" },
-    h(
-      "div",
-      { className: "chapter-header" },
-      h("span", { className: "chapter-eyebrow" }, "CHAPTER 04 / 04 \u00B7 DELIVERY ROADMAP"),
-      h("h2", { className: "chapter-title" }, "FROM IDEA TO DELIVERY"),
-      h(
-        "p",
-        { className: "chapter-subhead" },
-        "A CLEAR ",
-        h("span", { className: "accent-highlight" }, "PROCESS"),
-        ". A BETTER ",
-        h("span", { className: "accent-highlight" }, "OUTCOME"),
-        "."
-      )
-    ),
-    h(
-      "div",
-      { className: "roadmap-flow-container" },
-      // SVG Animated Connecting Rail
-      h(
-        "div",
-        { className: "roadmap-rail-track", "aria-hidden": "true" },
-        h(
-          "svg",
-          { viewBox: "0 0 1000 36", fill: "none", preserveAspectRatio: "none", className: "roadmap-rail-svg" },
-          h("path", {
-            d: "M 30 18 L 970 18",
-            stroke: "rgba(225, 29, 72, 0.22)",
-            strokeWidth: "3",
-            strokeDasharray: "6 4"
-          }),
-          h("path", {
-            d: "M 30 18 L 970 18",
-            stroke: "#E85D3B",
-            strokeWidth: "3",
-            className: "roadmap-rail-fill"
-          })
-        )
-      ),
-      // 5 Steps Grid
-      h(
-        "div",
-        { className: "roadmap-steps-grid" },
-        steps.map((st, i) =>
-          h(
-            "div",
-            { key: st.num, className: `roadmap-step-cell step-${i + 1}` },
-            h(
-              "div",
-              { className: "step-indicator-ring" },
-              h("span", { className: "step-node-number" }, st.num)
-            ),
-            h("h4", { className: "step-cell-name" }, st.name),
-            h("p", { className: "step-cell-desc" }, st.summary)
-          )
-        )
-      ),
-      // Finale Completion Banner
-      h(
-        "div",
-        { className: "roadmap-completion-banner" },
+      { className: "work-principles-list" },
+      principles.map((pr) =>
         h(
           "div",
-          { className: "completion-left" },
-          h("span", { className: "check-circle-icon", "aria-hidden": "true" }, "✓"),
+          { key: pr.step, className: "work-principle-item" },
+          h("div", { className: "principle-step-number" }, pr.step),
           h(
             "div",
-            null,
-            h("strong", { className: "completion-title" }, "Ready to turn your idea into working software?"),
-            h("p", { className: "completion-desc" }, "Let's discuss requirements, architecture, and timelines.")
+            { className: "principle-text-content" },
+            h("h4", { className: "principle-heading" }, pr.title),
+            h("p", { className: "principle-description" }, pr.body)
           )
-        ),
-        h(
-          "a",
-          {
-            href: "#contact",
-            className: "btn-pill-dark",
-            onClick: (e) => {
-              e.preventDefault();
-              const el = document.getElementById("contact");
-              if (el) el.scrollIntoView({ behavior: "smooth" });
-            }
-          },
-          h("span", null, "Start a Conversation"),
-          h("span", { className: "btn-trailing-circle" }, "→")
         )
+      )
+    ),
+    h(
+      "div",
+      { className: "about-footer-cta-row" },
+      h(
+        "div",
+        { className: "footer-cta-text" },
+        h("strong", null, "Interested in collaborating or discussing an opportunity?"),
+        h("span", null, "I’m always open to talking about software engineering and new projects.")
+      ),
+      h(
+        "a",
+        {
+          href: "#contact",
+          className: "about-contact-btn",
+          onClick: (e) => {
+            e.preventDefault();
+            const el = document.getElementById("contact");
+            if (el) el.scrollIntoView({ behavior: "smooth" });
+          }
+        },
+        "Get in Touch →"
       )
     )
   );
 }
 
 // --------------------------------------------------------------------------
-// MAIN ABOUT SCROLL STORY COMPONENT
+// MAIN ABOUT SECTION COMPONENT
 // --------------------------------------------------------------------------
 export function AboutScrollStory() {
-  const containerRef = useRef(null);
-  const [activeChapter, setActiveChapter] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const sectionRef = useRef(null);
+  const [activeTopic, setActiveTopic] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
 
-  // Check viewport width and motion preferences
   useEffect(() => {
-    const checkViewport = () => {
-      setIsMobile(window.innerWidth < 960);
-      setReducedMotion(
-        window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      );
-    };
-
-    checkViewport();
-    window.addEventListener("resize", checkViewport, { passive: true });
-    return () => window.removeEventListener("resize", checkViewport);
+    setReducedMotion(
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
   }, []);
 
-  // Desktop Scroll-Scrubbing Listener
+  // IntersectionObserver to highlight currently active topic on scroll
   useEffect(() => {
-    if (isMobile || reducedMotion) return;
+    const topicElements = [
+      document.getElementById("about-topic-who"),
+      document.getElementById("about-topic-build"),
+      document.getElementById("about-topic-foundation"),
+      document.getElementById("about-topic-work")
+    ].filter(Boolean);
 
-    let ticking = false;
+    if (topicElements.length === 0) return;
 
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const rect = containerRef.current.getBoundingClientRect();
-          const totalDist = containerRef.current.offsetHeight - window.innerHeight;
-          if (totalDist <= 0) return;
-
-          // How far into the container are we scrolled?
-          const scrolled = -rect.top;
-          const prog = Math.max(0, Math.min(1, scrolled / totalDist));
-          setScrollProgress(prog);
-
-          // 4 chapters mapped to [0, 0.25, 0.50, 0.75, 1.0]
-          let chapterIndex = 0;
-          if (prog < 0.25) chapterIndex = 0;
-          else if (prog < 0.50) chapterIndex = 1;
-          else if (prog < 0.75) chapterIndex = 2;
-          else chapterIndex = 3;
-
-          setActiveChapter(chapterIndex);
-          ticking = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            if (id === "about-topic-who") setActiveTopic(0);
+            else if (id === "about-topic-build") setActiveTopic(1);
+            else if (id === "about-topic-foundation") setActiveTopic(2);
+            else if (id === "about-topic-work") setActiveTopic(3);
+          }
         });
-        ticking = true;
-      }
-    };
+      },
+      { threshold: 0.28, rootMargin: "-10% 0px -40% 0px" }
+    );
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isMobile, reducedMotion]);
+    topicElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
-  // Jump smoothly to a specific chapter
-  const scrollToChapter = (chapterIdx) => {
-    if (isMobile || !containerRef.current) {
-      const el = document.querySelector(`.story-chapter-wrap:nth-child(${chapterIdx + 1})`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
+  const scrollToTopic = useCallback((index) => {
+    const ids = [
+      "about-topic-who",
+      "about-topic-build",
+      "about-topic-foundation",
+      "about-topic-work"
+    ];
+    const target = document.getElementById(ids[index]);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    const containerTop = containerRef.current.offsetTop;
-    const totalDist = containerRef.current.offsetHeight - window.innerHeight;
-    const targetScroll = containerTop + totalDist * (chapterIdx / 3.2);
-    window.scrollTo({ top: targetScroll, behavior: "smooth" });
-  };
+  }, []);
 
-  // Bot states corresponding to chapters
   const botStates = ["welcome", "thinking", "analyzing", "working"];
-  const currentBotState = activeChapter === 3 && scrollProgress > 0.9 ? "complete" : botStates[activeChapter];
-
   const botSpeeches = [
-    "Hello! Let's get acquainted.",
-    "Here's what I build with code & models.",
-    "Why thoughtful engineering matters.",
-    "From clear plan to deployed reality."
+    "Hello! Welcome to my background & profile.",
+    "Web applications, APIs, and modern stacks.",
+    "Data structures, OOP, DBMS, OS, & networks.",
+    "Thoughtful architecture, testing, & clean code."
   ];
 
-  const chapters = [
-    { id: "identity", label: "01 WHO", comp: h(ChapterIdentity) },
-    { id: "capabilities", label: "02 CAN DO", comp: h(ChapterCapabilities) },
-    { id: "value", label: "03 WHY ME", comp: h(ChapterValue) },
-    { id: "roadmap", label: "04 PROCESS", comp: h(ChapterRoadmap) }
+  const topics = [
+    { id: "who", label: "01 Who I Am" },
+    { id: "build", label: "02 What I Build" },
+    { id: "foundation", label: "03 CS Foundation" },
+    { id: "work", label: "04 How I Work" }
   ];
 
   return h(
     "section",
     {
       id: "about",
-      ref: containerRef,
-      className: `about-scroll-story-container ${isMobile ? "is-mobile-story" : "is-desktop-story"}`,
-      "aria-label": "About Md. Fardin Hossain — Interactive Story"
+      ref: sectionRef,
+      className: "about-editorial-section",
+      "aria-labelledby": "about-main-heading"
     },
 
     // ------------------------------------------------------------------------
-    // SECTION TOP BAR: Section Heading + Resume Action
+    // SECTION TOP BAR: Section Heading + Understated Resume Text Link
     // ------------------------------------------------------------------------
     h(
       "div",
-      { className: "about-story-topbar" },
+      { className: "about-section-topbar" },
       h(
         "div",
-        { className: "section-title-group" },
-        h("span", { className: "section-red-bar" }),
-        h(
-          "h2",
-          { className: "section-heading" },
-          "About Me \u00B7 The Interactive Story",
-          h("span", { className: "red-dot" })
-        )
+        { className: "about-title-block" },
+        h("h2", { id: "about-main-heading", className: "about-main-heading" }, "About Me")
       ),
       h(
         "a",
@@ -794,140 +545,108 @@ export function AboutScrollStory() {
           href: PROFILE_DATA.resumeUrl,
           target: "_blank",
           rel: "noopener",
-          className: "project-action-pill"
+          className: "about-resume-text-link",
+          "aria-label": "View Md. Fardin Hossain's Résumé PDF in new tab"
         },
-        "📄 Full Resume PDF ↗"
+        "View Résumé (PDF) ↗"
       )
     ),
 
     // ------------------------------------------------------------------------
-    // DESKTOP: STICKY STORYTELLING STAGE
+    // MEANINGFUL INTRO SLOGAN & INTRODUCTORY COPY
     // ------------------------------------------------------------------------
-    !isMobile
-      ? h(
-          "div",
-          { className: "about-story-sticky-stage" },
-
-          // Stage Mini-Navigator + Continuous Progress Rail
-          h(
-            "div",
-            { className: "about-story-nav-strip", "aria-label": "Chapter navigation" },
-            h(
-              "div",
-              { className: "chapter-pills-row" },
-              chapters.map((ch, i) =>
-                h(
-                  "button",
-                  {
-                    key: ch.id,
-                    type: "button",
-                    className: `chapter-nav-btn ${activeChapter === i ? "is-active" : ""}`,
-                    onClick: () => scrollToChapter(i),
-                    "aria-label": `Jump to Chapter ${i + 1}: ${ch.label}`
-                  },
-                  h("span", { className: "pill-indicator-dot" }),
-                  h("span", { className: "pill-text" }, ch.label)
-                )
-              )
-            ),
-            // Progress rail bar
-            h(
-              "div",
-              { className: "about-scrub-rail" },
-              h("div", {
-                className: "about-scrub-bar",
-                style: { width: `${Math.round(scrollProgress * 100)}%` }
-              })
-            )
-          ),
-
-          // Main Split Composition: [Left Story Content] | [Right Bot Companion Stage]
-          h(
-            "div",
-            { className: "about-story-stage-grid" },
-
-            // LEFT CONTENT AREA: Active Chapter View
-            h(
-              "div",
-              { className: "stage-content-area" },
-              h(
-                AnimatePresence,
-                { mode: "wait" },
-                h(
-                  motion.div,
-                  {
-                    key: activeChapter,
-                    initial: reducedMotion ? { opacity: 1 } : { opacity: 0, y: 14 },
-                    animate: { opacity: 1, y: 0 },
-                    exit: reducedMotion ? { opacity: 0 } : { opacity: 0, y: -14 },
-                    transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] },
-                    className: "active-chapter-view"
-                  },
-                  chapters[activeChapter].comp
-                )
-              )
-            ),
-
-            // RIGHT VISUAL GUIDE AREA: Bot F-01 & Ambient Display
-            h(
-              "div",
-              { className: "stage-bot-area" },
-              h(
-                "div",
-                { className: "bot-stage-pedestal" },
-                // Bot Speech Balloon
-                h(
-                  "div",
-                  { className: "bot-speech-bubble" },
-                  h("span", { className: "bot-speech-unit" }, "BOT F-01 GUIDE"),
-                  h("p", { className: "bot-speech-text" }, botSpeeches[activeChapter])
-                ),
-                // Bot F-01 Character Component
-                h(StoryBotGuide, {
-                  state: currentBotState,
-                  size: 130
-                }),
-                // Bot Meta Status Box
-                h(
-                  "div",
-                  { className: "bot-meta-tag" },
-                  h("span", { className: "bot-meta-led" }),
-                  h(
-                    "span",
-                    { className: "bot-meta-state-text" },
-                    `MODE: ${currentBotState.toUpperCase()}`
-                  )
-                )
-              )
-            )
-          )
+    h(
+      "div",
+      { className: "about-intro-hero-block" },
+      h(
+        "p",
+        { className: "about-slogan-statement" },
+        "“I turn complex problems into practical digital experiences.”"
+      ),
+      h(
+        "div",
+        { className: "about-intro-prose" },
+        h(
+          "p",
+          null,
+          "I’m a Computer Science and Engineering student and full-stack developer who enjoys turning ideas into reliable, user-friendly software. I build responsive web applications, connect frontend experiences with backend services and databases, and focus on writing maintainable code."
+        ),
+        h(
+          "p",
+          null,
+          "My computer science foundation includes data structures and algorithms, object-oriented programming, database management systems, operating systems, computer networks, and software engineering. I enjoy solving technical problems, understanding how systems work, and building practical applications that people can use."
         )
-      : // ----------------------------------------------------------------------
-        // MOBILE & TABLET: NATURAL VERTICAL DOCUMENT FLOW
-        // ----------------------------------------------------------------------
+      )
+    ),
+
+    // ------------------------------------------------------------------------
+    // TOPIC NAVIGATION BAR & BOT COMPANION (Sticky on Desktop, Natural on Mobile)
+    // ------------------------------------------------------------------------
+    h(
+      "div",
+      { className: "about-nav-and-content-layout" },
+
+      // LEFT: Sticky Topic Navigation Sidebar with Bot Guide
+      h(
+        "aside",
+        { className: "about-nav-sidebar", "aria-label": "About section topic navigation" },
         h(
           "div",
-          { className: "about-mobile-story-flow" },
-          // Mobile Floating Bot Companion
+          { className: "about-sticky-sidebar-inner" },
+          // Topic navigation buttons
           h(
-            "div",
-            { className: "mobile-bot-banner" },
-            h(StoryBotGuide, { state: currentBotState, size: 70 }),
-            h(
-              "div",
-              { className: "mobile-bot-info" },
-              h("span", { className: "mobile-bot-tag" }, "BOT F-01 STORY COMPANION"),
-              h("p", { className: "mobile-bot-tip" }, "Scroll down to walk through my 4-chapter journey.")
+            "nav",
+            { className: "about-topic-nav-menu", "aria-label": "Topic chapters" },
+            topics.map((t, idx) =>
+              h(
+                "button",
+                {
+                  key: t.id,
+                  type: "button",
+                  className: `about-nav-chip ${activeTopic === idx ? "is-active" : ""}`,
+                  onClick: () => scrollToTopic(idx),
+                  "aria-label": `Scroll to ${t.label}`,
+                  "aria-current": activeTopic === idx ? "true" : undefined
+                },
+                h("span", { className: "chip-indicator-dot", "aria-hidden": "true" }),
+                h("span", { className: "chip-text" }, t.label)
+              )
             )
           ),
-          // Stacked Chapter Cards
-          chapters.map((ch, idx) =>
+
+          // Bot F-01 Interactive Companion Card
+          h(
+            "div",
+            { className: "about-bot-companion-card" },
             h(
               "div",
-              { key: ch.id, className: "story-chapter-wrap mobile-chapter-card" },
-              ch.comp
+              { className: "bot-speech-bubble" },
+              h("span", { className: "bot-unit-tag" }, "BOT F-01 GUIDE"),
+              h("p", { className: "bot-speech-line" }, botSpeeches[activeTopic])
+            ),
+            h(StoryBotGuide, {
+              state: botStates[activeTopic],
+              size: 96
+            }),
+            h(
+              "div",
+              { className: "bot-status-footer" },
+              h("span", { className: "bot-led-indicator", "aria-hidden": "true" }),
+              h("span", { className: "bot-status-text" }, `TOPIC 0${activeTopic + 1} OF 04`)
             )
           )
         )
+      ),
+
+      // RIGHT: The 4 Open Narrative Topics
+      h(
+        "div",
+        { className: "about-topics-stream" },
+        h(TopicWhoIAm, null),
+        h(TopicWhatIBuild, null),
+        h(TopicCSFoundation, null),
+        h(TopicHowIWork, null)
+      )
+    )
   );
 }

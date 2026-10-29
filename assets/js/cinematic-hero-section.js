@@ -128,13 +128,6 @@ export function CinematicHeroSection() {
           ),
           h("span", { className: "hl-line hl-muted" }, "CREATES INTELLIGENT"),
           h("span", { className: "hl-line hl-muted" }, "IMPACT")
-        ),
-
-        // Supporting Description
-        h(
-          "p",
-          { ref: taglineRef, className: "portix-description" },
-          "Building intelligent systems and full-stack products for real-world impact."
         )
       ),
 
