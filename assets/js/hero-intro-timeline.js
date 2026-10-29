@@ -68,7 +68,7 @@ export function createHeroIntroTimeline({
     gsap.set(w, {
       clipPath: "polygon(0 0, 0 0, 0 100%, 0 100%)",
       opacity: 0,
-      y: 8
+      y: 12
     });
   });
 
