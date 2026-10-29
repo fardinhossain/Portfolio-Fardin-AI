@@ -1,15 +1,29 @@
 // ==========================================================================
-// FARDIN.AI — REDESIGNED SCROLL-DRIVEN ABOUT SECTION (#about)
-// Rich Editorial Storytelling for CSE Student & Full-Stack Developer
-// 4 Clear Chapters:
-//   01 — Who I Am
-//   02 — What I Build
-//   03 — Why Me (replaces CS Foundation)
-//   04 — How I Work
-// - Bulletproof word-by-word sequential text reveal with natural word spacing
-// - Bot F-01 Interactive Companion Card in left sticky progress sidebar
-// - Rich visual capability cards, value pillars, and 4-step delivery roadmap
-// - Responsive desktop & mobile layouts with zero scroll traps
+// FARDIN.AI — REDESIGNED ABOUT SECTION (#about)
+// Exactly matching the reference designs:
+// (media_1793296974908_45fbacfd.png, media_1793296978543_ad7d6824.png,
+//  media_1793296982203_baa85d4e.png, media_1793296984830_93437709.png)
+//
+// 1. Full mountain background across the WHOLE about section:
+//    - Topographic mountain with orange contour lines, sun arc, and summit flag
+//    - Seamless dark vignette overlay allowing text to remain 100% readable
+// 2. Title: "About Me" (Me in coral orange #FF6E4A)
+// 3. Slogan: "“ I turn complex problems into practical digital experiences.”"
+//    (both "complex problems" and "digital experiences" highlighted in coral orange #FF6E4A)
+// 4. Two-Column Layout:
+//    - Left: Sticky Chapter Tracker (01 Who I Am, 02 What I Build, 03 Why Me, 04 How I Work)
+//      with glowing orange double-ring indicator & smooth scroll
+//    - Right: 4 Chapters with exact reference components:
+//      - Chapter 01 (Who I Am): Lead + body text, 4 pills (CSE Student,
+//        highlighted Full-Stack Developer, Problem Solver, Lifelong Learner),
+//        and the mountain peak with hovering robot mascot.
+//      - Chapter 02 (What I Build): Lead text + 4 distinct colored cards
+//        (Frontend [blue], Backend [green], Database [purple], Full-Stack Apps [orange])
+//      - Chapter 03 (Why Me): Lead text + 4 visual feature badges in a row
+//        (Problem Solving [amber], Clean Code [green], Thoughtful Architecture [purple],
+//        Continuous Learning [coral])
+//      - Chapter 04 (How I Work): 5-step connected workflow sequence with
+//        orange circular icon nodes & dashed arrow connectors (----->)
 // ==========================================================================
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
@@ -17,7 +31,7 @@ import { PROFILE_DATA } from "./data.js";
 
 const h = React.createElement;
 
-function prefersReducedMotion() {
+function checkPrefersReducedMotion() {
   if (typeof window === "undefined" || !window.matchMedia) return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
@@ -32,10 +46,10 @@ export function ScrollWordReveal({
   as = "p"
 }) {
   const containerRef = useRef(null);
-  const [isRevealed, setIsRevealed] = useState(() => prefersReducedMotion());
+  const [isRevealed, setIsRevealed] = useState(() => checkPrefersReducedMotion());
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
+    if (checkPrefersReducedMotion()) {
       setIsRevealed(true);
       return;
     }
@@ -49,7 +63,7 @@ export function ScrollWordReveal({
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -30px 0px" }
+      { threshold: 0.1, rootMargin: "0px 0px -20px 0px" }
     );
     observer.observe(el);
 
@@ -71,19 +85,19 @@ export function ScrollWordReveal({
     words.map((word, idx) =>
       h(
         React.Fragment,
-        { key: `word-${idx}` },
+        { key: `token-${idx}` },
         h(
           "span",
           {
             className: "word-reveal-token",
             "aria-hidden": "true",
             style: {
-              transitionDelay: isRevealed ? `${delay + idx * 24}ms` : "0ms"
+              transitionDelay: isRevealed ? `${delay + idx * 22}ms` : "0ms"
             }
           },
           word
         ),
-        // Render explicit whitespace text node between adjacent inline tokens
+        // Explicit whitespace text node between adjacent inline tokens
         idx < words.length - 1 ? " " : null
       )
     )
@@ -91,76 +105,40 @@ export function ScrollWordReveal({
 }
 
 // --------------------------------------------------------------------------
-// BOT F-01 INTERACTIVE COMPANION (About Guide)
+// HOVERING SUMMIT ROBOT MASCOT (Over Chapter 01 Mountain Peak)
 // --------------------------------------------------------------------------
-export function AboutBotGuide({ activeChapter = 0 }) {
-  const botSpeeches = [
-    "Meet Fardin — crafting reliable software from Southeast University, Dhaka.",
-    "Responsive React/Next.js frontends, scalable Node APIs, and robust databases.",
-    "Strong CS fundamentals combined with clean code and disciplined problem-solving.",
-    "Understand the requirements, architect thoughtfully, test early, and iterate."
-  ];
-
-  const eyeConfigs = [
-    { leftD: "M21 21 Q25 16 29 21", rightD: "M35 21 Q39 16 43 21", color: "#E85D3B" },
-    { leftD: "M21 20 L29 20", rightD: "M35 20 L43 20", color: "#FF6E4A" },
-    { leftD: "M21 21 Q25 15 29 21", rightD: "M35 21 Q39 15 43 21", color: "#10B981" },
-    { leftD: "M21 20 L29 20", rightD: "M35 20 L43 20", color: "#E85D3B" }
-  ];
-
-  const currentEye = eyeConfigs[activeChapter] || eyeConfigs[0];
-
+export function AboutSummitRobot() {
   return h(
     "div",
-    { className: "about-bot-companion-card" },
+    { className: "about-summit-robot-wrap", "aria-hidden": "true" },
     h(
       "div",
-      { className: "bot-card-topbar" },
-      h("span", { className: "bot-unit-tag" }, "UNIT F-01 \u00B7 GUIDE"),
-      h("span", { className: "bot-live-pulse", "aria-hidden": "true" })
-    ),
-    h(
-      "div",
-      { className: "bot-speech-bubble" },
-      h("p", { className: "bot-speech-text" }, botSpeeches[activeChapter])
-    ),
-    h(
-      "div",
-      { className: "bot-avatar-wrap" },
+      { className: "about-summit-robot-mascot" },
       h(
         "svg",
         {
           viewBox: "0 0 64 64",
-          width: 76,
-          height: 76,
+          width: 54,
+          height: 54,
           fill: "none",
-          xmlns: "http://www.w3.org/2000/svg",
-          className: "bot-avatar-svg"
+          xmlns: "http://www.w3.org/2000/svg"
         },
         // Antenna
-        h("line", { x1: "32", y1: "6", x2: "32", y2: "14", stroke: "#94A3B8", strokeWidth: "2", strokeLinecap: "round" }),
-        h("circle", { cx: "32", cy: "6", r: "3", fill: "#E85D3B", className: "bot-antenna-beacon" }),
-        // Body / Dome Head
-        h("rect", { x: "14", y: "14", width: "36", height: "32", rx: "14", fill: "var(--bg-surface)", stroke: "var(--border-light)", strokeWidth: "1.8" }),
-        // Visor
-        h("rect", { x: "19", y: "21", width: "26", height: "15", rx: "6", fill: "#0B0D12" }),
-        // Eyes
-        h("path", { d: currentEye.leftD, stroke: currentEye.color, strokeWidth: "2.6", strokeLinecap: "round", fill: "none" }),
-        h("path", { d: currentEye.rightD, stroke: currentEye.color, strokeWidth: "2.6", strokeLinecap: "round", fill: "none" }),
-        // Ear Pods
-        h("rect", { x: "10", y: "24", width: "4", height: "12", rx: "2", fill: "#E85D3B" }),
-        h("rect", { x: "50", y: "24", width: "4", height: "12", rx: "2", fill: "#E85D3B" }),
-        // Core indicator
-        h("circle", { cx: "32", cy: "40", r: "2.5", fill: "#E85D3B" }),
+        h("line", { x1: "32", y1: "5", x2: "32", y2: "13", stroke: "#E2E8F0", strokeWidth: "2", strokeLinecap: "round" }),
+        h("circle", { cx: "32", cy: "5", r: "3", fill: "#FF6E4A" }),
         // Thruster flame
-        h("path", { d: "M28 48 Q32 58 36 48 Z", fill: "#FF6E4A", opacity: "0.85" })
+        h("path", { d: "M28 46 Q32 60 36 46 Z", fill: "#FF6E4A", opacity: "0.95" }),
+        // Body / Dome
+        h("rect", { x: "15", y: "13", width: "34", height: "32", rx: "13", fill: "#FFFFFF", stroke: "#E2E8F0", strokeWidth: "1.5" }),
+        // Visor
+        h("rect", { x: "20", y: "20", width: "24", height: "14", rx: "6", fill: "#0A0D14" }),
+        // Glowing Eyes
+        h("circle", { cx: "27", cy: "27", r: "2.4", fill: "#FF6E4A" }),
+        h("circle", { cx: "37", cy: "27", r: "2.4", fill: "#FF6E4A" }),
+        // Ear Pods
+        h("rect", { x: "11", y: "23", width: "4", height: "11", rx: "2", fill: "#FF6E4A" }),
+        h("rect", { x: "49", y: "23", width: "4", height: "11", rx: "2", fill: "#FF6E4A" })
       )
-    ),
-    h(
-      "div",
-      { className: "bot-status-footer" },
-      h("span", { className: "bot-status-dot", "aria-hidden": "true" }),
-      h("span", { className: "bot-status-label" }, `CHAPTER 0${activeChapter + 1} ACTIVE`)
     )
   );
 }
@@ -206,8 +184,8 @@ export function AboutScrollStory() {
         });
       },
       {
-        threshold: 0.25,
-        rootMargin: "-10% 0px -35% 0px"
+        threshold: 0.15,
+        rootMargin: "-10% 0px -40% 0px"
       }
     );
 
@@ -218,7 +196,11 @@ export function AboutScrollStory() {
   const scrollToChapter = (idx) => {
     const targetEl = chapterRefs.current[idx];
     if (targetEl) {
-      targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (window.__lenis) {
+        window.__lenis.scrollTo(targetEl, { duration: 1.15, offset: -85 });
+      } else {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       setActiveChapter(idx);
     }
   };
@@ -232,429 +214,550 @@ export function AboutScrollStory() {
       "aria-label": "About Md. Fardin Hossain — Background & Engineering Philosophy"
     },
 
-    // 1. Section Header Bar (Title + Understated Resume Link)
+    // 1. FULL-SECTION MOUNTAIN BACKGROUND ARTWORK LAYER
     h(
       "div",
-      { className: "about-section-topbar" },
+      { className: "about-full-mountain-bg", "aria-hidden": "true" },
+      h("img", {
+        src: "/assets/images/about-mountain-bg.png",
+        alt: "",
+        className: "about-full-mountain-img"
+      }),
+      h("div", { className: "about-full-mountain-gradient-overlay" })
+    ),
+
+    // Content Wrapper (Z-index 2 above background layer)
+    h(
+      "div",
+      { className: "about-content-inner" },
+
+      // 2. Section Header: "About Me" (Me in coral-orange)
       h(
         "div",
-        { className: "about-title-block" },
-        h("span", { className: "topic-eyebrow" }, "01 / BACKGROUND & FOCUS"),
-        h("h2", { className: "about-main-heading" }, "About Me")
-      ),
-      h(
-        "a",
-        {
-          href: PROFILE_DATA.resumeUrl || "/Fardin_Hossain_Resume.pdf",
-          target: "_blank",
-          rel: "noopener noreferrer",
-          className: "about-resume-text-link",
-          title: "Download Md. Fardin Hossain's Résumé (PDF)"
-        },
-        "View Résumé (PDF) \u2197"
-      )
-    ),
-
-    // 2. Animated Introductory Slogan (Word-by-Word Reveal)
-    h(
-      "div",
-      { className: "about-intro-hero-block" },
-      h(ScrollWordReveal, {
-        text: "“I turn complex problems into practical digital experiences.”",
-        className: "about-slogan-statement",
-        as: "h3",
-        delay: 60
-      })
-    ),
-
-    // 3. Two-Column Editorial Layout: Left Sticky Progress Tracker + Right Narrative Stream
-    h(
-      "div",
-      { className: "about-nav-and-content-layout" },
-
-      // LEFT: Non-boxed Sticky Progress Sidebar with Bot Companion
-      h(
-        "aside",
-        { className: "about-nav-sidebar", "aria-label": "About Chapter Navigation" },
+        { className: "about-section-topbar" },
         h(
-          "div",
-          { className: "about-sticky-sidebar-inner" },
-          h(
-            "div",
-            { className: "about-chapter-tracker-nav" },
-            // Animated vertical progress line
-            h(
-              "div",
-              { className: "tracker-track-rail", "aria-hidden": "true" },
-              h("div", {
-                className: "tracker-fill-line",
-                style: {
-                  height: `${(activeChapter / 3) * 100}%`
-                }
-              })
-            ),
-            // Chapter Selection Buttons
-            CHAPTER_CONFIG.map((chap, idx) =>
-              h(
-                "button",
-                {
-                  key: chap.id,
-                  type: "button",
-                  className: `about-chapter-chip ${activeChapter === idx ? "is-active" : ""}`,
-                  onClick: () => scrollToChapter(idx),
-                  "aria-label": `Scroll to chapter ${chap.num}: ${chap.label}`,
-                  "aria-current": activeChapter === idx ? "true" : undefined
-                },
-                h("span", { className: "chip-indicator-dot", "aria-hidden": "true" }),
-                h("span", { className: "chip-number" }, chap.num),
-                h("span", { className: "chip-text" }, chap.label)
-              )
-            )
-          ),
-
-          // Bot F-01 Interactive Companion Card
-          h(AboutBotGuide, { activeChapter })
+          "h2",
+          { className: "about-main-heading" },
+          "About ",
+          h("span", { className: "about-heading-accent" }, "Me")
+        ),
+        h(
+          "a",
+          {
+            href: PROFILE_DATA.resumeUrl || "/Fardin_Hossain_Resume.pdf",
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "about-resume-text-link",
+            title: "Download Md. Fardin Hossain's Résumé (PDF)"
+          },
+          "View Résumé (PDF) \u2197"
         )
       ),
 
-      // RIGHT: The 4 Progressive Scroll Chapters (Rich Editorial Presentation)
+      // 3. Introductory Slogan Quote ("complex problems" & "digital experiences" in coral-orange)
       h(
         "div",
-        { className: "about-topics-stream" },
-
-        // ====================================================================
-        // CHAPTER 01 — WHO I AM
-        // ====================================================================
+        { className: "about-intro-hero-block" },
         h(
-          "article",
-          {
-            id: "who-i-am",
-            ref: (el) => setChapterRef(el, 0),
-            className: "about-chapter-section chapter-who",
-            "aria-label": "Chapter 01: Who I Am"
-          },
+          "h3",
+          { className: "about-slogan-statement" },
+          "\u201C I turn ",
+          h("span", { className: "slogan-accent" }, "complex problems"),
+          " into practical ",
+          h("span", { className: "slogan-accent" }, "digital experiences."),
+          "\u201D"
+        )
+      ),
+
+      // 4. Two-Column Layout: Left Sticky Progress Tracker + Right Narrative Stream
+      h(
+        "div",
+        { className: "about-nav-and-content-layout" },
+
+        // LEFT: Vertical Sticky Progress Tracker (matches Image 2, 3, 4)
+        h(
+          "aside",
+          { className: "about-nav-sidebar", "aria-label": "About Chapter Navigation" },
           h(
             "div",
-            { className: "chapter-header" },
-            h("span", { className: "chapter-badge-number" }, "CHAPTER 01 / IDENTITY"),
-            h("h3", { className: "chapter-heading" }, "Who I Am")
-          ),
-          h(
-            "div",
-            { className: "chapter-content-body" },
+            { className: "about-sticky-sidebar-inner" },
             h(
               "div",
-              { className: "chapter-editorial-split" },
+              { className: "about-chapter-tracker-nav" },
+              // Vertical connecting rail
               h(
                 "div",
-                { className: "editorial-text-col" },
-                h(ScrollWordReveal, {
-                  text: "I’m a Computer Science and Engineering student and full-stack developer who enjoys turning ideas into reliable, user-friendly software.",
-                  className: "chapter-lead-text",
-                  as: "p",
-                  delay: 40
-                }),
-                h(ScrollWordReveal, {
-                  text: "I build web applications, connect frontend experiences with backend services and databases, and focus on writing maintainable code.",
-                  className: "chapter-body-text",
-                  as: "p",
-                  delay: 90
-                }),
-                // Focus & Location Tags
-                h(
-                  "div",
-                  { className: "about-tag-cluster" },
-                  h("span", { className: "about-tag-pill" }, "\uD83C\uDF93 Southeast University"),
-                  h("span", { className: "about-tag-pill" }, "\uD83D\uDCCD Dhaka, Bangladesh"),
-                  h("span", { className: "about-tag-pill" }, "\u26A1 Full-Stack Engineering"),
-                  h("span", { className: "about-tag-pill" }, "\uD83E\uDDE0 Applied AI & ML")
-                )
+                { className: "tracker-track-rail", "aria-hidden": "true" },
+                h("div", {
+                  className: "tracker-fill-line",
+                  style: {
+                    height: `${(activeChapter / 3) * 100}%`
+                  }
+                })
               ),
-              // Profile Portrait Card
-              h(
-                "div",
-                { className: "editorial-photo-card" },
+              // Chapter Selection Buttons
+              CHAPTER_CONFIG.map((chap, idx) =>
                 h(
-                  "div",
-                  { className: "photo-card-frame" },
-                  h("img", {
-                    src: PROFILE_DATA.heroPortrait,
-                    alt: "Md. Fardin Hossain — Software Engineer",
-                    className: "photo-card-img",
-                    loading: "lazy"
-                  })
-                ),
-                h(
-                  "div",
-                  { className: "photo-card-caption" },
-                  h("span", { className: "status-dot-active", "aria-hidden": "true" }),
-                  h("span", { className: "caption-label" }, "Available for Full-Stack Roles")
+                  "button",
+                  {
+                    key: chap.id,
+                    type: "button",
+                    className: `about-chapter-chip ${activeChapter === idx ? "is-active" : ""}`,
+                    onClick: () => scrollToChapter(idx),
+                    "aria-label": `Scroll to chapter ${chap.num}: ${chap.label}`,
+                    "aria-current": activeChapter === idx ? "true" : undefined
+                  },
+                  h(
+                    "span",
+                    { className: "chip-indicator-wrap", "aria-hidden": "true" },
+                    h("span", { className: "chip-indicator-dot" })
+                  ),
+                  h("span", { className: "chip-number" }, chap.num),
+                  h("span", { className: "chip-text" }, chap.label)
                 )
               )
             )
           )
         ),
 
-        // ====================================================================
-        // CHAPTER 02 — WHAT I BUILD
-        // ====================================================================
-        h(
-          "article",
-          {
-            id: "what-i-build",
-            ref: (el) => setChapterRef(el, 1),
-            className: "about-chapter-section chapter-build",
-            "aria-label": "Chapter 02: What I Build"
-          },
-          h(
-            "div",
-            { className: "chapter-header" },
-            h("span", { className: "chapter-badge-number" }, "CHAPTER 02 / CAPABILITIES"),
-            h("h3", { className: "chapter-heading" }, "What I Build")
-          ),
-          h(
-            "div",
-            { className: "chapter-content-body" },
-            h(ScrollWordReveal, {
-              text: "I build responsive web applications, interactive user interfaces, backend APIs, database-driven systems, and practical full-stack products.",
-              className: "chapter-lead-text",
-              as: "p",
-              delay: 40
-            }),
-            h(ScrollWordReveal, {
-              text: "I enjoy connecting different technologies to create applications that are useful, intuitive, and maintainable.",
-              className: "chapter-body-text",
-              as: "p",
-              delay: 90
-            }),
-            // 4 Capability Cards Grid
-            h(
-              "div",
-              { className: "capabilities-quad-grid" },
-              // 1. Frontend
-              h(
-                "div",
-                { className: "capability-card-cell" },
-                h("div", { className: "cell-icon-badge" }, "\uD83D\uDCBB"),
-                h("h4", { className: "cell-title" }, "Frontend & Interactive UIs"),
-                h("p", { className: "cell-desc" }, "Modern component systems with clean responsive layouts, fluid animations, and strict accessibility standards."),
-                h(
-                  "div",
-                  { className: "cell-tags-row" },
-                  ["React 18", "Next.js", "Tailwind CSS", "Three.js", "GSAP"].map((t) =>
-                    h("span", { key: t, className: "cell-tech-chip" }, t)
-                  )
-                )
-              ),
-              // 2. Backend & APIs
-              h(
-                "div",
-                { className: "capability-card-cell" },
-                h("div", { className: "cell-icon-badge" }, "\u2699\uFE0F"),
-                h("h4", { className: "cell-title" }, "Backend Services & APIs"),
-                h("p", { className: "cell-desc" }, "RESTful endpoints, modular controllers, authentication middleware, and resilient server-side architectures."),
-                h(
-                  "div",
-                  { className: "cell-tags-row" },
-                  ["Node.js", "Express", "REST APIs", "JWT Auth", "Postman"].map((t) =>
-                    h("span", { key: t, className: "cell-tech-chip" }, t)
-                  )
-                )
-              ),
-              // 3. Databases
-              h(
-                "div",
-                { className: "capability-card-cell" },
-                h("div", { className: "cell-icon-badge" }, "\uD83D\uDDC4\uFE0F"),
-                h("h4", { className: "cell-title" }, "Database Systems & Data"),
-                h("p", { className: "cell-desc" }, "Schema modeling, query optimization, indexing, and data pipelines connecting services with persistent stores."),
-                h(
-                  "div",
-                  { className: "cell-tags-row" },
-                  ["MongoDB", "PostgreSQL", "DuckDB", "Mongoose", "SQL"].map((t) =>
-                    h("span", { key: t, className: "cell-tech-chip" }, t)
-                  )
-                )
-              ),
-              // 4. Core & AI
-              h(
-                "div",
-                { className: "capability-card-cell" },
-                h("div", { className: "cell-icon-badge" }, "\uD83E\uDDE0"),
-                h("h4", { className: "cell-title" }, "Core Languages & AI Systems"),
-                h("p", { className: "cell-desc" }, "Algorithmic problem-solving, ranking pipelines, model evaluation, and software engineering practices."),
-                h(
-                  "div",
-                  { className: "cell-tags-row" },
-                  ["Python", "C / C++", "DSA", "ML Pipelines", "Git / CI-CD"].map((t) =>
-                    h("span", { key: t, className: "cell-tech-chip" }, t)
-                  )
-                )
-              )
-            )
-          )
-        ),
-
-        // ====================================================================
-        // CHAPTER 03 — WHY ME (Replaces CS Foundation)
-        // ====================================================================
-        h(
-          "article",
-          {
-            id: "why-me",
-            ref: (el) => setChapterRef(el, 2),
-            className: "about-chapter-section chapter-why",
-            "aria-label": "Chapter 03: Why Me"
-          },
-          h(
-            "div",
-            { className: "chapter-header" },
-            h("span", { className: "chapter-badge-number" }, "CHAPTER 03 / VALUE & STRENGTHS"),
-            h("h3", { className: "chapter-heading" }, "Why Me")
-          ),
-          h(
-            "div",
-            { className: "chapter-content-body" },
-            h(ScrollWordReveal, {
-              text: "I combine a solid computer science foundation with a practical, hands-on approach to software development. I enjoy understanding a problem before choosing a solution, breaking complex tasks into manageable steps, and turning ideas into working applications.",
-              className: "chapter-lead-text",
-              as: "p",
-              delay: 40
-            }),
-            h(ScrollWordReveal, {
-              text: "My approach emphasizes problem-solving, clean code, thoughtful architecture, debugging, and continuous learning. I am comfortable learning new technologies, working across frontend and backend systems, and improving my implementations through testing and feedback.",
-              className: "chapter-body-text",
-              as: "p",
-              delay: 80
-            }),
-            h(ScrollWordReveal, {
-              text: "As a CSE student and aspiring software engineer, I value both the fundamentals behind a system and the experience of the people using it. I aim to build solutions that are reliable, maintainable, and genuinely useful.",
-              className: "chapter-body-text",
-              as: "p",
-              delay: 120
-            }),
-            // 3 Value Pillars
-            h(
-              "div",
-              { className: "why-value-pillars-row" },
-              h(
-                "div",
-                { className: "why-pillar-card" },
-                h("span", { className: "pillar-number-badge" }, "01"),
-                h("h4", { className: "pillar-heading" }, "Fundamentals + Real Execution"),
-                h("p", { className: "pillar-text" }, "Rooted in strong computer science principles (DSA, OOP, databases) while shipping working, deployed applications.")
-              ),
-              h(
-                "div",
-                { className: "why-pillar-card" },
-                h("span", { className: "pillar-number-badge" }, "02"),
-                h("h4", { className: "pillar-heading" }, "End-to-End Problem Solver"),
-                h("p", { className: "pillar-text" }, "Comfortable navigating from client interfaces down to server APIs and database schemas to eliminate friction.")
-              ),
-              h(
-                "div",
-                { className: "why-pillar-card" },
-                h("span", { className: "pillar-number-badge" }, "03"),
-                h("h4", { className: "pillar-heading" }, "Tested, Maintainable Code"),
-                h("p", { className: "pillar-text" }, "Emphasis on thoughtful architecture, careful debugging, continuous refinement, and user-centered design.")
-              )
-            )
-          )
-        ),
-
-        // ====================================================================
-        // CHAPTER 04 — HOW I WORK
-        // ====================================================================
-        h(
-          "article",
-          {
-            id: "how-i-work",
-            ref: (el) => setChapterRef(el, 3),
-            className: "about-chapter-section chapter-work",
-            "aria-label": "Chapter 04: How I Work"
-          },
-          h(
-            "div",
-            { className: "chapter-header" },
-            h("span", { className: "chapter-badge-number" }, "CHAPTER 04 / PROCESS"),
-            h("h3", { className: "chapter-heading" }, "How I Work")
-          ),
-          h(
-            "div",
-            { className: "chapter-content-body" },
-            h(ScrollWordReveal, {
-              text: "I begin by understanding the problem, the requirements, and the people who will use the product.",
-              className: "chapter-lead-text",
-              as: "p",
-              delay: 40
-            }),
-            h(ScrollWordReveal, {
-              text: "I plan a practical solution, implement it with attention to structure and maintainability, and test it to identify problems early. I continuously refine my work, learn from feedback, and look for better ways to build reliable software.",
-              className: "chapter-body-text",
-              as: "p",
-              delay: 90
-            }),
-            // 4-Step Engineering Sequence
-            h(
-              "div",
-              { className: "process-steps-sequence" },
-              [
-                {
-                  step: "STEP 01",
-                  title: "Understand & Define",
-                  desc: "Dig deep into user requirements, problem constraints, and system specifications before writing code."
-                },
-                {
-                  step: "STEP 02",
-                  title: "Architect & Structure",
-                  desc: "Select the right tools, design data models and schemas, and establish clean component boundaries."
-                },
-                {
-                  step: "STEP 03",
-                  title: "Implement & Test Early",
-                  desc: "Write modular, readable code; test edge cases continuously; and catch bugs before they grow."
-                },
-                {
-                  step: "STEP 04",
-                  title: "Refine & Deliver",
-                  desc: "Iterate from feedback, optimize performance and accessibility, and ship reliable software."
-                }
-              ].map((s) =>
-                h(
-                  "div",
-                  { key: s.step, className: "process-step-item" },
-                  h("span", { className: "step-indicator-pill" }, s.step),
-                  h("h4", { className: "step-title" }, s.title),
-                  h("p", { className: "step-desc" }, s.desc)
-                )
-              )
-            )
-          )
-        ),
-
-        // Bottom Contact Callout Row
+        // RIGHT: The 4 Progressive Scroll Chapters
         h(
           "div",
-          { className: "about-footer-cta-row" },
+          { className: "about-topics-stream" },
+
+          // ====================================================================
+          // CHAPTER 01 — WHO I AM (Matches Image 2)
+          // ====================================================================
           h(
-            "p",
-            { className: "footer-cta-text" },
-            "Interested in collaborating or exploring practical software solutions?"
-          ),
-          h(
-            "a",
+            "article",
             {
-              href: "#contact",
-              className: "about-contact-btn",
-              onClick: (e) => {
-                e.preventDefault();
-                const contactEl = document.querySelector("#contact");
-                if (contactEl) {
-                  contactEl.scrollIntoView({ behavior: "smooth" });
-                }
-              }
+              id: "who-i-am",
+              ref: (el) => setChapterRef(el, 0),
+              className: "about-chapter-section chapter-who",
+              "aria-label": "Chapter 01: Who I Am"
             },
-            "Get In Touch \u2192"
+            h(
+              "div",
+              { className: "chapter-header" },
+              h("span", { className: "chapter-badge-number" }, "CHAPTER 01"),
+              h("h3", { className: "chapter-heading" }, "Who I Am")
+            ),
+            h(
+              "div",
+              { className: "chapter-content-body" },
+              h(
+                "div",
+                { className: "chapter-who-grid" },
+                // Left text & badges
+                h(
+                  "div",
+                  { className: "chapter-who-text-col" },
+                  h(ScrollWordReveal, {
+                    text: "I’m a Computer Science and Engineering student and full-stack developer who enjoys turning ideas into reliable, user-friendly software.",
+                    className: "chapter-lead-text",
+                    as: "p",
+                    delay: 20
+                  }),
+                  h(ScrollWordReveal, {
+                    text: "I build web applications, connect frontend experiences with backend services and databases, and focus on writing maintainable code.",
+                    className: "chapter-body-text",
+                    as: "p",
+                    delay: 60
+                  }),
+                  // 4 Understated Label Pills in single horizontal row
+                  h(
+                    "div",
+                    { className: "who-pills-row" },
+                    h("span", { className: "who-pill-chip" }, "🎓 CSE Student"),
+                    h("span", { className: "who-pill-chip pill-highlighted" }, "</> Full-Stack Developer"),
+                    h("span", { className: "who-pill-chip" }, "💡 Problem Solver"),
+                    h("span", { className: "who-pill-chip" }, "📈 Lifelong Learner")
+                  )
+                ),
+                // Right mountain summit card with hovering robot mascot
+                h(
+                  "div",
+                  { className: "chapter-summit-card" },
+                  h("img", {
+                    src: "/assets/images/about-mountain-bg.png",
+                    alt: "Topographic mountain peak with orange glowing contour lines, sun arc, and flag",
+                    className: "summit-card-bg-img",
+                    loading: "lazy"
+                  }),
+                  h(AboutSummitRobot, null)
+                )
+              )
+            )
+          ),
+
+          // ====================================================================
+          // CHAPTER 02 — WHAT I BUILD (Matches Image 3)
+          // ====================================================================
+          h(
+            "article",
+            {
+              id: "what-i-build",
+              ref: (el) => setChapterRef(el, 1),
+              className: "about-chapter-section chapter-build",
+              "aria-label": "Chapter 02: What I Build"
+            },
+            h(
+              "div",
+              { className: "chapter-header" },
+              h("span", { className: "chapter-badge-number" }, "CHAPTER 02"),
+              h("h3", { className: "chapter-heading" }, "What I Build")
+            ),
+            h(
+              "div",
+              { className: "chapter-content-body" },
+              h(ScrollWordReveal, {
+                text: "I build responsive web applications, interactive user interfaces, backend APIs, database-driven systems, and practical full-stack products.",
+                className: "chapter-lead-text",
+                as: "p",
+                delay: 20
+              }),
+              // 4 Distinct Colored Compact Cards (Image 3)
+              h(
+                "div",
+                { className: "capabilities-quad-grid" },
+                // 1. Frontend (Blue)
+                h(
+                  "div",
+                  { className: "capability-card-cell card-theme-blue" },
+                  h(
+                    "div",
+                    { className: "cell-icon-box box-blue" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("circle", { cx: "12", cy: "12", r: "10" }),
+                      h("line", { x1: "2", y1: "12", x2: "22", y2: "12" }),
+                      h("path", { d: "M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" })
+                    )
+                  ),
+                  h("h4", { className: "cell-title" }, "Frontend"),
+                  h("p", { className: "cell-subtext" }, "React, Tailwind, Zustand")
+                ),
+                // 2. Backend (Green)
+                h(
+                  "div",
+                  { className: "capability-card-cell card-theme-green" },
+                  h(
+                    "div",
+                    { className: "cell-icon-box box-green" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polygon", { points: "12 2 2 8.5 12 15 22 8.5 12 2" }),
+                      h("polyline", { points: "2 15.5 12 22 22 15.5" })
+                    )
+                  ),
+                  h("h4", { className: "cell-title" }, "Backend"),
+                  h("p", { className: "cell-subtext" }, "Node.js, Express.js, Python")
+                ),
+                // 3. Database (Purple)
+                h(
+                  "div",
+                  { className: "capability-card-cell card-theme-purple" },
+                  h(
+                    "div",
+                    { className: "cell-icon-box box-purple" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("ellipse", { cx: "12", cy: "5", rx: "9", ry: "3" }),
+                      h("path", { d: "M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" }),
+                      h("path", { d: "M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" })
+                    )
+                  ),
+                  h("h4", { className: "cell-title" }, "Database"),
+                  h("p", { className: "cell-subtext" }, "MongoDB, Firebase, MySQL")
+                ),
+                // 4. Full-Stack Apps (Orange)
+                h(
+                  "div",
+                  { className: "capability-card-cell card-theme-orange" },
+                  h(
+                    "div",
+                    { className: "cell-icon-box box-orange" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polygon", { points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2" })
+                    )
+                  ),
+                  h("h4", { className: "cell-title" }, "Full-Stack Apps"),
+                  h("p", { className: "cell-subtext" }, "End-to-end solutions")
+                )
+              )
+            )
+          ),
+
+          // ====================================================================
+          // CHAPTER 03 — WHY ME (Matches Image 3)
+          // ====================================================================
+          h(
+            "article",
+            {
+              id: "why-me",
+              ref: (el) => setChapterRef(el, 2),
+              className: "about-chapter-section chapter-why",
+              "aria-label": "Chapter 03: Why Me"
+            },
+            h(
+              "div",
+              { className: "chapter-header" },
+              h("span", { className: "chapter-badge-number" }, "CHAPTER 03"),
+              h("h3", { className: "chapter-heading" }, "Why Me")
+            ),
+            h(
+              "div",
+              { className: "chapter-content-body" },
+              h(ScrollWordReveal, {
+                text: "I combine a solid computer science foundation with a practical, hands-on approach to software development. I enjoy understanding problems, writing maintainable code, debugging complex issues, and improving through feedback.",
+                className: "chapter-lead-text",
+                as: "p",
+                delay: 20
+              }),
+              // 4 Distinct Visual Feature Badges in a Row (Image 3)
+              h(
+                "div",
+                { className: "why-feature-badges-row" },
+                // 1. Problem Solving (Amber)
+                h(
+                  "div",
+                  { className: "why-feature-badge badge-amber" },
+                  h(
+                    "div",
+                    { className: "badge-icon" },
+                    h(
+                      "svg",
+                      { width: "19", height: "19", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("path", { d: "M9 18h6" }),
+                      h("path", { d: "M10 22h4" }),
+                      h("path", { d: "M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z" })
+                    )
+                  ),
+                  h("span", { className: "badge-text" }, "Problem Solving")
+                ),
+                // 2. Clean Code (Green)
+                h(
+                  "div",
+                  { className: "why-feature-badge badge-green" },
+                  h(
+                    "div",
+                    { className: "badge-icon" },
+                    h(
+                      "svg",
+                      { width: "19", height: "19", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polyline", { points: "16 18 22 12 16 6" }),
+                      h("polyline", { points: "8 6 2 12 8 18" })
+                    )
+                  ),
+                  h("span", { className: "badge-text" }, "Clean Code")
+                ),
+                // 3. Thoughtful Architecture (Purple)
+                h(
+                  "div",
+                  { className: "why-feature-badge badge-purple" },
+                  h(
+                    "div",
+                    { className: "badge-icon" },
+                    h(
+                      "svg",
+                      { width: "19", height: "19", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("rect", { x: "4", y: "4", width: "16", height: "16", rx: "2" }),
+                      h("line", { x1: "9", y1: "9", x2: "15", y2: "15" }),
+                      h("line", { x1: "15", y1: "9", x2: "9", y2: "15" })
+                    )
+                  ),
+                  h("span", { className: "badge-text" }, "Thoughtful Architecture")
+                ),
+                // 4. Continuous Learning (Coral)
+                h(
+                  "div",
+                  { className: "why-feature-badge badge-coral" },
+                  h(
+                    "div",
+                    { className: "badge-icon" },
+                    h(
+                      "svg",
+                      { width: "19", height: "19", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polyline", { points: "23 6 13.5 15.5 8.5 10.5 1 18" }),
+                      h("polyline", { points: "17 6 23 6 23 12" })
+                    )
+                  ),
+                  h("span", { className: "badge-text" }, "Continuous Learning")
+                )
+              )
+            )
+          ),
+
+          // ====================================================================
+          // CHAPTER 04 — HOW I WORK (Matches Image 4)
+          // ====================================================================
+          h(
+            "article",
+            {
+              id: "how-i-work",
+              ref: (el) => setChapterRef(el, 3),
+              className: "about-chapter-section chapter-work",
+              "aria-label": "Chapter 04: How I Work"
+            },
+            h(
+              "div",
+              { className: "chapter-header" },
+              h("span", { className: "chapter-badge-number" }, "CHAPTER 04"),
+              h("h3", { className: "chapter-heading" }, "How I Work")
+            ),
+            h(
+              "div",
+              { className: "chapter-content-body" },
+              // 5-Step Connected Workflow Sequence with Dashed Arrow Connectors (Image 4)
+              h(
+                "div",
+                { className: "work-sequence-container" },
+
+                // Step 1: Understand
+                h(
+                  "div",
+                  { className: "work-step-node" },
+                  h(
+                    "div",
+                    { className: "step-node-icon-circle" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("circle", { cx: "11", cy: "11", r: "8" }),
+                      h("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
+                    )
+                  ),
+                  h("h4", { className: "step-node-title" }, "Understand"),
+                  h("p", { className: "step-node-desc" }, "Define the problem and requirements")
+                ),
+
+                // Dashed Arrow Connector 1 -> 2
+                h(
+                  "div",
+                  { className: "step-connector-arrow", "aria-hidden": "true" },
+                  h(
+                    "svg",
+                    { width: "42", height: "16", viewBox: "0 0 42 16", fill: "none" },
+                    h("path", { d: "M2 8H36", stroke: "#FF6E4A", strokeWidth: "1.6", strokeDasharray: "3 3" }),
+                    h("path", { d: "M32 4L37 8L32 12", stroke: "#FF6E4A", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round" })
+                  )
+                ),
+
+                // Step 2: Plan
+                h(
+                  "div",
+                  { className: "work-step-node" },
+                  h(
+                    "div",
+                    { className: "step-node-icon-circle" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polygon", { points: "12 2 2 7 12 12 22 7 12 2" }),
+                      h("polyline", { points: "2 17 12 22 22 17" }),
+                      h("polyline", { points: "2 12 12 17 22 12" })
+                    )
+                  ),
+                  h("h4", { className: "step-node-title" }, "Plan"),
+                  h("p", { className: "step-node-desc" }, "Design a practical solution")
+                ),
+
+                // Dashed Arrow Connector 2 -> 3
+                h(
+                  "div",
+                  { className: "step-connector-arrow", "aria-hidden": "true" },
+                  h(
+                    "svg",
+                    { width: "42", height: "16", viewBox: "0 0 42 16", fill: "none" },
+                    h("path", { d: "M2 8H36", stroke: "#FF6E4A", strokeWidth: "1.6", strokeDasharray: "3 3" }),
+                    h("path", { d: "M32 4L37 8L32 12", stroke: "#FF6E4A", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round" })
+                  )
+                ),
+
+                // Step 3: Build
+                h(
+                  "div",
+                  { className: "work-step-node" },
+                  h(
+                    "div",
+                    { className: "step-node-icon-circle" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polyline", { points: "16 18 22 12 16 6" }),
+                      h("polyline", { points: "8 6 2 12 8 18" })
+                    )
+                  ),
+                  h("h4", { className: "step-node-title" }, "Build"),
+                  h("p", { className: "step-node-desc" }, "Implement with clean structure")
+                ),
+
+                // Dashed Arrow Connector 3 -> 4
+                h(
+                  "div",
+                  { className: "step-connector-arrow", "aria-hidden": "true" },
+                  h(
+                    "svg",
+                    { width: "42", height: "16", viewBox: "0 0 42 16", fill: "none" },
+                    h("path", { d: "M2 8H36", stroke: "#FF6E4A", strokeWidth: "1.6", strokeDasharray: "3 3" }),
+                    h("path", { d: "M32 4L37 8L32 12", stroke: "#FF6E4A", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round" })
+                  )
+                ),
+
+                // Step 4: Test
+                h(
+                  "div",
+                  { className: "work-step-node" },
+                  h(
+                    "div",
+                    { className: "step-node-icon-circle" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" })
+                    )
+                  ),
+                  h("h4", { className: "step-node-title" }, "Test"),
+                  h("p", { className: "step-node-desc" }, "Identify and fix issues early")
+                ),
+
+                // Dashed Arrow Connector 4 -> 5
+                h(
+                  "div",
+                  { className: "step-connector-arrow", "aria-hidden": "true" },
+                  h(
+                    "svg",
+                    { width: "42", height: "16", viewBox: "0 0 42 16", fill: "none" },
+                    h("path", { d: "M2 8H36", stroke: "#FF6E4A", strokeWidth: "1.6", strokeDasharray: "3 3" }),
+                    h("path", { d: "M32 4L37 8L32 12", stroke: "#FF6E4A", strokeWidth: "1.6", strokeLinecap: "round", strokeLinejoin: "round" })
+                  )
+                ),
+
+                // Step 5: Improve
+                h(
+                  "div",
+                  { className: "work-step-node" },
+                  h(
+                    "div",
+                    { className: "step-node-icon-circle" },
+                    h(
+                      "svg",
+                      { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                      h("polyline", { points: "23 4 23 10 17 10" }),
+                      h("polyline", { points: "1 20 1 14 7 14" }),
+                      h("path", { d: "M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" })
+                    )
+                  ),
+                  h("h4", { className: "step-node-title" }, "Improve"),
+                  h("p", { className: "step-node-desc" }, "Learn from feedback and keep iterating")
+                )
+              )
+            )
           )
         )
       )

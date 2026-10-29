@@ -366,6 +366,45 @@ function PortfolioApp() {
     });
   }, []);
 
+  // Initialize Lenis Smooth Scrolling across the entire website
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    let lenis = null;
+    let rafId = null;
+
+    import("lenis")
+      .then(({ default: Lenis }) => {
+        lenis = new Lenis({
+          duration: 1.15,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: "vertical",
+          gestureOrientation: "vertical",
+          smoothWheel: true,
+          wheelMultiplier: 1.0,
+          touchMultiplier: 1.5,
+          infinite: false
+        });
+
+        function raf(time) {
+          lenis.raf(time);
+          rafId = requestAnimationFrame(raf);
+        }
+        rafId = requestAnimationFrame(raf);
+        window.__lenis = lenis;
+      })
+      .catch((err) => {
+        console.warn("Lenis initialization:", err);
+      });
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (lenis) {
+        lenis.destroy();
+        delete window.__lenis;
+      }
+    };
+  }, []);
+
   const handleToggleTheme = (e) => {
     const rect = e?.currentTarget?.getBoundingClientRect();
     const nextTheme = theme === "dark" ? "light" : "dark";
@@ -520,7 +559,11 @@ function PortfolioApp() {
     }
     const el = document.getElementById(sectionId);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
+      if (window.__lenis) {
+        window.__lenis.scrollTo(el, { duration: 1.15, offset: sectionId === "home" ? 0 : -70 });
+      } else {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
     }
   };
 

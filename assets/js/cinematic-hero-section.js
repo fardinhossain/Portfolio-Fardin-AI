@@ -1,11 +1,20 @@
 // ==========================================================================
 // FARDIN.AI — EDITORIAL FULL-WIDTH HERO SECTION
-// 1. Two-column composition within a full-viewport hero section
-// 2. Left column: Role label, condensed display headline, and repositioned
-//    bold modern condensed name "MD. FARDIN HOSSAIN" directly below headline
-// 3. Right column: Large stationary circular orange-to-dark gradient behind
-//    Fardin's portrait photo + HeroAuraFlyingRobot mascot looping gracefully
-// 4. Stable scroll behavior & seamless background unification
+// Exactly matching the reference design (media_1793296971840_ea1a1391.png):
+// 1. Left column:
+//    - Role kicker: "| ASPIRING AI ENGINEER · FULL-STACK DEVELOPER"
+//    - Headline: "BUILDING THAT CREATES INTELLIGENT IMPACT" (BUILDING white, rest muted)
+//    - Orange horizontal accent line below IMPACT
+//    - Prominent name: "MD. FARDIN HOSSAIN" (FARDIN in coral orange #FF6E4A)
+//    - Actions: "LET'S TALK →" (orange pill) + "View Résumé (PDF)"
+//    - 4 Strengths in a single row with stacked 2-line text & orange icons:
+//      [ ◫ ] Full-Stack Developer | [ ✢ ] AI & ML Enthusiast |
+//      [ ⌖ ] Problem Solver       | [ 🎓 ] Continuous Learner
+// 2. Right column:
+//    - Circular glowing orange halo behind Fardin
+//    - Tilted dashed orange orbital track
+//    - Fardin's real portrait photo
+//    - Cute 3D white robot mascot with orange ear pods, black visor, glowing eyes & thruster
 // ==========================================================================
 
 import React, { useEffect, useRef } from "react";
@@ -21,7 +30,8 @@ function checkPrefersReducedMotion() {
 
 // --------------------------------------------------------------------------
 // FLYING ROBOT MASCOT (Aura Flight Orbit)
-// Smoothly loops around the glowing halo and portrait with subtle banking
+// Gleaming white body, dark glossy visor, glowing orange LED eyes,
+// orange ear pods & thruster flame plume (matches Image 1 & Image 5)
 // --------------------------------------------------------------------------
 export function HeroAuraFlyingRobot() {
   return h(
@@ -37,35 +47,38 @@ export function HeroAuraFlyingRobot() {
         "svg",
         {
           viewBox: "0 0 64 64",
-          width: 56,
-          height: 56,
+          width: 66,
+          height: 66,
           fill: "none",
           xmlns: "http://www.w3.org/2000/svg",
           className: "robot-mascot-svg"
         },
         // Antenna beacon & rod
-        h("line", { x1: "32", y1: "6", x2: "32", y2: "14", stroke: "#E2E8F0", strokeWidth: "2", strokeLinecap: "round" }),
-        h("circle", { cx: "32", cy: "6", r: "3", fill: "#E85D3B", className: "robot-antenna-beacon" }),
+        h("line", { x1: "32", y1: "5", x2: "32", y2: "13", stroke: "#E2E8F0", strokeWidth: "2", strokeLinecap: "round" }),
+        h("circle", { cx: "32", cy: "5", r: "3", fill: "#FF6E4A", className: "robot-antenna-beacon" }),
         // Thruster flame plume
-        h("path", { d: "M28 46 Q32 58 36 46 Z", fill: "url(#heroRobotThruster)", className: "robot-thruster-flame" }),
-        // Body / Dome
-        h("rect", { x: "16", y: "14", width: "32", height: "30", rx: "12", fill: "#FFFFFF", stroke: "#E2E8F0", strokeWidth: "1.5" }),
-        // Visor
-        h("rect", { x: "21", y: "21", width: "22", height: "13", rx: "5", fill: "#0B0D12" }),
-        // Scanner Eye (LED visor light)
-        h("ellipse", { cx: "32", cy: "27.5", rx: "6", ry: "2.5", fill: "#FF6E4A", className: "robot-scanner-eye" }),
-        // Ear Pods / Side Thrusters
-        h("rect", { x: "12", y: "24", width: "4", height: "10", rx: "2", fill: "#E85D3B" }),
-        h("rect", { x: "48", y: "24", width: "4", height: "10", rx: "2", fill: "#E85D3B" }),
+        h("path", { d: "M28 46 Q32 62 36 46 Z", fill: "url(#heroRobotThruster)", className: "robot-thruster-flame" }),
+        // Body / Dome Head (Crisp White)
+        h("rect", { x: "15", y: "13", width: "34", height: "32", rx: "13", fill: "#FFFFFF", stroke: "#E2E8F0", strokeWidth: "1.5" }),
+        // Visor Screen (Glossy Dark)
+        h("rect", { x: "20", y: "20", width: "24", height: "14", rx: "6", fill: "#0A0D14" }),
+        // Glowing Eyes
+        h("circle", { cx: "27", cy: "27", r: "2.4", fill: "#FF6E4A", className: "robot-eye" }),
+        h("circle", { cx: "37", cy: "27", r: "2.4", fill: "#FF6E4A", className: "robot-eye" }),
+        // Ear Pods / Micro Thrusters
+        h("rect", { x: "11", y: "23", width: "4", height: "11", rx: "2", fill: "#FF6E4A" }),
+        h("rect", { x: "49", y: "23", width: "4", height: "11", rx: "2", fill: "#FF6E4A" }),
+        // Core LED
+        h("circle", { cx: "32", cy: "39", r: "1.8", fill: "#FF6E4A" }),
         // Gradient definition
         h(
           "defs",
           null,
           h(
             "linearGradient",
-            { id: "heroRobotThruster", x1: "32", y1: "46", x2: "32", y2: "58", gradientUnits: "userSpaceOnUse" },
+            { id: "heroRobotThruster", x1: "32", y1: "46", x2: "32", y2: "62", gradientUnits: "userSpaceOnUse" },
             h("stop", { offset: "0%", stopColor: "#FF6E4A", stopOpacity: "0.95" }),
-            h("stop", { offset: "60%", stopColor: "#FACC15", stopOpacity: "0.7" }),
+            h("stop", { offset: "60%", stopColor: "#FACC15", stopOpacity: "0.8" }),
             h("stop", { offset: "100%", stopColor: "#FACC15", stopOpacity: "0" })
           )
         )
@@ -74,7 +87,7 @@ export function HeroAuraFlyingRobot() {
   );
 }
 
-export function CinematicHeroSection() {
+export function CinematicHeroSection({ resumeUrl }) {
   const containerRef = useRef(null);
   const bgLayerRef = useRef(null);
   const haloAuraRef = useRef(null);
@@ -121,6 +134,16 @@ export function CinematicHeroSection() {
     };
   }, []);
 
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    const contactEl = document.getElementById("contact");
+    if (contactEl) {
+      contactEl.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const finalResumeUrl = resumeUrl || PROFILE_DATA.resumeUrl || "/Fardin_Hossain_Resume.pdf";
+
   return h(
     "section",
     {
@@ -147,16 +170,16 @@ export function CinematicHeroSection() {
       "div",
       { className: "portix-hero-grid" },
 
-      // === LEFT COLUMN: ROLE LABEL, CONDENSED HEADLINE & PROMINENT REPOSITIONED NAME ===
+      // === LEFT COLUMN: ROLE LABEL, HEADLINE, NAME, ACTIONS, STRENGTHS ===
       h(
         "div",
         { ref: leftColRef, className: "portix-left-col" },
 
-        // Small role label with orange-red square
+        // Small role label with coral-orange vertical bar
         h(
           "div",
           { ref: labelBadgeRef, className: "portix-kicker-badge" },
-          h("span", { className: "kicker-square", "aria-hidden": "true" }),
+          h("span", { className: "kicker-bar", "aria-hidden": "true" }),
           h(
             "span",
             { className: "kicker-text" },
@@ -176,7 +199,9 @@ export function CinematicHeroSection() {
             h("span", { className: "hl-muted" }, "THAT")
           ),
           h("span", { className: "hl-line hl-muted" }, "CREATES INTELLIGENT"),
-          h("span", { className: "hl-line hl-muted" }, "IMPACT")
+          h("span", { className: "hl-line hl-muted" }, "IMPACT"),
+          // Orange horizontal accent line below IMPACT (matches Image 1 & Image 5)
+          h("span", { className: "hl-accent-bar", "aria-hidden": "true" })
         ),
 
         // Repositioned Name Directly Below Headline
@@ -216,10 +241,190 @@ export function CinematicHeroSection() {
               "HOSSAIN"
             )
           )
+        ),
+
+        // Action Buttons Row directly below name
+        h(
+          "div",
+          { className: "portix-hero-actions" },
+          h(
+            "a",
+            {
+              href: "#contact",
+              className: "portix-btn-talk",
+              onClick: handleContactClick
+            },
+            "LET'S TALK ",
+            h("span", { className: "btn-arrow", "aria-hidden": "true" }, "\u2192")
+          ),
+          h(
+            "a",
+            {
+              href: finalResumeUrl,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "portix-btn-resume",
+              title: "View Md. Fardin Hossain's Résumé (PDF)"
+            },
+            h(
+              "svg",
+              {
+                className: "btn-download-icon",
+                width: "15",
+                height: "15",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2.2",
+                strokeLinecap: "round",
+                strokeLinejoin: "round",
+                "aria-hidden": "true"
+              },
+              h("path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }),
+              h("polyline", { points: "7 10 12 15 17 10" }),
+              h("line", { x1: "12", y1: "15", x2: "12", y2: "3" })
+            ),
+            "View R\u00E9sum\u00E9 (PDF)"
+          )
+        ),
+
+        // Core Strengths Row: 4 Badges with 2-line stacked text & orange icons (Image 1)
+        h(
+          "div",
+          { className: "portix-strengths-row", "aria-label": "Core strengths" },
+          // 1. Full-Stack Developer
+          h(
+            "div",
+            { className: "portix-strength-chip" },
+            h(
+              "div",
+              { className: "chip-icon-box" },
+              h(
+                "svg",
+                {
+                  width: "18",
+                  height: "18",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  className: "strength-chip-icon",
+                  "aria-hidden": "true"
+                },
+                h("rect", { x: "3", y: "3", width: "18", height: "18", rx: "3" }),
+                h("path", { d: "M3 9h18M9 21V9" })
+              )
+            ),
+            h(
+              "div",
+              { className: "chip-text-lines" },
+              h("span", { className: "chip-line-1" }, "Full-Stack"),
+              h("span", { className: "chip-line-2" }, "Developer")
+            )
+          ),
+          // 2. AI & ML Enthusiast
+          h(
+            "div",
+            { className: "portix-strength-chip" },
+            h(
+              "div",
+              { className: "chip-icon-box" },
+              h(
+                "svg",
+                {
+                  width: "18",
+                  height: "18",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  className: "strength-chip-icon",
+                  "aria-hidden": "true"
+                },
+                h("path", { d: "M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" }),
+                h("circle", { cx: "12", cy: "12", r: "3" })
+              )
+            ),
+            h(
+              "div",
+              { className: "chip-text-lines" },
+              h("span", { className: "chip-line-1" }, "AI & ML"),
+              h("span", { className: "chip-line-2" }, "Enthusiast")
+            )
+          ),
+          // 3. Problem Solver
+          h(
+            "div",
+            { className: "portix-strength-chip" },
+            h(
+              "div",
+              { className: "chip-icon-box" },
+              h(
+                "svg",
+                {
+                  width: "18",
+                  height: "18",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  className: "strength-chip-icon",
+                  "aria-hidden": "true"
+                },
+                h("circle", { cx: "12", cy: "12", r: "9" }),
+                h("path", { d: "M12 7v5l3 3" }),
+                h("circle", { cx: "12", cy: "12", r: "1.5", fill: "currentColor" })
+              )
+            ),
+            h(
+              "div",
+              { className: "chip-text-lines" },
+              h("span", { className: "chip-line-1" }, "Problem"),
+              h("span", { className: "chip-line-2" }, "Solver")
+            )
+          ),
+          // 4. Continuous Learner
+          h(
+            "div",
+            { className: "portix-strength-chip" },
+            h(
+              "div",
+              { className: "chip-icon-box" },
+              h(
+                "svg",
+                {
+                  width: "18",
+                  height: "18",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  strokeLinecap: "round",
+                  strokeLinejoin: "round",
+                  className: "strength-chip-icon",
+                  "aria-hidden": "true"
+                },
+                h("path", { d: "M22 10v6M2 10l10-5 10 5-10 5z" }),
+                h("path", { d: "M6 12v5c3 3 9 3 12 0v-5" })
+              )
+            ),
+            h(
+              "div",
+              { className: "chip-text-lines" },
+              h("span", { className: "chip-line-1" }, "Continuous"),
+              h("span", { className: "chip-line-2" }, "Learner")
+            )
+          )
         )
       ),
 
-      // === RIGHT COLUMN: STATIONARY CIRCULAR GRADIENT, FLYING ROBOT & REAL PORTRAIT ===
+      // === RIGHT COLUMN: CIRCULAR HALO, ORBIT TRACK, REAL PORTRAIT & ROBOT ===
       h(
         "div",
         { className: "portix-right-col" },
@@ -230,6 +435,29 @@ export function CinematicHeroSection() {
           className: "portix-halo-circle",
           "aria-hidden": "true"
         }),
+
+        // Tilted dashed orange orbital track
+        h(
+          "svg",
+          {
+            className: "portix-orbit-track",
+            viewBox: "0 0 600 600",
+            fill: "none",
+            xmlns: "http://www.w3.org/2000/svg",
+            "aria-hidden": "true"
+          },
+          h("ellipse", {
+            cx: "300",
+            cy: "300",
+            rx: "260",
+            ry: "160",
+            transform: "rotate(-24 300 300)",
+            stroke: "#FF6E4A",
+            strokeWidth: "1.5",
+            strokeDasharray: "6 8",
+            strokeOpacity: "0.55"
+          })
+        ),
 
         // Real Portrait
         h(
