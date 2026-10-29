@@ -1,22 +1,21 @@
 // ==========================================================================
 // FARDIN.AI — FLYRANK AI 4-MONTH INTERNSHIP JOURNEY EXPLORE PAGE
 // Route: /experience/flyrank-ai
-// Full 10-Chapter Interactive Storytelling Case Study:
-//   Chapter 01 — The Beginning (#journey-hero)
-//   Chapter 02 — Internship Confirmation & Onboarding (#journey-onboarding)
-//   Chapter 03 — Completing Both Internship Tracks (#journey-tracks)
-//   Chapter 04 — Two Capstones Completed (#journey-capstones)
-//   Chapter 05 — Twenty Certifications in Four Months (#journey-certificates)
-//   Chapter 06 — Climbing the Leaderboard (#journey-leaderboard)
-//   Chapter 07 — Internship Progress Report (#journey-progress-report)
-//   Chapter 08 — Final Internship Report & Evaluation (#journey-final-report)
-//   Chapter 09 — Recommendation Letter (#journey-recommendation)
-//   Chapter 10 — Final Reflection (#journey-reflection)
-// Full Light/Dark Theme System & Mobile-First Responsiveness
+// Full 10-Chapter Interactive Scroll-Driven Storytelling Case Study
+// Structural reference pattern: https://storytelling.noomoagency.com/
+//
+// Key Mechanics:
+//   - Full-screen centered text scenes with generous whitespace (one idea/screen)
+//   - Sentences split into per-word spans scrubbed to scroll position
+//   - Recurring illustrated motif: Bot F-01 inline in display typography
+//   - Two "slow" breaks: Two Capstones Showcase (Ch 4) & 20 Certificates Grid (Ch 5)
+//   - Minimal chrome: slim fixed top bar (Back to Home · Theme Toggle · Verify Credential)
+//   - Interactive word beat in Leaderboard (Ch 6): tapping Ranker/Agent/Certificates swaps visual
+//   - Exact verified facts, dates (July 1 – October 31, 2026), and strict 9,961 counter settling
+//   - Complete Light (cream #FAF8F5) and Dark (#0D1117) theme token system
 // ==========================================================================
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   JOURNEY_OVERVIEW,
   JOURNEY_STATS,
@@ -26,29 +25,42 @@ import {
   ANTHROPIC_CERTIFICATES,
   PROFILE_DATA
 } from "./data.js";
+import { getCurrentTheme, subscribeTheme, applyTheme } from "./theme-manager.js";
 
 const h = React.createElement;
 
 // --------------------------------------------------------------------------
-// Animated Numerical Counter Component
+// 1. EXACT ANIMATED COUNTER (Settles strictly at target, e.g. exactly 9,961)
 // --------------------------------------------------------------------------
 function CountUpValue({ target, decimals = 0, prefix = "", suffix = "" }) {
   const [val, setVal] = useState(0);
 
   useEffect(() => {
     if (typeof target !== "number" || isNaN(target)) {
+      setVal(target);
       return;
     }
+    // Reduced motion preference: set directly
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVal(target);
+      return;
+    }
+
     let startTime = null;
     let animId = null;
-    const duration = 1100;
+    const duration = 1250;
 
     function step(timestamp) {
       if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // easeOutCubic
       const ease = 1 - Math.pow(1 - progress, 3);
-      setVal(ease * target);
-      if (progress < 1) {
+
+      if (progress >= 1) {
+        setVal(target); // Strictly settles at exact target!
+      } else {
+        setVal(ease * target);
         animId = window.requestAnimationFrame(step);
       }
     }
@@ -72,112 +84,247 @@ function CountUpValue({ target, decimals = 0, prefix = "", suffix = "" }) {
 }
 
 // --------------------------------------------------------------------------
-// MAIN COMPONENT: FlyRankJourneyView
+// 2. RECURRING INLINE MOTIF: BOT F-01
+// A small white-and-red cartoon robot that sits inline in display typography
 // --------------------------------------------------------------------------
-export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertModal }) {
-  const [activeSectionId, setActiveSectionId] = useState("journey-hero");
-  const [topN, setTopN] = useState(6);
-  const [trackFilter, setTrackFilter] = useState("both"); // "both", "ml", "fl"
-  const [expandedMonths, setExpandedMonths] = useState({
-    july: true,
-    "july-aug": true,
-    august: true,
-    september: true,
-    october: true,
-    "october-signoff": true
-  });
-  const [activeMonthTab, setActiveMonthTab] = useState("july");
-  const [flippedCerts, setFlippedCerts] = useState({});
-  const [flipAll, setFlipAll] = useState(false);
-  const [certCategory, setCertCategory] = useState("all");
-  const [certSearchQuery, setCertSearchQuery] = useState("");
-  const [copiedUrl, setCopiedUrl] = useState(false);
-
-  // Universal Lightbox / Modal Preview State
-  const [previewModal, setPreviewModal] = useState(null); // { type: 'img'|'doc', src, title, subtitle, caption }
-
-  // 10 Chapter Navigation Items
-  const chapters = useMemo(
-    () => [
-      { id: "journey-hero", num: "01", label: "Hero" },
-      { id: "journey-onboarding", num: "02", label: "Onboarding" },
-      { id: "journey-tracks", num: "03", label: "Two Tracks" },
-      { id: "journey-capstones", num: "04", label: "Two Capstones" },
-      { id: "journey-certificates", num: "05", label: "20 Certs" },
-      { id: "journey-leaderboard", num: "06", label: "Leaderboard" },
-      { id: "journey-progress-report", num: "07", label: "Progress Report" },
-      { id: "journey-final-report", num: "08", label: "Final Report" },
-      { id: "journey-recommendation", num: "09", label: "Recommendation" },
-      { id: "journey-reflection", num: "10", label: "Reflection" }
-    ],
-    []
+function BotInlineMotif({ state = "welcome", size = 36 }) {
+  return h(
+    "span",
+    {
+      className: "story-bot-inline-motif",
+      "aria-hidden": "true",
+      title: "Bot F-01 Story Mascot"
+    },
+    h(
+      "svg",
+      {
+        width: size,
+        height: size,
+        viewBox: "0 0 64 64",
+        fill: "none",
+        xmlns: "http://www.w3.org/2000/svg",
+        className: "story-bot-svg"
+      },
+      // Antenna
+      h("line", { x1: "32", y1: "5", x2: "32", y2: "13", stroke: "var(--story-accent)", strokeWidth: "3.2", strokeLinecap: "round" }),
+      h("circle", { cx: "32", cy: "5", r: "3.2", fill: "var(--story-accent)" }),
+      // Porcelain dome head
+      h("rect", { x: "12", y: "13", width: "40", height: "30", rx: "13", fill: "#FFFFFF", stroke: "var(--story-border)", strokeWidth: "2" }),
+      // Visor screen
+      h("rect", { x: "17", y: "18", width: "30", height: "18", rx: "7", fill: "#0A0E1A" }),
+      // Expressive eyes
+      state === "welcome"
+        ? h(React.Fragment, null,
+            h("path", { d: "M22 28 Q26 22 30 28", stroke: "var(--story-accent)", strokeWidth: "3", strokeLinecap: "round", fill: "none" }),
+            h("path", { d: "M34 28 Q38 22 42 28", stroke: "var(--story-accent)", strokeWidth: "3", strokeLinecap: "round", fill: "none" })
+          )
+        : h(React.Fragment, null,
+            h("circle", { cx: "26", cy: "27", r: "3.2", fill: "var(--story-accent)" }),
+            h("circle", { cx: "38", cy: "27", r: "3.2", fill: "var(--story-accent)" })
+          ),
+      // Body chassis
+      h("path", { d: "M20 43 L44 43 L40 54 L24 54 Z", fill: "#FFFFFF", stroke: "var(--story-border)", strokeWidth: "1.8" }),
+      // AI core
+      h("circle", { cx: "32", cy: "48", r: "3.5", fill: "var(--story-accent)" })
+    )
   );
+}
 
-  // Handle Initial Deep-Link Anchor Scroll
+// --------------------------------------------------------------------------
+// 3. WORD-BY-WORD SCROLL-SCRUBBED SENTENCE COMPONENT
+// Splits a sentence into per-word spans and scrub-animates them on scroll
+// --------------------------------------------------------------------------
+function WordScrubSentence({
+  text,
+  inlineMotif = null,
+  inlineIndex = -1,
+  className = "",
+  style = {}
+}) {
+  const containerRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
   useEffect(() => {
-    if (initialSection) {
-      const el = document.getElementById(initialSection);
-      if (el) {
-        setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 150);
-      }
-    } else {
-      window.scrollTo({ top: 0, behavior: "instant" });
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReducedMotion(true);
+      return;
     }
-  }, [initialSection]);
 
-  // ScrollSpy for Sticky 10-Chapter Mini-Nav
-  useEffect(() => {
-    const sectionIds = chapters.map((c) => c.id);
-
+    let ticking = false;
     const handleScroll = () => {
-      const scrollPos = window.scrollY + 160;
-      for (let i = sectionIds.length - 1; i >= 0; i--) {
-        const el = document.getElementById(sectionIds[i]);
-        if (el && el.offsetTop <= scrollPos) {
-          setActiveSectionId(sectionIds[i]);
-          break;
-        }
+      if (!containerRef.current) return;
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const el = containerRef.current;
+          if (!el) {
+            ticking = false;
+            return;
+          }
+          const rect = el.getBoundingClientRect();
+          const winHeight = window.innerHeight || 800;
+          // Progress scrubs between element entering bottom 85% and reaching top 20%
+          const start = winHeight * 0.85;
+          const end = winHeight * 0.2;
+          const p = Math.max(0, Math.min(1, (start - rect.top) / (start - end)));
+          setScrollProgress(p);
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [chapters]);
+  }, []);
 
-  // Keyboard navigation for Modal (ESC to close)
+  const words = useMemo(() => text.trim().split(/\s+/), [text]);
+
+  if (reducedMotion) {
+    return h(
+      "div",
+      { className: `story-display-sentence ${className}`, style },
+      words.map((w, i) =>
+        h(
+          React.Fragment,
+          { key: i },
+          i === inlineIndex && inlineMotif,
+          h("span", { className: "story-word revealed" }, w, " ")
+        )
+      )
+    );
+  }
+
+  return h(
+    "div",
+    {
+      ref: containerRef,
+      className: `story-display-sentence ${className}`,
+      style
+    },
+    words.map((w, i) => {
+      const wordThreshold = i / Math.max(1, words.length - 1);
+      const isRevealed = scrollProgress >= wordThreshold * 0.88;
+      const revealFactor = Math.max(
+        0,
+        Math.min(1, (scrollProgress - wordThreshold * 0.88) / 0.12)
+      );
+
+      return h(
+        React.Fragment,
+        { key: i },
+        i === inlineIndex && inlineMotif,
+        h(
+          "span",
+          {
+            className: `story-word ${isRevealed ? "revealed" : "dormant"}`,
+            style: {
+              opacity: isRevealed ? 1 : Math.max(0.18, revealFactor),
+              transform: isRevealed
+                ? "none"
+                : `translateY(${Math.max(0, (1 - revealFactor) * 8)}px)`
+            }
+          },
+          w,
+          " "
+        )
+      );
+    })
+  );
+}
+
+// --------------------------------------------------------------------------
+// MAIN EXPORT: FlyRankJourneyView
+// --------------------------------------------------------------------------
+export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertModal }) {
+  // Theme state synced with ThemeManager
+  const [theme, setTheme] = useState(() => getCurrentTheme());
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && previewModal) {
-        setPreviewModal(null);
+    return subscribeTheme((newTheme) => setTheme(newTheme));
+  }, []);
+
+  const handleToggleTheme = () => {
+    const current = getCurrentTheme();
+    const nextTheme = current === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    applyTheme(nextTheme, true);
+  };
+
+  // Brief Branded Intro Loader (Auto-dismisses within 1.2s max, timeout fallback)
+  const [loaderVisible, setLoaderVisible] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoaderVisible(false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Chapter 03 Progress Rail state
+  const [scrollFillPct, setScrollFillPct] = useState(0);
+  const [activeMonthTab, setActiveMonthTab] = useState("july");
+
+  // Chapter 04 Ranker Simulator state
+  const [topN, setTopN] = useState(6);
+
+  // Chapter 05 20-Certificates Filter & Search state
+  const [certTab, setCertTab] = useState("all"); // "all", "ai-fluency", "ml-backend"
+  const [certQuery, setCertQuery] = useState("");
+  const [flippedCerts, setFlippedCerts] = useState({});
+  const [flipAll, setFlipAll] = useState(false);
+
+  // Chapter 06 Interactive Word Beat state ("Ranker", "Agent", "Certificates")
+  const [activeWordBeat, setActiveWordBeat] = useState("Ranker");
+
+  // Universal Lightbox Modal state
+  const [modalPreview, setModalPreview] = useState(null);
+
+  // Handle deep-link anchor
+  useEffect(() => {
+    if (initialSection) {
+      const el = document.getElementById(initialSection);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 140);
+      }
+    }
+  }, [initialSection]);
+
+  // Track overall page scroll for Chapter 03 Progress Rail
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const totalScroll =
+            document.documentElement.scrollHeight - window.innerHeight;
+          if (totalScroll > 0) {
+            const pct = Math.min(
+              100,
+              Math.max(0, Math.round((window.scrollY / totalScroll) * 100))
+            );
+            setScrollFillPct(pct);
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [previewModal]);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // Smooth scroll to chapter
-  const scrollToChapter = (id) => {
-    setActiveSectionId(id);
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  // Keyboard navigation for modal (ESC to dismiss)
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape" && modalPreview) {
+        setModalPreview(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modalPreview]);
 
-  // URL Copy handler
-  const copyShareUrl = () => {
-    const shareUrl = `${window.location.origin}/experience/flyrank-ai`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareUrl).catch(() => {});
-    }
-    setCopiedUrl(true);
-    setTimeout(() => setCopiedUrl(false), 2400);
-  };
-
-  // --------------------------------------------------------------------------
-  // Ranker Simulator Logic (Chapter 04)
-  // --------------------------------------------------------------------------
+  // Ranker Simulator Calculations (Chapter 04)
   const learnedOrder = useMemo(() => {
     return RANKER_SAMPLE_PAGES.slice().sort(
       (a, b) => b.decline + b.demand - (a.decline + a.demand)
@@ -204,9 +351,25 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
     return hits / topN;
   }, [fixedOrder, topN]);
 
-  // --------------------------------------------------------------------------
-  // Certificate Wall Logic (Chapter 05)
-  // --------------------------------------------------------------------------
+  // Filtered Certificates (Chapter 05)
+  // Categories: All (20), AI Fluency (10: indices 1-10), ML & Backend (10: indices 11-20)
+  const filteredCerts = useMemo(() => {
+    const q = certQuery.trim().toLowerCase();
+    return ANTHROPIC_CERTIFICATES.filter((c) => {
+      let matchesTab = true;
+      if (certTab === "ai-fluency") {
+        matchesTab = c.index <= 10;
+      } else if (certTab === "ml-backend") {
+        matchesTab = c.index > 10;
+      }
+      const matchesSearch =
+        !q ||
+        c.title.toLowerCase().includes(q) ||
+        c.learned.toLowerCase().includes(q);
+      return matchesTab && matchesSearch;
+    });
+  }, [certTab, certQuery]);
+
   const toggleCertFlip = (index) => {
     setFlippedCerts((prev) => ({ ...prev, [index]: !prev[index] }));
   };
@@ -214,177 +377,160 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
   const handleToggleFlipAll = () => {
     const next = !flipAll;
     setFlipAll(next);
-    const nextMap = {};
+    const map = {};
     if (next) {
       ANTHROPIC_CERTIFICATES.forEach((c) => {
-        nextMap[c.index] = true;
+        map[c.index] = true;
       });
     }
-    setFlippedCerts(nextMap);
+    setFlippedCerts(map);
   };
 
-  const filteredCerts = useMemo(() => {
-    const q = certSearchQuery.trim().toLowerCase();
-    return ANTHROPIC_CERTIFICATES.filter((c) => {
-      const matchesCat = certCategory === "all" || c.category === certCategory;
-      const matchesQuery =
-        !q ||
-        c.title.toLowerCase().includes(q) ||
-        c.learned.toLowerCase().includes(q) ||
-        (c.categoryLabel && c.categoryLabel.toLowerCase().includes(q));
-      return matchesCat && matchesQuery;
-    });
-  }, [certCategory, certSearchQuery]);
+  const verifyUrl =
+    "https://internship.flyrank.ai/verify/FR-D11-9E3D0-1FE2A?first_name=Md.";
 
-  const verifyCredentialUrl = PROFILE_DATA.flyrankVerifyUrl;
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return h(
     "div",
-    { className: "journey-view-wrapper", "data-journey-page": "true" },
-    h(
-      "div",
-      { className: "page-shell" },
+    {
+      className: `story-page-root theme-${theme}`,
+      "data-theme": theme
+    },
 
-      // ======================================================================
-      // TOP HEADER BAR: Back Button & Verified Actions
-      // ======================================================================
+    // ------------------------------------------------------------------------
+    // BRIEF BRANDED INTRO LOADER (Auto-dismisses in <= 1.2s, non-blocking)
+    // ------------------------------------------------------------------------
+    loaderVisible &&
       h(
-        "header",
-        { className: "journey-topbar", "aria-label": "Journey page controls" },
+        "div",
+        {
+          className: "story-branded-loader",
+          onClick: () => setLoaderVisible(false),
+          "aria-label": "Click or scroll to dismiss loader"
+        },
+        h(
+          "div",
+          { className: "story-loader-content" },
+          h(BotInlineMotif, { state: "welcome", size: 48 }),
+          h("div", { className: "story-loader-title" }, "FLYRANK AI · ML INTERNSHIP"),
+          h("div", { className: "story-loader-sub" }, "Initializing 4-Month Story...")
+        )
+      ),
+
+    // ------------------------------------------------------------------------
+    // FIXED SLIM TOP BAR (Back · Theme Toggle · Verify Credential Only)
+    // No chapter rail, no section numbers, no progress bar
+    // ------------------------------------------------------------------------
+    h(
+      "header",
+      { className: "story-slim-topbar", "aria-label": "Navigation header" },
+      h(
+        "button",
+        {
+          type: "button",
+          className: "story-topbar-back",
+          onClick: onBackHome,
+          "aria-label": "Return to portfolio home"
+        },
+        h("span", { className: "topbar-arrow", "aria-hidden": "true" }, "←"),
+        h("span", null, "Back to Portfolio Home")
+      ),
+      h(
+        "div",
+        { className: "story-topbar-right" },
         h(
           "button",
           {
             type: "button",
-            className: "journey-back-btn",
-            onClick: onBackHome,
-            "aria-label": "Return to main portfolio home"
+            className: "story-theme-toggle-btn",
+            onClick: handleToggleTheme,
+            "aria-label": `Switch to ${theme === "dark" ? "light" : "dark"} theme`
           },
-          h("span", { className: "journey-back-arrow", "aria-hidden": "true" }, "←"),
-          h("span", { className: "journey-back-text" }, "Back to Portfolio Home")
+          h("span", { className: "theme-icon" }, theme === "dark" ? "☀️" : "🌙"),
+          h("span", { className: "theme-name" }, theme.toUpperCase())
         ),
         h(
-          "div",
-          { className: "journey-topbar-actions" },
-          h(
-            "button",
-            {
-              type: "button",
-              className: "journey-action-pill",
-              onClick: copyShareUrl,
-              "aria-label": "Copy direct link to this journey page"
-            },
-            h("span", null, copiedUrl ? "✓ Copied /experience/flyrank-ai" : "🔗 Share Journey URL")
-          ),
-          h(
-            "a",
-            {
-              href: verifyCredentialUrl,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-verify-badge",
-              title: "View official verifiable credential on FlyRank portal"
-            },
-            h("span", { className: "verify-badge-icon" }, "✓"),
-            h("span", null, `Verified Credential: ${PROFILE_DATA.flyrankCredentialId} ↗`)
-          )
+          "a",
+          {
+            href: verifyUrl,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            className: "story-topbar-verify",
+            title: "Open official FlyRank credential verification"
+          },
+          h("span", { className: "verify-dot" }),
+          h("span", null, "✓ Verify: FR-D11-9E3D0-1FE2A ↗")
         )
-      ),
+      )
+    ),
 
-      // ======================================================================
-      // STICKY 10-CHAPTER NAVIGATION STRIP
-      // ======================================================================
+    // ========================================================================
+    // CHAPTER 01 — HERO SCENE
+    // Eyebrow · Giant "journey" · Subline · 2 Badges · Count-up strip · Cue
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-01-hero",
+        className: "story-fullscreen-scene story-hero-scene",
+        "aria-labelledby": "hero-giant-heading"
+      },
       h(
-        "nav",
-        {
-          className: "journey-sticky-nav-wrap",
-          "aria-label": "10-Chapter Story Navigation"
-        },
+        "div",
+        { className: "story-scene-container" },
         h(
           "div",
-          { className: "journey-mini-nav" },
-          chapters.map((ch) =>
-            h(
-              "button",
-              {
-                key: ch.id,
-                type: "button",
-                className: `journey-nav-pill ${activeSectionId === ch.id ? "active" : ""}`,
-                onClick: () => scrollToChapter(ch.id),
-                "aria-current": activeSectionId === ch.id ? "true" : undefined
-              },
-              h("span", { className: "pill-num" }, ch.num),
-              h("span", { className: "pill-label" }, ch.label)
-            )
-          )
-        )
-      ),
-
-      // ======================================================================
-      // CHAPTER 01 — THE BEGINNING (HERO SECTION)
-      // ======================================================================
-      h(
-        "section",
-        {
-          id: "journey-hero",
-          className: "journey-chapter-section",
-          "aria-labelledby": "hero-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 01 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "MY PROFESSIONAL JOURNEY · JULY—OCTOBER 2026")
+          { className: "story-scene-eyebrow" },
+          "FLYRank AI INTERNSHIP · JULY – OCTOBER 2026"
         ),
         h(
+          "h1",
+          { id: "hero-giant-heading", className: "story-giant-hero-word" },
+          "journey"
+        ),
+        h(
+          "p",
+          { className: "story-scene-subline hero-subline" },
+          "Turning four months of parallel effort into production machine learning, dual capstones, and national ranking."
+        ),
+
+        // Two Headline Rank Badges (Labeled EXACTLY)
+        h(
           "div",
-          { className: "journey-hero-editorial" },
+          { className: "story-headline-badges-row" },
           h(
-            "h1",
-            { id: "hero-heading", className: "journey-hero-title" },
-            "FOUR MONTHS.",
-            h("br"),
-            h("span", { className: "text-crimson" }, "TWO TRACKS."),
-            h("br"),
-            "ONE MACHINE LEARNING JOURNEY."
-          ),
-          h(
-            "p",
-            { className: "journey-hero-lead" },
-            "From my internship confirmation to completing assignments, building capstones, earning certifications, and reaching the top of Bangladesh's Machine Learning track leaderboard, this is the story of how I turned consistent effort into measurable progress."
+            "div",
+            { className: "story-rank-badge badge-ml-leader" },
+            h("span", { className: "badge-text" }, "🏆 #1 · Bangladesh · Machine Learning Track")
           ),
           h(
             "div",
-            { className: "journey-identity-bar" },
-            h(
-              "div",
-              { className: "identity-author" },
-              h("span", { className: "author-name" }, "Md. Fardin Hossain"),
-              h("span", { className: "author-dot" }, "·"),
-              h("span", { className: "author-role" }, "Machine Learning Intern"),
-              h("span", { className: "author-dot" }, "·"),
-              h("span", { className: "author-org" }, "FlyRank AI")
-            ),
-            h(
-              "div",
-              { className: "identity-cohort-pill" },
-              h("span", { className: "cohort-live-dot" }),
-              h("span", null, "July – October 2026 (4 Months · Remote)")
-            )
+            { className: "story-rank-badge badge-overall-rank" },
+            h("span", { className: "badge-text" }, "#23 · Overall (of 4,794)")
           )
         ),
 
-        // Key Headline Statistics Wall
+        // Count-up Stat Strip (9,961 settles strictly at 9,961)
         h(
           "div",
-          { className: "journey-stats-grid" },
-          JOURNEY_STATS.map((st) =>
+          { className: "story-hero-stat-strip" },
+          [
+            { count: 9961, label: "candidate pages ranked" },
+            { count: null, display: "0.78", sub: "vs 0.30", label: "precision@50, learned ranker vs fixed rule" },
+            { count: 78.8, decimals: 1, suffix: "M", label: "daily-performance rows via DuckDB" },
+            { count: 12, label: "executed ML notebooks + paper" },
+            { count: null, display: "20/20", label: "Anthropic Academy certificates" },
+            { count: 134, prefix: "~", label: "hours logged (approx.)" }
+          ].map((st, i) =>
             h(
               "div",
-              { key: st.id, className: "journey-stat-card" },
+              { key: i, className: "hero-stat-card" },
               h(
                 "div",
-                { className: "journey-stat-num" },
+                { className: "hero-stat-number" },
                 st.count !== null
                   ? h(CountUpValue, {
                       target: st.count,
@@ -393,284 +539,152 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                       suffix: st.suffix || ""
                     })
                   : st.display,
-                st.subDisplay &&
-                  h("span", { className: "journey-stat-subnum" }, ` ${st.subDisplay}`)
+                st.sub && h("span", { className: "stat-sub" }, ` ${st.sub}`)
               ),
-              h("div", { className: "journey-stat-caption" }, st.label)
+              h("div", { className: "hero-stat-label" }, st.label)
             )
           )
         ),
 
-        // Verification & Quick Action Bar
+        // Scroll to explore cue
         h(
           "div",
-          { className: "journey-hero-actions-row" },
-          h(
-            "a",
-            {
-              href: "/paper.pdf",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-primary"
-            },
-            h("span", null, "📄 Read ML Research Paper (PDF) ↗")
-          ),
-          h(
-            "a",
-            {
-              href: "https://github.com/fardinhossain/FlyRankAI-ML-Internship-Task",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-secondary"
-            },
-            h("span", null, "💻 Explore ML GitHub Repository ↗")
-          ),
-          h(
-            "button",
-            {
-              type: "button",
-              className: "journey-btn-secondary",
-              onClick: () =>
-                setPreviewModal({
-                  type: "img",
-                  src: "/assets/images/FlyRank_ML_Certificate_of_Completion.png",
-                  title: "FlyRank AI Certificate of Completion",
-                  subtitle: "Machine Learning Intern · Issued October 16, 2026",
-                  caption:
-                    "Official certificate awarded to Md. Fardin Hossain upon completing all FlyRank AI ML Track requirements (ID: FR-D11-9E3D0-1FE2A)."
-                })
-            },
-            h("span", null, "🎖️ View Certificate of Completion")
-          )
+          { className: "story-scroll-cue", "aria-hidden": "true" },
+          h("span", null, "Scroll to explore"),
+          h("span", { className: "scroll-arrow" }, "↓")
         )
-      ),
+      )
+    ),
 
-      // ======================================================================
-      // CHAPTER 02 — INTERNSHIP CONFIRMATION AND ONBOARDING
-      // ======================================================================
+    // ========================================================================
+    // CHAPTER 02 — ONBOARDING
+    // "I applied, and later received my confirmation to join FlyRank AI."
+    // One idea per screen, word-by-word reveal, Bot F-01 inline motif
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-02-onboarding",
+        className: "story-fullscreen-scene",
+        "aria-labelledby": "onboarding-title"
+      },
       h(
-        "section",
-        {
-          id: "journey-onboarding",
-          className: "journey-chapter-section",
-          "aria-labelledby": "onboarding-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 02 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "INTERNSHIP CONFIRMATION & ONBOARDING")
-        ),
-        h(
-          "h2",
-          { id: "onboarding-heading", className: "journey-section-h2" },
-          "IT STARTED WITH A YES."
-        ),
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 02 · ONBOARDING"),
+        h(WordScrubSentence, {
+          text: "I applied, and later received my confirmation to join FlyRank AI.",
+          inlineNode: h(BotInlineMotif, { state: "welcome", size: 38 }),
+          inlineIndex: 6,
+          className: "story-main-sentence"
+        }),
         h(
           "p",
-          { className: "journey-section-desc" },
-          "Entry into the FlyRank AI internship program began in July 2026. Accepted into the program with Machine Learning as the primary technical track, I set out to pursue both the ML engineering requirements and the General AI Fluency curriculum concurrently."
+          { className: "story-scene-subline" },
+          "Accepted into the July 2026 cohort with two simultaneous mandates: Machine Learning as the main track, and General AI Fluency in parallel."
         ),
 
+        // Confirmation Document Card
         h(
           "div",
-          { className: "onboarding-milestone-card" },
+          { className: "story-document-card" },
           h(
             "div",
-            { className: "onboarding-header" },
-            h(
-              "div",
-              { className: "onboarding-badge" },
-              h("span", { className: "milestone-num" }, "MILESTONE 01"),
-              h("span", null, "OFFICIALLY CONFIRMED")
-            ),
-            h("div", { className: "onboarding-date" }, "July 2026 · Cohort Entry")
+            { className: "doc-card-badge" },
+            h("span", { className: "badge-check" }, "✓"),
+            h("span", null, "Official Internship Confirmation Record")
           ),
           h(
             "div",
-            { className: "onboarding-body-grid" },
+            { className: "doc-card-details" },
+            h("div", { className: "doc-card-role" }, "Role: Machine Learning Engineering Intern"),
+            h("div", { className: "doc-card-period" }, "Internship Dates: July 1, 2026 to October 31, 2026"),
+            h("div", { className: "doc-card-org" }, "FlyRank Corp. · Southeast University (Student ID: 2023100000569)"),
+            h("div", { className: "doc-card-signers" }, "Supervisors: Alen Malkoc, Founder & CEO · Arijana Ibrović, Director of Program")
+          ),
+          h(
+            "div",
+            { className: "doc-card-action" },
             h(
-              "div",
-              { className: "onboarding-details" },
-              h(
-                "h3",
-                { className: "onboarding-title" },
-                "Program Confirmation & Track Setup"
-              ),
-              h(
-                "ul",
-                { className: "onboarding-checklist" },
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "Primary Track: "),
-                  "Machine Learning / Applied Search Intelligence (Decision-Support Ranking Systems)."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "Parallel Track: "),
-                  "General AI Fluency (Autonomous Agents, Automation Workflows, and Personal Brand Portfolio)."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "Verified Portal ID: "),
-                  h("code", { className: "code-pill" }, PROFILE_DATA.flyrankCredentialId),
-                  " (Issued October 16, 2026)."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "Initial Goal Established: "),
-                  "Deliver 100% of all curriculum deliverables, complete both track capstones, and log verifiable engineering progress."
-                )
-              )
-            ),
-            h(
-              "div",
-              { className: "onboarding-evidence-panel" },
-              h(
-                "div",
-                {
-                  className: "cert-preview-thumbnail",
-                  onClick: () =>
-                    setPreviewModal({
-                      type: "img",
-                      src: "/assets/images/FlyRank_ML_Certificate_of_Completion.png",
-                      title: "FlyRank AI Certificate of Completion",
-                      subtitle: "Machine Learning Intern · Issued October 16, 2026",
-                      caption:
-                        "Official credential issued to Md. Fardin Hossain (ID: FR-D11-9E3D0-1FE2A) verifying completion of the FlyRank AI Machine Learning internship."
-                    })
-                },
-                h("img", {
-                  src: "/assets/images/FlyRank_ML_Certificate_of_Completion.png",
-                  alt: "FlyRank AI Certificate of Completion preview",
-                  loading: "lazy"
-                }),
-                h(
-                  "div",
-                  { className: "thumb-zoom-overlay" },
-                  h("span", null, "🔍 Click to Inspect Full Certificate")
-                )
-              ),
-              h(
-                "div",
-                { className: "thumb-caption-row" },
-                h("span", { className: "status-check" }, "✓"),
-                h("span", null, "D11 Verified Certificate of Completion · FlyRank AI")
-              )
+              "a",
+              {
+                href: "/assets/documents/flyrank-internship-confirmation-letter-md-fardin-hossain.pdf",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-secondary"
+              },
+              "📄 Download Confirmation Letter (PDF) ↗"
             )
           )
         )
-      ),
+      )
+    ),
 
-      // ======================================================================
-      // CHAPTER 03 — COMPLETING BOTH INTERNSHIP TRACKS
-      // ======================================================================
+    // ========================================================================
+    // CHAPTER 03 — TWO TRACKS (THE WORK ITSELF)
+    // Word reveal · Animated progress rail (39/39 complete) · Month tabs
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-03-tracks",
+        className: "story-fullscreen-scene",
+        "aria-labelledby": "tracks-title"
+      },
       h(
-        "section",
-        {
-          id: "journey-tracks",
-          className: "journey-chapter-section",
-          "aria-labelledby": "tracks-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 03 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "PARALLEL CURRICULUM EXECUTION")
-        ),
-        h(
-          "h2",
-          { id: "tracks-heading", className: "journey-section-h2" },
-          "LEARN IN PARALLEL. BUILD WITH PURPOSE."
-        ),
-        h(
-          "p",
-          { className: "journey-section-desc" },
-          "Rather than limiting myself to a single syllabus, I executed the rigorous requirements of both the General AI Fluency and Machine Learning tracks in parallel across the full four months."
-        ),
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 03 · THE WORK ITSELF"),
+        h(WordScrubSentence, {
+          text: "Two parallel tracks. Thirty-nine assignments. Zero missed deadlines.",
+          inlineNode: h(BotInlineMotif, { state: "thinking", size: 36 }),
+          inlineIndex: 3,
+          className: "story-main-sentence"
+        }),
 
-        // Dual Track Architectural Comparison Cards
+        // Animated Progress Rail
         h(
           "div",
-          { className: "dual-track-cards-grid" },
-          // Track A Card
+          { className: "story-curriculum-progress-box" },
           h(
             "div",
-            { className: "track-showcase-card track-a" },
-            h(
-              "div",
-              { className: "track-badge-row" },
-              h("span", { className: "track-code-badge" }, "TRACK A"),
-              h("span", { className: "track-status-pill" }, "✓ 39/39 Portal Cards (100%)")
-            ),
-            h("h3", { className: "track-title" }, "General AI Fluency Track"),
-            h(
-              "p",
-              { className: "track-summary" },
-              "Comprehensive mastery of modern LLM toolchains, deterministic chained automation workflows, Model Context Protocol (MCP) primitives, autonomous agent architectures, and production edge deployment."
-            ),
-            h(
-              "div",
-              { className: "track-deliverables-list" },
-              h("div", { className: "track-deliv-item" }, "• FL-01: AI Workflow Audit & Portfolio Sitemap"),
-              h("div", { className: "track-deliv-item" }, "• FL-04: Deterministic 5-Run Automation Workflow (83% time reduction)"),
-              h("div", { className: "track-deliv-item" }, "• FL-05: Model Context Protocol (MCP) tool connectors"),
-              h("div", { className: "track-deliv-item" }, "• FL-07: ST-Scout autonomous search intelligence agent"),
-              h("div", { className: "track-deliv-item" }, "• Capstone: Impact Project (Personal Hub + Study Coach Agent)")
-            )
+            { className: "progress-box-header" },
+            h("span", { className: "progress-box-title" }, "Curriculum Completion Rail"),
+            h("span", { className: "progress-box-stat" }, "39 of 39 portal cards complete (100%)")
           ),
-
-          // Track B Card
           h(
             "div",
-            { className: "track-showcase-card track-b" },
-            h(
-              "div",
-              { className: "track-badge-row" },
-              h("span", { className: "track-code-badge accent" }, "TRACK B"),
-              h("span", { className: "track-status-pill" }, "✓ 12 Notebooks + Research Paper")
-            ),
-            h("h3", { className: "track-title" }, "Machine Learning Track (Applied Search Intelligence)"),
-            h(
-              "p",
-              { className: "track-summary" },
-              "Engineering decision-support content-refresh ranking models for unseen client domains. Large-scale SQL analytics across 78.8M rows via DuckDB, rigorous client-grouped holdouts, and Precision@50 benchmarking."
-            ),
-            h(
-              "div",
-              { className: "track-deliverables-list" },
-              h("div", { className: "track-deliv-item" }, "• Lane 2 Problem Formulation: Content refresh opportunity scoring"),
-              h("div", { className: "track-deliv-item" }, "• DuckDB Analytics: Querying 78.8M telemetry rows out-of-core"),
-              h("div", { className: "track-deliv-item" }, "• Leakage Audit: Client-grouped GroupKFold cross-validation"),
-              h("div", { className: "track-deliv-item" }, "• 0.78 Precision@50 achieved vs 0.30 fixed-rule baseline"),
-              h("div", { className: "track-deliv-item" }, "• Capstone: Peer-style ML Research Paper (/paper.pdf)")
-            )
+            { className: "story-progress-bar-track" },
+            h("div", {
+              className: "story-progress-bar-fill",
+              style: { width: "100%" }
+            })
+          ),
+          h(
+            "div",
+            { className: "progress-box-split" },
+            h("span", null, "ML Track: ML-01 → ML-12 + Capstone Research Paper"),
+            h("span", null, "AI Fluency: Audit · Automation · MCP · ST-Scout · Impact Capstone")
           )
         ),
 
-        // Interactive Month-by-Month Timeline Navigator
+        // Interactive Month Tabs + Milestones (Renders fully in both Light & Dark modes)
         h(
           "div",
-          { className: "month-timeline-wrapper" },
+          { className: "story-month-explorer" },
           h(
             "div",
-            { className: "month-tabs-bar" },
+            { className: "story-month-tab-bar" },
             JOURNEY_TIMELINE.map((m) =>
               h(
                 "button",
                 {
                   key: m.id,
                   type: "button",
-                  className: `month-tab-btn ${activeMonthTab === m.id ? "active" : ""}`,
+                  className: `story-month-tab-btn ${activeMonthTab === m.id ? "active" : ""}`,
                   onClick: () => setActiveMonthTab(m.id)
                 },
-                h("span", { className: "month-tab-dot" }),
+                h("span", { className: "month-tab-indicator" }),
                 h("span", null, m.navLabel)
               )
             )
@@ -678,164 +692,61 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
 
           // Active Month Detail Card
           (() => {
-            const currentMonth =
+            const current =
               JOURNEY_TIMELINE.find((m) => m.id === activeMonthTab) || JOURNEY_TIMELINE[0];
             return h(
               "div",
-              { className: "month-detail-panel" },
+              { className: "story-month-panel" },
               h(
                 "div",
-                { className: "month-detail-header" },
-                h(
-                  "div",
-                  null,
-                  h("span", { className: "month-meta-tag" }, currentMonth.theme),
-                  h("h3", { className: "month-name-h3" }, currentMonth.month)
+                { className: "month-panel-top" },
+                h("div", null,
+                  h("span", { className: "month-theme-pill" }, current.theme),
+                  h("h3", { className: "month-title-h3" }, current.month)
                 ),
-                h(
-                  "span",
-                  { className: "month-status-pill" },
-                  "✓ Verified Complete"
+                h("span", { className: "month-check-pill" }, "✓ 100% Complete")
+              ),
+              h("p", { className: "month-summary-text" }, current.summary),
+              h(
+                "ul",
+                { className: "month-items-list" },
+                current.items.map((item, idx) =>
+                  h("li", { key: idx }, h("span", { className: "item-check" }, "✓"), " ", item)
                 )
               ),
-              h("p", { className: "month-summary-p" }, currentMonth.summary),
               h(
                 "div",
-                { className: "month-items-block" },
-                h("h4", { className: "subhead-label" }, "Key Completed Milestones:"),
-                h(
-                  "ul",
-                  { className: "month-bullet-list" },
-                  currentMonth.items.map((item, idx) =>
-                    h("li", { key: idx }, item)
-                  )
+                { className: "month-tags-container" },
+                current.tags.map((t, idx) =>
+                  h("span", { key: idx, className: "month-tag-chip" }, t)
                 )
-              ),
-              currentMonth.tags &&
-                h(
-                  "div",
-                  { className: "month-tags-row" },
-                  currentMonth.tags.map((t, idx) =>
-                    h("span", { key: idx, className: "tag-pill" }, t)
-                  )
-                ),
-              currentMonth.deliverables &&
-                h(
-                  "div",
-                  { className: "month-deliverables-row" },
-                  currentMonth.deliverables.map((deliv, idx) =>
-                    h(
-                      "div",
-                      { key: idx, className: "deliv-badge" },
-                      h("span", { className: "deliv-icon" }, "📦"),
-                      h("span", null, deliv.label)
-                    )
-                  )
-                )
+              )
             );
-          })()
-        )
-      ),
+          })(),
 
-      // ======================================================================
-      // CHAPTER 04 — TWO CAPSTONES COMPLETED
-      // ======================================================================
-      h(
-        "section",
-        {
-          id: "journey-capstones",
-          className: "journey-chapter-section",
-          "aria-labelledby": "capstones-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 04 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "CAPSTONE DELIVERABLES")
-        ),
-        h(
-          "h2",
-          { id: "capstones-heading", className: "journey-section-h2" },
-          "TWO TRACKS. TWO CAPSTONES. REAL OUTPUT."
-        ),
-        h(
-          "p",
-          { className: "journey-section-desc" },
-          "Both tracks culminated in concrete, production-tested capstone deliverables: an empirical research paper and ranking model in Machine Learning, and an autonomous search intelligence agent and edge portfolio in AI Fluency."
-        ),
-
-        // Capstone A: AI Fluency Showcase
-        h(
-          "div",
-          { className: "capstone-showcase-box capstone-a" },
+          // Real Closing Links (Never placeholder links)
           h(
             "div",
-            { className: "capstone-header" },
+            { className: "story-month-closing-links" },
             h(
-              "div",
-              null,
-              h("span", { className: "capstone-track-tag" }, "GENERAL AI FLUENCY CAPSTONE · OPTION A"),
-              h(
-                "h3",
-                { className: "capstone-h3" },
-                "Autonomous Search Intelligence Systems, Edge Evidence Hub & Agent Pipeline"
-              )
-            ),
-            h("div", { className: "capstone-workload-badge" }, "Portal: /intern/assignments/fl-cap · ~12 Hours")
-          ),
-          h(
-            "div",
-            { className: "capstone-pillars-grid" },
-            h(
-              "div",
-              { className: "pillar-card" },
-              h("h4", { className: "pillar-title" }, "1. AI Stack Mastery"),
-              h(
-                "p",
-                { className: "pillar-text" },
-                "Engineered deterministic 4-stage chained automation workflows (FL-04) and Model Context Protocol (MCP) primitives (FL-05), yielding an 83% triage latency reduction on real enterprise search queries."
-              )
+              "a",
+              {
+                href: "https://fardinflyrankai.vercel.app/",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-link-pill"
+              },
+              "🔍 Survive the Crit (Portfolio Review) ↗"
             ),
             h(
-              "div",
-              { className: "pillar-card" },
-              h("h4", { className: "pillar-title" }, "2. Edge Evidence Hub"),
-              h(
-                "p",
-                { className: "pillar-text" },
-                "Deployed high-performance portfolio hub on Vercel CDN featuring semantic HTML5, terminal identity kit, serverless interview request triage, and official FlyRank graduate badge."
-              )
-            ),
-            h(
-              "div",
-              { className: "pillar-card" },
-              h("h4", { className: "pillar-title" }, "3. Autonomous ST-Scout Agent"),
-              h(
-                "p",
-                { className: "pillar-text" },
-                "Engineered ST-Scout (st_scout_agent.py): queries DuckDB telemetry out-of-core over 78.8M rows, calls live search APIs, enforces 60-character SEO title guardrails, and stages markdown action briefs."
-              )
-            )
-          )
-        ),
-
-        // Capstone B: Machine Learning Showcase
-        h(
-          "div",
-          { className: "capstone-showcase-box capstone-b" },
-          h(
-            "div",
-            { className: "capstone-header" },
-            h(
-              "div",
-              null,
-              h("span", { className: "capstone-track-tag accent" }, "MACHINE LEARNING CAPSTONE · LANE 2"),
-              h(
-                "h3",
-                { className: "capstone-h3" },
-                "Decision-Support Content-Refresh Prioritization for Unseen Client Domains"
-              )
+              "a",
+              {
+                href: "https://www.linkedin.com/in/fardinhosn/",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-link-pill"
+              },
+              "📢 Show It (Published Build-in-Public Post) ↗"
             ),
             h(
               "a",
@@ -843,67 +754,100 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                 href: "/paper.pdf",
                 target: "_blank",
                 rel: "noopener noreferrer",
-                className: "paper-download-pill"
+                className: "story-link-pill"
               },
-              "📄 Full Paper (PDF) ↗"
+              "📄 Research Paper (PDF) ↗"
+            )
+          )
+        )
+      )
+    ),
+
+    // ========================================================================
+    // CHAPTER 04 — TWO CAPSTONES (INTERACTIVE SHOWCASE SCENE)
+    // Centerpiece: ML Capstone (Ranker demo) + AI Fluency Capstone (ST-Scout)
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-04-capstones",
+        className: "story-fullscreen-scene story-showcase-scene",
+        "aria-labelledby": "capstones-title"
+      },
+      h(
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 04 · TWO CAPSTONES"),
+        h(WordScrubSentence, {
+          text: "Two tracks. Two capstones. Built and evaluated on real data.",
+          inlineNode: h(BotInlineMotif, { state: "analyzing", size: 36 }),
+          inlineIndex: 2,
+          className: "story-main-sentence"
+        }),
+
+        // (a) ML Capstone Showcase Card
+        h(
+          "div",
+          { className: "story-capstone-card ml-capstone" },
+          h(
+            "div",
+            { className: "capstone-card-header" },
+            h("div", null,
+              h("span", { className: "capstone-track-tag" }, "MACHINE LEARNING CAPSTONE · LANE 2"),
+              h("h3", { className: "capstone-headline" }, "Content-Refresh Prioritization System for Unseen Client Domains")
+            ),
+            h(
+              "a",
+              {
+                href: "/paper.pdf",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-primary"
+              },
+              "📄 Download Paper PDF ↗"
             )
           ),
 
           // 4 Core Verified Metrics
           h(
             "div",
-            { className: "capstone-metrics-row" },
-            h(
-              "div",
-              { className: "capstone-metric-pill" },
-              h("span", { className: "cap-metric-val" }, "9,961"),
-              h("span", { className: "cap-metric-lbl" }, "Candidate Pages Ranked")
+            { className: "capstone-key-metrics-grid" },
+            h("div", { className: "cap-metric-box" },
+              h("div", { className: "metric-num" }, "9,961"),
+              h("div", { className: "metric-label" }, "candidate pages ranked")
             ),
-            h(
-              "div",
-              { className: "capstone-metric-pill highlight" },
-              h("span", { className: "cap-metric-val" }, "0.78 vs 0.30"),
-              h("span", { className: "cap-metric-lbl" }, "Precision@50 (+160% Lift)")
+            h("div", { className: "cap-metric-box highlight" },
+              h("div", { className: "metric-num" }, "0.78 vs 0.30"),
+              h("div", { className: "metric-label" }, "precision@50 (learned vs fixed)")
             ),
-            h(
-              "div",
-              { className: "capstone-metric-pill" },
-              h("span", { className: "cap-metric-val" }, "78.8M"),
-              h("span", { className: "cap-metric-lbl" }, "DuckDB Telemetry Rows")
+            h("div", { className: "cap-metric-box" },
+              h("div", { className: "metric-num" }, "78.8M"),
+              h("div", { className: "metric-label" }, "DuckDB daily telemetry rows")
             ),
-            h(
-              "div",
-              { className: "capstone-metric-pill" },
-              h("span", { className: "cap-metric-val" }, "12"),
-              h("span", { className: "cap-metric-lbl" }, "Executed ML Notebooks")
+            h("div", { className: "cap-metric-box" },
+              h("div", { className: "metric-num" }, "12"),
+              h("div", { className: "metric-label" }, "executed ML notebooks + paper")
             )
           ),
 
-          // Interactive Ranker Simulator
+          // Embedded Interactive "Play with the Ranker" Demo
           h(
             "div",
-            { className: "ranker-simulator-card" },
+            { className: "story-ranker-demo-container" },
             h(
               "div",
-              { className: "simulator-header" },
-              h(
-                "div",
-                null,
-                h("h4", { className: "sim-title" }, "Interactive Ranking Simulator"),
-                h(
-                  "p",
-                  { className: "sim-desc" },
-                  "Compare the Learned Ranking Model (evaluating historical decline jointly with latent search demand) against the Fixed-Rule Baseline (ranking by historical decline alone)."
+              { className: "ranker-demo-header" },
+              h("div", null,
+                h("h4", { className: "ranker-demo-title" }, "Play with the Ranker"),
+                h("p", { className: "ranker-plain-english" },
+                  "The learned ranker detects latent query demand to prioritize pages that will actually bounce back, while the fixed rule wastes budget on dead pages that only look declining."
                 )
               ),
               h(
                 "div",
-                { className: "sim-slider-group" },
-                h(
-                  "label",
-                  { htmlFor: "top-n-slider", className: "slider-label" },
-                  `Top-N Pages Evaluated: `,
-                  h("strong", null, topN)
+                { className: "ranker-slider-box" },
+                h("label", { htmlFor: "top-n-slider", className: "slider-lbl" },
+                  "Top-N Pages: ", h("strong", null, topN)
                 ),
                 h("input", {
                   id: "top-n-slider",
@@ -912,201 +856,205 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                   max: 12,
                   value: topN,
                   onChange: (e) => setTopN(parseInt(e.target.value, 10)),
-                  className: "sim-range-input"
+                  // Blur on release so PageUp/PageDown scroll page again
+                  onPointerUp: (e) => e.target.blur(),
+                  onMouseUp: (e) => e.target.blur(),
+                  onTouchEnd: (e) => e.target.blur(),
+                  "aria-label": "Select number of top candidate pages for comparison",
+                  className: "ranker-range-slider"
                 })
               )
             ),
 
-            // Side-by-side Score Matrix
+            // Side-by-side Score Gauges
             h(
               "div",
-              { className: "sim-score-grid" },
+              { className: "ranker-gauges-grid" },
               h(
                 "div",
-                { className: "sim-score-box learned" },
-                h("span", { className: "sim-box-tag" }, "LEARNED RANKER (PROPOSED)"),
-                h(
-                  "div",
-                  { className: "sim-big-score" },
-                  `${(learnedPrecision * 100).toFixed(0)}%`
-                ),
-                h(
-                  "div",
-                  { className: "sim-score-label" },
-                  `Precision@${topN} — Captures true refresh potential`
-                )
+                { className: "ranker-gauge learned" },
+                h("div", { className: "gauge-tag" }, "LEARNED RANKER (PROPOSED)"),
+                h("div", { className: "gauge-val" }, `${(learnedPrecision * 100).toFixed(0)}%`),
+                h("div", { className: "gauge-lbl" }, `Precision@${topN} — Captures true refresh potential`)
               ),
               h(
                 "div",
-                { className: "sim-score-box baseline" },
-                h("span", { className: "sim-box-tag" }, "FIXED-RULE BASELINE"),
-                h(
-                  "div",
-                  { className: "sim-big-score" },
-                  `${(fixedPrecision * 100).toFixed(0)}%`
-                ),
-                h(
-                  "div",
-                  { className: "sim-score-label" },
-                  `Precision@${topN} — Misallocates effort to dead pages`
-                )
+                { className: "ranker-gauge fixed" },
+                h("div", { className: "gauge-tag" }, "FIXED-RULE BASELINE"),
+                h("div", { className: "gauge-val" }, `${(fixedPrecision * 100).toFixed(0)}%`),
+                h("div", { className: "gauge-lbl" }, `Precision@${topN} — Misallocates effort to dead pages`)
               )
             ),
 
-            // Top-N Candidate Pages Comparison List
+            // Candidate Comparison Table
             h(
               "div",
-              { className: "sim-candidates-table" },
+              { className: "ranker-candidates-table" },
               h(
                 "div",
-                { className: "sim-table-row header" },
+                { className: "table-row header" },
                 h("span", { style: { width: "12%" } }, "Rank"),
-                h("span", { style: { width: "28%" } }, "Learned Ranker Selection"),
-                h("span", { style: { width: "28%" } }, "Fixed-Rule Selection"),
-                h("span", { style: { width: "32%" } }, "Core Ranking Rationale")
+                h("span", { style: { width: "30%" } }, "Learned Ranker Selection"),
+                h("span", { style: { width: "30%" } }, "Fixed-Rule Selection"),
+                h("span", { style: { width: "28%" } }, "Decision Impact")
               ),
               Array.from({ length: topN }).map((_, i) => {
-                const lPage = learnedOrder[i];
-                const fPage = fixedOrder[i];
+                const lp = learnedOrder[i];
+                const fp = fixedOrder[i];
                 return h(
                   "div",
-                  { key: i, className: "sim-table-row" },
-                  h("span", { className: "table-rank-num" }, `#${i + 1}`),
-                  h(
-                    "span",
-                    { className: "table-page-name" },
-                    h(
-                      "span",
-                      { className: `page-status-dot ${lPage.needs ? "hit" : "miss"}` }
-                    ),
-                    `${lPage.name} `,
-                    h("small", null, `(Demand: ${lPage.demand})`)
+                  { key: i, className: "table-row" },
+                  h("span", { className: "row-rank" }, `#${i + 1}`),
+                  h("span", { className: "row-name" },
+                    h("span", { className: `dot ${lp.needs ? "hit" : "miss"}` }),
+                    `${lp.name} (Demand: ${lp.demand})`
                   ),
-                  h(
-                    "span",
-                    { className: "table-page-name" },
-                    h(
-                      "span",
-                      { className: `page-status-dot ${fPage.needs ? "hit" : "miss"}` }
-                    ),
-                    `${fPage.name} `,
-                    h("small", null, `(Decline: -${fPage.decline}%)`)
+                  h("span", { className: "row-name" },
+                    h("span", { className: `dot ${fp.needs ? "hit" : "miss"}` }),
+                    `${fp.name} (-${fp.decline}%)`
                   ),
-                  h(
-                    "span",
-                    { className: "table-reason" },
-                    lPage.needs
-                      ? "High recovery potential · Refresh immediate"
-                      : "Low query demand · Defer action"
+                  h("span", { className: "row-status" },
+                    lp.needs ? "High recovery potential · Refresh" : "Low query demand · Defer"
                   )
                 );
               })
+            ),
+
+            // Plain-English Disclaimer (Kept exactly as required)
+            h(
+              "div",
+              { className: "ranker-disclaimer-box" },
+              h("strong", null, "Illustrative Demo vs. Actual Evaluation Dataset: "),
+              "This 12-page interactive sample illustrates the ranking disparity. The actual production model was trained and evaluated on 9,961 candidate pages across 78.8M daily telemetry rows (P@50 = 0.78 vs 0.30)."
             )
           ),
 
-          // Empirical Research Figures Gallery
+          // Research Figures Gallery (Figure 1, 2, 3)
           h(
             "div",
-            { className: "research-figures-wrap" },
-            h("h4", { className: "figures-title" }, "Empirical Research Figures (/paper.pdf)"),
+            { className: "story-figures-row" },
+            [
+              { src: "/assets/images/figures/cost_value_matrix.png", title: "Figure 1: Cost-Value Matrix", desc: "Effort vs expected recovery quadrant mapping." },
+              { src: "/assets/images/figures/action_mix.png", title: "Figure 2: Action Mix", desc: "Immediate Refresh vs Deferral distribution." },
+              { src: "/assets/images/figures/top_reason_codes.png", title: "Figure 3: Top Reason Codes", desc: "SHAP-aligned attribution feature hierarchy." }
+            ].map((fig, idx) =>
+              h(
+                "div",
+                {
+                  key: idx,
+                  className: "story-fig-thumb",
+                  onClick: () =>
+                    setModalPreview({
+                      type: "img",
+                      src: fig.src,
+                      title: fig.title,
+                      subtitle: "ML Research Paper · Lane 2 Applied Search Intelligence",
+                      caption: fig.desc
+                    })
+                },
+                h("img", { src: fig.src, alt: fig.title, loading: "lazy" }),
+                h("div", { className: "fig-name" }, fig.title)
+              )
+            )
+          )
+        ),
+
+        // (b) AI Fluency Capstone Showcase Card
+        h(
+          "div",
+          { className: "story-capstone-card fluency-capstone" },
+          h(
+            "div",
+            { className: "capstone-card-header" },
+            h("div", null,
+              h("span", { className: "capstone-track-tag blue" }, "AI FLUENCY CAPSTONE · IMPACT PROJECT"),
+              h("h3", { className: "capstone-headline" }, "Personal-Brand Hub + Study Coach Agent + 20/20 Certificates")
+            ),
             h(
-              "div",
-              { className: "figures-grid" },
-              [
-                {
-                  src: "/assets/images/figures/cost_value_matrix.png",
-                  title: "Figure 1: Cost-Value Opportunity Matrix",
-                  caption: "Quadrant mapping of effort vs. expected traffic recovery across candidate cohort."
-                },
-                {
-                  src: "/assets/images/figures/action_mix.png",
-                  title: "Figure 2: Action Mix Distribution",
-                  caption: "Breakdown of Immediate Refresh vs Deferral recommendations."
-                },
-                {
-                  src: "/assets/images/figures/top_reason_codes.png",
-                  title: "Figure 3: Top Feature Reason Codes",
-                  caption: "SHAP-aligned attribution indicating primary signals driving model priority."
-                }
-              ].map((fig, idx) =>
-                h(
-                  "div",
-                  {
-                    key: idx,
-                    className: "figure-card",
-                    onClick: () =>
-                      setPreviewModal({
-                        type: "img",
-                        src: fig.src,
-                        title: fig.title,
-                        subtitle: "ML Research Paper · Lane 2 Applied Search Intelligence",
-                        caption: fig.caption
-                      })
-                  },
-                  h("div", { className: "figure-img-wrap" },
-                    h("img", { src: fig.src, alt: fig.title, loading: "lazy" })
-                  ),
-                  h("div", { className: "figure-meta" },
-                    h("span", { className: "fig-name" }, fig.title),
-                    h("span", { className: "fig-zoom-hint" }, "🔍 Zoom")
-                  )
-                )
+              "a",
+              {
+                href: "https://github.com/fardinhossain/FlyRankAI-ML-Internship-Task",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-secondary"
+              },
+              "💻 View Agent Repo ↗"
+            )
+          ),
+          h(
+            "div",
+            { className: "fluency-pillars-grid" },
+            h("div", { className: "pillar-box" },
+              h("h4", { className: "pillar-name" }, "1. AI Stack Mastery"),
+              h("p", { className: "pillar-desc" },
+                "Engineered deterministic 4-stage chained automation workflows (FL-04) and MCP tool connectors (FL-05), yielding an 83% triage time reduction on enterprise search queries."
+              )
+            ),
+            h("div", { className: "pillar-box" },
+              h("h4", { className: "pillar-name" }, "2. Edge Evidence Hub"),
+              h("p", { className: "pillar-desc" },
+                "Edge-hosted portfolio on Vercel CDN featuring terminal identity kit, Geist typography, working serverless interview request triage form, and official FlyRank graduate badge."
+              )
+            ),
+            h("div", { className: "pillar-box" },
+              h("h4", { className: "pillar-name" }, "3. Autonomous ST-Scout Agent"),
+              h("p", { className: "pillar-desc" },
+                "Engineered ST-Scout (st_scout_agent.py): queries DuckDB telemetry over 78.8M rows, calls live search tools, enforces 60-character SEO title guardrails, and stages markdown briefs."
               )
             )
           )
         )
-      ),
+      )
+    ),
 
-      // ======================================================================
-      // CHAPTER 05 — TWENTY CERTIFICATIONS IN FOUR MONTHS
-      // ======================================================================
+    // ========================================================================
+    // CHAPTER 05 — 20 CERTIFICATES (THE CARD-GRID "SLOW" SECTION)
+    // 20 Anthropic Academy flip cards · All (20) / AI Fluency (10) / ML & Backend (10)
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-05-certificates",
+        className: "story-fullscreen-scene story-certs-section",
+        "aria-labelledby": "certs-title"
+      },
       h(
-        "section",
-        {
-          id: "journey-certificates",
-          className: "journey-chapter-section",
-          "aria-labelledby": "certs-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 05 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "ANTHROPIC ACADEMY CREDENTIALS")
-        ),
-        h(
-          "h2",
-          { id: "certs-heading", className: "journey-section-h2" },
-          "TWENTY CERTIFICATIONS. CONTINUOUS LEARNING."
-        ),
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 05 · CONTINUOUS LEARNING"),
+        h(WordScrubSentence, {
+          text: "Twenty courses. Twenty certifications. Four months of continuous study.",
+          inlineNode: h(BotInlineMotif, { state: "welcome", size: 36 }),
+          inlineIndex: 3,
+          className: "story-main-sentence"
+        }),
+
+        // Explicit Clarifying Line
         h(
           "p",
-          { className: "journey-section-desc" },
-          "Alongside my internship assignments and capstone work, I completed all 20 Anthropic Academy certificates during the four-month journey. Click any card to flip and inspect core learnings, or click the zoom button to inspect the full certificate."
+          { className: "story-certs-clarifying-line" },
+          "7 credential tracks on the main portfolio · 20 Anthropic Academy course certificates below."
         ),
 
-        // Filter and Search Toolbar
+        // Filter Tabs & Search Bar
         h(
           "div",
-          { className: "certs-toolbar" },
+          { className: "story-certs-toolbar" },
           h(
             "div",
-            { className: "certs-filter-tabs" },
+            { className: "story-certs-filter-tabs" },
             [
               { id: "all", label: "All (20)" },
-              { id: "ai-fluency", label: "AI Fluency" },
-              { id: "claude-code", label: "Claude & Tools" },
-              { id: "mcp", label: "MCP Primitives" },
-              { id: "agents", label: "Agents & Skills" },
-              { id: "cloud", label: "Cloud & Bedrock" }
+              { id: "ai-fluency", label: "AI Fluency (10)" },
+              { id: "ml-backend", label: "ML & Backend (10)" }
             ].map((tab) =>
               h(
                 "button",
                 {
                   key: tab.id,
                   type: "button",
-                  className: `cert-filter-btn ${certCategory === tab.id ? "active" : ""}`,
-                  onClick: () => setCertCategory(tab.id)
+                  className: `story-cert-filter-tab ${certTab === tab.id ? "active" : ""}`,
+                  onClick: () => setCertTab(tab.id)
                 },
                 tab.label
               )
@@ -1114,41 +1062,42 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
           ),
           h(
             "div",
-            { className: "certs-actions-group" },
+            { className: "story-certs-controls" },
             h("input", {
               type: "search",
               placeholder: "Search certificates or concepts...",
-              value: certSearchQuery,
-              onChange: (e) => setCertSearchQuery(e.target.value),
-              className: "cert-search-input",
-              "aria-label": "Search certificates"
+              value: certQuery,
+              onChange: (e) => setCertQuery(e.target.value),
+              className: "story-cert-search-input",
+              "aria-label": "Search certificates by keyword"
             }),
             h(
               "button",
               {
                 type: "button",
-                className: "cert-flip-all-btn",
+                className: "story-cert-flip-all-btn",
                 onClick: handleToggleFlipAll
               },
-              flipAll ? "🔄 Reset Cards" : "🔄 Flip All Cards"
+              flipAll ? "🔄 Reset Cards" : "🔄 Flip All 20"
             )
           )
         ),
 
-        // Interactive 20-Card Flip Grid
+        // 20-Card Flip Grid (Readable in BOTH Light and Dark mode)
         h(
           "div",
-          { className: "certs-grid" },
+          { className: "story-certs-grid" },
           filteredCerts.map((cert) => {
             const isFlipped = !!flippedCerts[cert.index];
             return h(
               "div",
               {
                 key: cert.index,
-                className: `cert-card-container ${isFlipped ? "is-flipped" : ""}`,
+                className: `story-cert-flip-container ${isFlipped ? "is-flipped" : ""}`,
                 tabIndex: 0,
                 role: "button",
-                "aria-label": `${cert.title} — click to flip and read details`,
+                "aria-label": `${cert.title} — click to flip card`,
+                onClick: () => toggleCertFlip(cert.index),
                 onKeyDown: (e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
@@ -1158,23 +1107,23 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
               },
               h(
                 "div",
-                { className: "cert-card-inner" },
-                // Front Side
+                { className: "story-cert-flip-inner" },
+
+                // FRONT FACE
                 h(
                   "div",
                   {
-                    className: "cert-card-face cert-card-front",
-                    onClick: () => toggleCertFlip(cert.index)
+                    className: "story-cert-card-face front-face"
                   },
                   h(
                     "div",
-                    { className: "cert-front-header" },
-                    h("span", { className: "cert-idx-badge" }, `#${String(cert.index).padStart(2, "0")}`),
-                    h("span", { className: "cert-cat-pill" }, cert.categoryLabel || "Anthropic Academy")
+                    { className: "cert-face-header" },
+                    h("span", { className: "cert-index-pill" }, `#${String(cert.index).padStart(2, "0")}`),
+                    h("span", { className: "cert-track-pill" }, cert.index <= 10 ? "AI Fluency" : "ML & Tools")
                   ),
                   h(
                     "div",
-                    { className: "cert-front-thumb" },
+                    { className: "cert-thumbnail-box" },
                     h("img", {
                       src: cert.image,
                       alt: cert.title,
@@ -1184,17 +1133,17 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                   h("h4", { className: "cert-card-title" }, cert.title),
                   h(
                     "div",
-                    { className: "cert-front-footer" },
-                    h("span", { className: "flip-tip" }, "↻ Click to view key takeaway"),
+                    { className: "cert-face-footer" },
+                    h("span", { className: "flip-hint" }, "↻ Click to flip"),
                     h(
                       "button",
                       {
                         type: "button",
-                        className: "cert-inspect-btn",
-                        title: "Inspect certificate high-res image",
+                        className: "cert-zoom-btn",
+                        title: "Inspect certificate high-resolution image",
                         onClick: (e) => {
                           e.stopPropagation();
-                          setPreviewModal({
+                          setModalPreview({
                             type: "img",
                             src: cert.image,
                             title: cert.title,
@@ -1208,32 +1157,31 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                   )
                 ),
 
-                // Back Side
+                // BACK FACE (Key Learnings)
                 h(
                   "div",
                   {
-                    className: "cert-card-face cert-card-back",
-                    onClick: () => toggleCertFlip(cert.index)
+                    className: "story-cert-card-face back-face"
                   },
                   h(
                     "div",
-                    { className: "cert-back-header" },
-                    h("span", { className: "cert-idx-badge" }, `#${String(cert.index).padStart(2, "0")}`),
-                    h("span", { className: "cert-cat-pill" }, "Key Concept Mastered")
+                    { className: "cert-face-header" },
+                    h("span", { className: "cert-index-pill" }, `#${String(cert.index).padStart(2, "0")}`),
+                    h("span", { className: "cert-track-pill" }, "Key Takeaway")
                   ),
                   h("h4", { className: "cert-back-title" }, cert.title),
                   h("p", { className: "cert-back-learned" }, cert.learned),
                   h(
                     "div",
-                    { className: "cert-back-footer" },
+                    { className: "cert-face-footer" },
                     h(
                       "button",
                       {
                         type: "button",
-                        className: "cert-full-btn",
+                        className: "cert-inspect-modal-btn",
                         onClick: (e) => {
                           e.stopPropagation();
-                          setPreviewModal({
+                          setModalPreview({
                             type: "img",
                             src: cert.image,
                             title: cert.title,
@@ -1242,615 +1190,554 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
                           });
                         }
                       },
-                      "🔍 View Full Certificate"
+                      "🔍 Full Certificate"
                     ),
-                    h("span", { className: "flip-tip" }, "↻ Click to flip back")
+                    h("span", { className: "flip-hint" }, "↻ Flip back")
                   )
                 )
               )
             );
           })
         )
-      ),
+      )
+    ),
 
-      // ======================================================================
-      // CHAPTER 06 — CLIMBING THE LEADERBOARD
-      // ======================================================================
+    // ========================================================================
+    // CHAPTER 06 — LEADERBOARD (THE TROPHY PANEL)
+    // Headline "#1 in Bangladesh · Machine Learning Track"
+    // RANK #23 of 4794 · POINTS 2,136 · Tappable word beats: [Ranker] [Agent] [Certificates]
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-06-leaderboard",
+        className: "story-fullscreen-scene",
+        "aria-labelledby": "leaderboard-title"
+      },
       h(
-        "section",
-        {
-          id: "journey-leaderboard",
-          className: "journey-chapter-section",
-          "aria-labelledby": "leaderboard-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 06 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "NATIONAL STANDING & LEADERBOARD PROGRESSION")
-        ),
-        h(
-          "h2",
-          { id: "leaderboard-heading", className: "journey-section-h2" },
-          "CONSISTENCY TURNED INTO RANK."
-        ),
-        h(
-          "p",
-          { className: "journey-section-desc" },
-          "Through steady, weekly submission of all 39 assignments across both tracks and the completion of 20 certifications, I accumulated 2,136 participation points—attaining the #1 standing in Bangladesh on the Machine Learning track."
-        ),
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 06 · NATIONAL STANDING"),
+        h(WordScrubSentence, {
+          text: "Consistency turned into rank on the national stage.",
+          inlineNode: h(BotInlineMotif, { state: "welcome", size: 36 }),
+          inlineIndex: 2,
+          className: "story-main-sentence"
+        }),
 
-        // Two Prominent Distinct Rankings
+        // Trophy Showcase Panel
         h(
           "div",
-          { className: "leaderboard-ranks-duo" },
-          // Rank 1: #1 in Bangladesh ML Track
+          { className: "story-trophy-panel" },
           h(
             "div",
-            { className: "rank-banner-box rank-ml-1" },
-            h("div", { className: "rank-eyebrow-tag" }, "NATIONAL TRACK LEADER · BANGLADESH"),
-            h("div", { className: "rank-number-display" }, "#1 IN BANGLADESH"),
-            h(
-              "div",
-              { className: "rank-category-label" },
-              "Machine Learning Track · FlyRank AI National Cohort"
-            ),
-            h(
-              "p",
-              { className: "rank-description" },
-              "Recognized at the top of the Machine Learning track nationally for comprehensive notebook delivery, DuckDB analytical depth, and precision-benchmarked capstone execution."
+            { className: "trophy-top-row" },
+            h("div", { className: "trophy-badge-pill" }, "NATIONAL TRACK CHAMPION · BANGLADESH"),
+            h("h2", { id: "leaderboard-title", className: "trophy-headline" },
+              "#1 in Bangladesh · Machine Learning Track"
             )
           ),
 
-          // Rank 2: #23 Overall National Leaderboard
+          // Exact Verified Standing Details
           h(
             "div",
-            { className: "rank-banner-box rank-overall-23" },
-            h("div", { className: "rank-eyebrow-tag" }, "OVERALL NATIONAL STANDING"),
-            h(
-              "div",
-              { className: "rank-number-display" },
-              "#23 ",
-              h("small", { className: "rank-total-sub" }, "of 4,794")
+            { className: "trophy-standing-card" },
+            h("div", { className: "standing-header-line" },
+              "YOUR STANDING — Md. Fardin Hossain · Machine Learning · Bangladesh"
             ),
             h(
               "div",
-              { className: "rank-category-label" },
-              "2,136 Points · Participation-Based Baseline"
-            ),
-            h(
-              "p",
-              { className: "rank-description" },
-              "Exact verified snapshot: Standing #23 out of 4,794 international interns in the Bangladesh scope, having delivered 39 of 39 curriculum cards without missing a milestone."
-            )
-          )
-        ),
-
-        // Points Accumulation Progression Staircase
-        h(
-          "div",
-          { className: "leaderboard-staircase-panel" },
-          h("h4", { className: "staircase-title" }, "Documented Progression Timeline"),
-          h(
-            "div",
-            { className: "staircase-steps-row" },
-            [
-              { step: "01", label: "Cohort Entry", pts: "0 pts", desc: "July onboarding & track setup" },
-              { step: "02", label: "Foundations", pts: "420 pts", desc: "Starter notebooks & audit" },
-              { step: "03", label: "DuckDB 78.8M", pts: "980 pts", desc: "SQL queries & automation" },
-              { step: "04", label: "Models & ST-Scout", pts: "1,640 pts", desc: "GroupKFold & agent tests" },
-              { step: "05", label: "Capstones & 20 Certs", pts: "2,136 pts", desc: "#1 ML Rank in Bangladesh" }
-            ].map((st, i) =>
-              h(
-                "div",
-                { key: i, className: "staircase-step-item" },
-                h("div", { className: "staircase-step-num" }, st.step),
-                h("div", { className: "staircase-step-pts" }, st.pts),
-                h("div", { className: "staircase-step-lbl" }, st.label),
-                h("div", { className: "staircase-step-desc" }, st.desc)
-              )
-            )
-          )
-        ),
-
-        // Live Action Links & Evidence
-        h(
-          "div",
-          { className: "leaderboard-actions-bar" },
-          h(
-            "a",
-            {
-              href: JOURNEY_LEADERBOARD.leaderboardUrl,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-primary"
-            },
-            h("span", null, "📊 View Live FlyRank Leaderboard ↗")
-          ),
-          h(
-            "a",
-            {
-              href: verifyCredentialUrl,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-secondary"
-            },
-            h("span", null, "✓ Verify Credential ID: FR-D11-9E3D0-1FE2A ↗")
-          )
-        )
-      ),
-
-      // ======================================================================
-      // CHAPTER 07 — INTERNSHIP PROGRESS REPORT
-      // ======================================================================
-      h(
-        "section",
-        {
-          id: "journey-progress-report",
-          className: "journey-chapter-section",
-          "aria-labelledby": "progress-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 07 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "MID-TERM EVALUATION")
-        ),
-        h(
-          "h2",
-          { id: "progress-heading", className: "journey-section-h2" },
-          "INTERNSHIP PROGRESS REPORT"
-        ),
-        h(
-          "p",
-          { className: "journey-section-desc" },
-          "Archived mid-term milestone review documenting curriculum advancement across both technical tracks during July and August 2026."
-        ),
-
-        h(
-          "div",
-          { className: "report-document-card" },
-          h(
-            "div",
-            { className: "report-header-strip" },
-            h(
-              "div",
-              { className: "report-title-group" },
-              h("span", { className: "report-meta-tag" }, "MID-TERM RECORD · ARCHIVED"),
-              h("h3", { className: "report-h3" }, "FlyRank AI Mid-Term Progress Review & Milestone Audit")
-            ),
-            h("span", { className: "report-period-pill" }, "Coverage: Weeks 01–04 · July–Aug 2026")
-          ),
-          h(
-            "div",
-            { className: "report-summary-body" },
-            h(
-              "div",
-              { className: "report-bullets-col" },
-              h("h4", { className: "subhead-label" }, "Verified Mid-Term Milestones:"),
-              h(
-                "ul",
-                { className: "report-items-list" },
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "20 of 20 Initial Tasks Delivered: "),
-                  "100% on-time submission rate across prompt engineering fundamentals, workflow audits, and exploratory ML notebooks."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "78.8M-Row Data Warehouse Integrated: "),
-                  "Out-of-core DuckDB SQL pipelines engineered to process multi-gigabyte search performance telemetry without RAM spikes."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "Baseline Precision Benchmarked: "),
-                  "Fixed-rule decline heuristic audited (0.30 P@50) and feature leakage boundary established for candidate generation."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "First 10 Anthropic Certifications: "),
-                  "Mastered prompt engineering, Claude Code tools, and foundation frameworks."
-                )
-              )
-            ),
-            h(
-              "div",
-              { className: "report-meta-sidebar" },
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Track Status"), h("span", { className: "m-val" }, "2 Tracks Active")),
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Tasks Complete"), h("span", { className: "m-val" }, "20 / 20 Submitted")),
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Data Scale"), h("span", { className: "m-val" }, "78.8M Rows")),
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Supervisor Sign"), h("span", { className: "m-val" }, "Archived Milestone")),
-              h(
-                "a",
-                {
-                  href: "https://github.com/fardinhossain/FlyRankAI-ML-Internship-Task",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "report-action-btn"
-                },
-                "📂 View Progress Commits on GitHub ↗"
-              )
-            )
-          )
-        )
-      ),
-
-      // ======================================================================
-      // CHAPTER 08 — FINAL INTERNSHIP REPORT & EVALUATION
-      // ======================================================================
-      h(
-        "section",
-        {
-          id: "journey-final-report",
-          className: "journey-chapter-section",
-          "aria-labelledby": "final-report-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 08 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "FINAL EVALUATION & SYNTHESIS")
-        ),
-        h(
-          "h2",
-          { id: "final-report-heading", className: "journey-section-h2" },
-          "FINAL INTERNSHIP REPORT & EVALUATION"
-        ),
-        h(
-          "p",
-          { className: "journey-section-desc" },
-          "Comprehensive four-month culmination report summarizing technical outcomes, verified deliverables, and supervisor sign-off across all 39 curriculum assignments and both capstones."
-        ),
-
-        h(
-          "div",
-          { className: "report-document-card culmination" },
-          h(
-            "div",
-            { className: "report-header-strip" },
-            h(
-              "div",
-              { className: "report-title-group" },
-              h("span", { className: "report-meta-tag success" }, "FINAL EVALUATION · SIGNED OFF"),
-              h("h3", { className: "report-h3" }, "FlyRank AI Comprehensive 4-Month Internship Final Evaluation")
-            ),
-            h("span", { className: "report-period-pill" }, "July 1 – October 28, 2026 · Complete")
-          ),
-          h(
-            "div",
-            { className: "report-summary-body" },
-            h(
-              "div",
-              { className: "report-bullets-col" },
-              h("h4", { className: "subhead-label" }, "Verified Final Outcomes:"),
-              h(
-                "ul",
-                { className: "report-items-list" },
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "100% Curriculum Completion: "),
-                  "All 39 of 39 curriculum cards delivered and validated without overdue flags or revision requests."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "Both Capstones Shipped: "),
-                  "General AI Fluency Impact Project (ST-Scout Agent) & ML Peer-Style Research Paper (0.78 P@50 vs 0.30 baseline)."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "20 of 20 Anthropic Certifications Verified: "),
-                  "Completed entire Anthropic Academy sequence spanning Prompting, MCP, Claude Code, and Subagent architecture."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "134 Hours Logged: "),
-                  "Documented experimentation, notebook execution, code refactoring, and adversarial QA."
-                ),
-                h(
-                  "li",
-                  null,
-                  h("strong", null, "National Rank #1 in ML Track: "),
-                  "Achieved top standing in Bangladesh Machine Learning cohort (2,136 total participation points)."
-                )
-              )
-            ),
-            h(
-              "div",
-              { className: "report-meta-sidebar" },
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Duration"), h("span", { className: "m-val" }, "4 Full Months")),
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Portal Cards"), h("span", { className: "m-val" }, "39 / 39 (100%)")),
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Certificates"), h("span", { className: "m-val" }, "20 / 20 Earned")),
-              h("div", { className: "meta-row" }, h("span", { className: "m-lbl" }, "Hours Logged"), h("span", { className: "m-val" }, "~134 Hours")),
-              h(
-                "a",
-                {
-                  href: "/paper.pdf",
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "report-action-btn primary"
-                },
-                "📄 Download ML Research Paper (PDF) ↗"
-              )
-            )
-          )
-        )
-      ),
-
-      // ======================================================================
-      // CHAPTER 09 — RECOMMENDATION LETTER
-      // ======================================================================
-      h(
-        "section",
-        {
-          id: "journey-recommendation",
-          className: "journey-chapter-section",
-          "aria-labelledby": "rec-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 09 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "FORMAL PROFESSIONAL ENDORSEMENT")
-        ),
-        h(
-          "h2",
-          { id: "rec-heading", className: "journey-section-h2" },
-          "RECOMMENDATION LETTER"
-        ),
-        h(
-          "p",
-          { className: "journey-section-desc" },
-          "Official supervisor evaluation record and recommendation documentation affirming technical rigor, consistent milestone execution, and production engineering excellence."
-        ),
-
-        h(
-          "div",
-          { className: "letterhead-document-box" },
-          h(
-            "div",
-            { className: "letterhead-top" },
-            h(
-              "div",
-              { className: "letterhead-brand" },
-              h("div", { className: "flyrank-logo-mark" }, "FlyRank AI"),
-              h("div", { className: "letterhead-division" }, "Applied Machine Learning & AI Engineering Program")
-            ),
-            h(
-              "div",
-              { className: "letterhead-meta-box" },
-              h("span", { className: "meta-line" }, "Date: October 16, 2026"),
-              h("span", { className: "meta-line" }, `Credential ID: ${PROFILE_DATA.flyrankCredentialId}`),
-              h("span", { className: "meta-line verified" }, "✓ Authenticated on Official Portal")
-            )
-          ),
-
-          h(
-            "div",
-            { className: "letterhead-body" },
-            h("div", { className: "rec-salutation" }, "To Whom It May Concern,"),
-            h(
-              "p",
-              { className: "rec-paragraph" },
-              "This letter confirms that ",
-              h("strong", null, "Md. Fardin Hossain"),
-              " successfully completed the rigorous four-month FlyRank AI Machine Learning Internship (July–October 2026). Throughout the program, Fardin demonstrated outstanding analytical capability, engineering diligence, and intellectual curiosity."
-            ),
-            h(
-              "p",
-              { className: "rec-paragraph" },
-              "Specifically, Fardin took ownership of the ",
-              h("strong", null, "Lane 2 Applied Search Intelligence ranking task"),
-              "—architecting out-of-core DuckDB pipelines over 78.8 million telemetry rows, enforcing zero-leakage client holdouts, and training learned rankers that improved Precision@50 from 0.30 to 0.78 (+160% lift). Concurrently, he completed all 39 portal assignments, 20 Anthropic Academy certificates, and earned the #1 Machine Learning standing in Bangladesh."
-            ),
-            h(
-              "p",
-              { className: "rec-paragraph" },
-              "Fardin combines deep technical execution in machine learning with modern full-stack development skills. He has our highest recommendation for machine learning engineering, software engineering, and AI systems roles."
-            ),
-
-            h(
-              "div",
-              { className: "letterhead-signoff-row" },
-              h(
-                "div",
-                { className: "signoff-block" },
-                h("div", { className: "sign-title" }, "FlyRank AI Internship Evaluation Board"),
-                h("div", { className: "sign-dept" }, "Machine Learning & AI Engineering Division"),
-                h("div", { className: "sign-url" }, "internship.flyrank.ai")
+              { className: "standing-stats-row" },
+              h("div", { className: "standing-stat" },
+                h("span", { className: "stat-tag" }, "RANK"),
+                h("span", { className: "stat-val highlight" }, "#23 of 4794")
               ),
-              h(
-                "div",
-                { className: "signoff-action" },
-                h(
-                  "a",
-                  {
-                    href: verifyCredentialUrl,
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                    className: "journey-btn-primary"
-                  },
-                  "✓ Verify Official Record on FlyRank Portal ↗"
-                )
+              h("div", { className: "standing-stat" },
+                h("span", { className: "stat-tag" }, "POINTS"),
+                h("span", { className: "stat-val" }, "2,136"),
+                h("span", { className: "stat-sub" }, "(participation-based V1)")
+              ),
+              h("div", { className: "standing-stat" },
+                h("span", { className: "stat-tag" }, "MOVEMENT"),
+                h("span", { className: "stat-val" }, "— 0"),
+                h("span", { className: "stat-sub" }, "(weekly baseline)")
+              ),
+              h("div", { className: "standing-stat" },
+                h("span", { className: "stat-tag" }, "NEXT MILESTONE"),
+                h("span", { className: "stat-val" }, "2 pts to #22")
               )
             )
-          )
-        )
-      ),
+          ),
 
-      // ======================================================================
-      // CHAPTER 10 — FINAL REFLECTION
-      // ======================================================================
-      h(
-        "section",
-        {
-          id: "journey-reflection",
-          className: "journey-chapter-section",
-          "aria-labelledby": "reflection-heading"
-        },
-        h(
-          "div",
-          { className: "journey-section-eyebrow" },
-          h("span", { className: "eyebrow-num" }, "CHAPTER 10 / 10"),
-          h("span", { className: "eyebrow-sep" }, "·"),
-          h("span", null, "CLOSING RETROSPECTIVE")
-        ),
-        h(
-          "h2",
-          { id: "reflection-heading", className: "journey-section-h2" },
-          "THE WORK BEHIND THE RESULTS."
-        ),
-        h(
-          "blockquote",
-          { className: "journey-quote-box" },
-          "“Four months of work became more than a list of completed tasks. It became a record of experimentation, execution, learning, and measurable progress.”"
-        ),
+          // Two Headline Badges (Exact wording)
+          h(
+            "div",
+            { className: "story-headline-badges-row" },
+            h("div", { className: "story-rank-badge badge-ml-leader" },
+              "🏆 #1 · Bangladesh · Machine Learning Track"
+            ),
+            h("div", { className: "story-rank-badge badge-overall-rank" },
+              "#23 · Overall (of 4,794)"
+            )
+          ),
 
-        // Final Accomplishment Summary Matrix
-        h(
-          "div",
-          { className: "final-recap-grid" },
-          [
-            { num: "2", label: "Track Capstones Completed", sub: "Impact Project & ML Paper" },
-            { num: "20", label: "Anthropic Academy Certs", sub: "100% Sequence Finished" },
-            { num: "#1", label: "ML Track in Bangladesh", sub: "National Cohort Standing" },
-            { num: "#23", label: "Overall National Rank", sub: "of 4,794 Total Interns" },
-            { num: "0.78", label: "Precision@50 Achieved", sub: "+160% vs Fixed Rule (0.30)" },
-            { num: "39/39", label: "Curriculum Tasks Delivered", sub: "100% Completion Rate" }
-          ].map((item, idx) =>
+          // Interactive Word Beat (Tapping words swaps visual beside text)
+          h(
+            "div",
+            { className: "story-word-beat-box" },
+            h(
+              "p",
+              { className: "word-beat-prompt" },
+              "Every rank milestone was powered by consistent deliverables. Tap to inspect: ",
+              ["Ranker", "Agent", "Certificates"].map((word) =>
+                h(
+                  "button",
+                  {
+                    key: word,
+                    type: "button",
+                    className: `word-beat-chip ${activeWordBeat === word ? "active" : ""}`,
+                    onClick: () => setActiveWordBeat(word)
+                  },
+                  `[${word}]`
+                )
+              )
+            ),
+
+            // Dynamic Visual Card based on Tapped Word
             h(
               "div",
-              { key: idx, className: "final-recap-card" },
-              h("div", { className: "recap-num" }, item.num),
-              h("div", { className: "recap-lbl" }, item.label),
-              h("div", { className: "recap-sub" }, item.sub)
+              { className: "word-beat-visual-card" },
+              activeWordBeat === "Ranker" &&
+                h("div", { className: "beat-content" },
+                  h("h4", null, "ML Ranker System (0.78 Precision@50 vs 0.30 Fixed Rule)"),
+                  h("p", null, "Trained and benchmarked on 9,961 candidate pages across 78.8M telemetry rows with DuckDB. Validated with client-grouped holdouts.")
+                ),
+              activeWordBeat === "Agent" &&
+                h("div", { className: "beat-content" },
+                  h("h4", null, "Autonomous ST-Scout Agent (st_scout_agent.py)"),
+                  h("p", null, "Queries DuckDB tables, fetches live search data, enforces 60-character SEO title guardrails, and stages verified markdown briefs.")
+                ),
+              activeWordBeat === "Certificates" &&
+                h("div", { className: "beat-content" },
+                  h("h4", null, "20/20 Anthropic Academy Certificates Earned"),
+                  h("p", null, "Completed all 20 official courses spanning Prompt Engineering, Claude Code, Model Context Protocol (MCP), and Subagent systems.")
+                )
             )
-          )
-        ),
+          ),
 
-        // Closing Navigation Actions
-        h(
-          "div",
-          { className: "reflection-footer-actions" },
+          // Verified Endpoints Timeline (Only verified start and finish endpoints)
           h(
-            "button",
-            {
-              type: "button",
-              className: "journey-btn-primary",
-              onClick: onBackHome
-            },
-            "← Return to Portfolio Home"
+            "div",
+            { className: "story-endpoints-timeline" },
+            h("div", { className: "endpoint-node start" },
+              h("div", { className: "ep-date" }, "July 1, 2026"),
+              h("div", { className: "ep-pts" }, "0 Points"),
+              h("div", { className: "ep-lbl" }, "Onboarding Baseline")
+            ),
+            h("div", { className: "endpoint-rail" }),
+            h("div", { className: "endpoint-node finish" },
+              h("div", { className: "ep-date" }, "October 31, 2026"),
+              h("div", { className: "ep-pts" }, "2,136 Points"),
+              h("div", { className: "ep-lbl" }, "#1 Bangladesh (ML) · #23 Overall of 4,794")
+            )
           ),
+
+          // Live Leaderboard Link
           h(
-            "a",
-            {
-              href: "/paper.pdf",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-secondary"
-            },
-            "📄 Read Research Paper (PDF) ↗"
-          ),
-          h(
-            "a",
-            {
-              href: "https://github.com/fardinhossain",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-secondary"
-            },
-            "💻 GitHub Profile ↗"
-          ),
-          h(
-            "a",
-            {
-              href: "https://www.linkedin.com/in/fardinhosn/",
-              target: "_blank",
-              rel: "noopener noreferrer",
-              className: "journey-btn-secondary"
-            },
-            "💼 LinkedIn Profile ↗"
+            "div",
+            { className: "trophy-actions-row" },
+            h(
+              "a",
+              {
+                href: JOURNEY_LEADERBOARD.leaderboardUrl,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-primary"
+              },
+              "📊 View live leaderboard ↗"
+            )
           )
         )
       )
     ),
 
     // ========================================================================
-    // UNIVERSAL MODAL LIGHTBOX
+    // CHAPTER 07 — INTERNSHIP PROGRESS REPORT
+    // Document viewer + Download button + Key-facts box filled ONLY from supplied PDF
     // ========================================================================
-    previewModal &&
+    h(
+      "section",
+      {
+        id: "chapter-07-progress-report",
+        className: "story-fullscreen-scene",
+        "aria-labelledby": "progress-report-title"
+      },
+      h(
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 07 · INTERNSHIP PROGRESS REPORT"),
+        h(WordScrubSentence, {
+          text: "Documenting thirty-six assignments and two hundred ninety-seven hours.",
+          inlineNode: h(BotInlineMotif, { state: "analyzing", size: 36 }),
+          inlineIndex: 2,
+          className: "story-main-sentence"
+        }),
+
+        // Document Viewer Card (Data strictly from supplied PDF: flyrank-internship-progress-report-.pdf)
+        h(
+          "div",
+          { className: "story-report-viewer-card" },
+          h(
+            "div",
+            { className: "report-viewer-header" },
+            h("div", null,
+              h("span", { className: "report-meta-tag" }, "OFFICIAL PROGRESS RECORD"),
+              h("h3", { id: "progress-report-title", className: "report-headline" },
+                "Internship Progress Report — Machine Learning, July 2026"
+              )
+            ),
+            h(
+              "a",
+              {
+                href: "/assets/documents/flyrank-internship-progress-report.pdf",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-primary"
+              },
+              "📄 Download Progress Report (PDF) ↗"
+            )
+          ),
+
+          // Key Facts Box (Filled ONLY from supplied document)
+          h(
+            "div",
+            { className: "story-key-facts-box" },
+            h("h4", { className: "facts-title" }, "Key Facts from Document Record:"),
+            h("ul", { className: "facts-list" },
+              h("li", null, h("strong", null, "Assignments Completed: "), "36 practical assignments representing 139.5 estimated assignment hours."),
+              h("li", null, h("strong", null, "Total Documented Hours: "), "At least 297 documented hours across practical tasks, accepted capstone work, program meetings, and verified Anthropic Academy courses."),
+              h("li", null, h("strong", null, "Accepted Capstones: "), "Option A General AI Fluency Impact Project & ML Capstone Research Paper (0.78 P@50)."),
+              h("li", null, h("strong", null, "Verified Academy Courses: "), "20 verified Anthropic Academy courses completed and on file."),
+              h("li", null, h("strong", null, "Official Verifier Reference: "), "FR-D7-1E236-BE5A6 (FlyRank Corp. · Casper, WY)")
+            )
+          )
+        )
+      )
+    ),
+
+    // ========================================================================
+    // CHAPTER 08 — FINAL INTERNSHIP REPORT & EVALUATION
+    // Date shown: July 1 – October 31, 2026 (Certificate Date Rule strictly kept)
+    // Document viewer + Download button + Highlights ONLY from supplied PDF
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-08-final-report",
+        className: "story-fullscreen-scene",
+        "aria-labelledby": "final-report-title"
+      },
+      h(
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 08 · FINAL EVALUATION"),
+        h(WordScrubSentence, {
+          text: "Four months evaluated. Both tracks accepted with distinction.",
+          inlineNode: h(BotInlineMotif, { state: "welcome", size: 36 }),
+          inlineIndex: 2,
+          className: "story-main-sentence"
+        }),
+
+        // Final Report Card
+        h(
+          "div",
+          { className: "story-report-viewer-card culmination" },
+          h(
+            "div",
+            { className: "report-viewer-header" },
+            h("div", null,
+              h("span", { className: "report-meta-tag success" }, "EVALUATION COMPLETE · SIGNED OFF"),
+              h("h3", { id: "final-report-title", className: "report-headline" },
+                "Final Internship Report & Evaluation"
+              ),
+              h("div", { className: "report-date-line" }, "Period: July 1 – October 31, 2026")
+            ),
+            h(
+              "a",
+              {
+                href: "/assets/documents/flyrank-internship-progress-report.pdf",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-primary"
+              },
+              "📄 Download Final Report (PDF) ↗"
+            )
+          ),
+
+          // Evaluation Highlights (Taken ONLY from supplied document)
+          h(
+            "div",
+            { className: "story-key-facts-box" },
+            h("h4", { className: "facts-title" }, "Documented Evaluation Highlights:"),
+            h("ul", { className: "facts-list" },
+              h("li", null, h("strong", null, "100% Curriculum Delivery: "), "39 of 39 practical assignments and portal cards submitted and approved."),
+              h("li", null, h("strong", null, "Culminating Project Accepted: "), "\"Send the Link: Launch, Demo & Story\" reviewed and accepted by lead track mentor."),
+              h("li", null, h("strong", null, "Dual-Track Specialization: "), "Machine Learning as primary specialization; AI Fluency & Machine Learning independently qualified."),
+              h("li", null, h("strong", null, "Program Meeting Attendance: "), "33 attended program meetings, 32 completed learning resources."),
+              h("li", null, h("strong", null, "National Achievement: "), "#1 Machine Learning Track standing in Bangladesh (2,136 participation points).")
+            )
+          )
+        )
+      )
+    ),
+
+    // ========================================================================
+    // CHAPTER 09 — RECOMMENDATION LETTER
+    // Document viewer + Download button + Verbatim quote from supplied letter
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-09-recommendation",
+        className: "story-fullscreen-scene",
+        "aria-labelledby": "rec-title"
+      },
+      h(
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 09 · RECOMMENDATION"),
+        h(WordScrubSentence, {
+          text: "A formal recommendation for machine learning engineering.",
+          inlineNode: h(BotInlineMotif, { state: "welcome", size: 36 }),
+          inlineIndex: 3,
+          className: "story-main-sentence"
+        }),
+
+        // Formal Letterhead Document Card
+        h(
+          "div",
+          { className: "story-letterhead-card" },
+          h(
+            "div",
+            { className: "letterhead-header" },
+            h("div", { className: "letterhead-logo" }, "FlyRank AI"),
+            h("div", { className: "letterhead-sub" }, "FlyRank Corp. · Reference ID: FR-D10-E55EB-4F0FE")
+          ),
+
+          // Verbatim Quote from Supplied Letter
+          h(
+            "blockquote",
+            { className: "letterhead-quote" },
+            "“Based on this verified completion record, I recommend Md. for opportunities aligned with machine learning engineering and applied AI roles.”",
+            h("footer", { className: "quote-author" }, "— Alen Malkoc, Founder & CEO, FlyRank Corp.")
+          ),
+
+          // Key Document Details
+          h(
+            "p",
+            { className: "letterhead-body-summary" },
+            "\"During the program, Md. completed 36 practical assignments applying curriculum in Data wrangling, Embeddings and clustering, Intent and opportunity modeling, and Insight to action... The program record documents at least 297 hours across practical assignments, accepted capstone work, program meetings, learning resources, and verified Anthropic Academy courses.\""
+          ),
+
+          // Action Button
+          h(
+            "div",
+            { className: "letterhead-footer" },
+            h(
+              "a",
+              {
+                href: "/assets/documents/flyrank-recommendation-letter.pdf",
+                target: "_blank",
+                rel: "noopener noreferrer",
+                className: "story-btn-primary"
+              },
+              "📄 Download Official Recommendation Letter (PDF) ↗"
+            )
+          )
+        )
+      )
+    ),
+
+    // ========================================================================
+    // CHAPTER 10 — REFLECTION & FINALE
+    // Full-screen closing scene: what the 4 months built, both tracks,
+    // both capstone titles, both rank badges, 31 October 2026, verify credential
+    // ========================================================================
+    h(
+      "section",
+      {
+        id: "chapter-10-reflection",
+        className: "story-fullscreen-scene story-finale-scene",
+        "aria-labelledby": "reflection-title"
+      },
+      h(
+        "div",
+        { className: "story-scene-container" },
+        h("div", { className: "story-scene-eyebrow" }, "CHAPTER 10 · REFLECTION & FINALE"),
+        h(WordScrubSentence, {
+          text: "Four months of experimentation. A foundation built to keep building.",
+          inlineNode: h(BotInlineMotif, { state: "welcome", size: 40 }),
+          inlineIndex: 4,
+          className: "story-main-sentence"
+        }),
+
+        // Finale Recap Grid
+        h(
+          "div",
+          { className: "story-finale-recap-grid" },
+          h("div", { className: "recap-card" },
+            h("div", { className: "recap-tag" }, "TRACKS COMPLETED"),
+            h("div", { className: "recap-h" }, "Machine Learning & General AI Fluency"),
+            h("div", { className: "recap-sub" }, "39/39 Portal Deliverables · 100% Complete")
+          ),
+          h("div", { className: "recap-card" },
+            h("div", { className: "recap-tag" }, "TWO CAPSTONES"),
+            h("div", { className: "recap-h" }, "Content-Refresh Ranker & ST-Scout Agent"),
+            h("div", { className: "recap-sub" }, "0.78 Precision@50 · 78.8M Rows · Deployed Edge Hub")
+          ),
+          h("div", { className: "recap-card" },
+            h("div", { className: "recap-tag" }, "NATIONAL STANDING"),
+            h("div", { className: "recap-h" }, "#1 in Bangladesh · #23 Overall of 4,794"),
+            h("div", { className: "recap-sub" }, "2,136 Verified Points")
+          ),
+          h("div", { className: "recap-card" },
+            h("div", { className: "recap-tag" }, "CREDENTIAL DATES"),
+            h("div", { className: "recap-h" }, "July 1 – October 31, 2026"),
+            h("div", { className: "recap-sub" }, "Displayed Certificate Date: 31 OCTOBER 2026")
+          )
+        ),
+
+        // Both Rank Badges
+        h(
+          "div",
+          { className: "story-headline-badges-row" },
+          h("div", { className: "story-rank-badge badge-ml-leader" },
+            "🏆 #1 · Bangladesh · Machine Learning Track"
+          ),
+          h("div", { className: "story-rank-badge badge-overall-rank" },
+            "#23 · Overall (of 4,794)"
+          )
+        ),
+
+        // Final Actions: Verify Credential & Return Home
+        h(
+          "div",
+          { className: "story-finale-actions" },
+          h(
+            "a",
+            {
+              href: verifyUrl,
+              target: "_blank",
+              rel: "noopener noreferrer",
+              className: "story-btn-primary large"
+            },
+            "✓ Verified · D11 Certificate of Completion · Machine Learning ↗"
+          ),
+          h(
+            "button",
+            {
+              type: "button",
+              className: "story-btn-secondary large",
+              onClick: onBackHome
+            },
+            "← Return to Main Portfolio"
+          )
+        )
+      )
+    ),
+
+    // ========================================================================
+    // FOOTER
+    // Short CTA · Contact Links · Back to Top
+    // ========================================================================
+    h(
+      "footer",
+      { className: "story-footer", "aria-label": "Footer" },
+      h("p", { className: "footer-cta" },
+        "Ready to discuss machine learning engineering or product collaboration?"
+      ),
+      h(
+        "div",
+        { className: "footer-links" },
+        h("a", { href: "mailto:fardin.hosn@gmail.com" }, "fardin.hosn@gmail.com"),
+        h("a", { href: "https://github.com/fardinhossain", target: "_blank", rel: "noopener" }, "GitHub ↗"),
+        h("a", { href: "https://www.linkedin.com/in/fardinhosn/", target: "_blank", rel: "noopener" }, "LinkedIn ↗")
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          className: "story-back-to-top-btn",
+          onClick: scrollToTop,
+          "aria-label": "Scroll back to the top of the story"
+        },
+        "Back to Top ↑"
+      )
+    ),
+
+    // ========================================================================
+    // UNIVERSAL MODAL PREVIEW (CERTIFICATES / FIGURES)
+    // ========================================================================
+    modalPreview &&
       h(
         "div",
         {
-          className: "journey-modal-backdrop",
-          onClick: () => setPreviewModal(null),
+          className: "story-modal-overlay",
+          onClick: () => setModalPreview(null),
           role: "dialog",
           "aria-modal": "true",
-          "aria-label": previewModal.title || "Preview Dialog"
+          "aria-label": modalPreview.title || "Preview Dialog"
         },
         h(
           "div",
           {
-            className: "journey-modal-card",
+            className: "story-modal-box",
             onClick: (e) => e.stopPropagation()
           },
           h(
             "div",
-            { className: "journey-modal-header" },
-            h(
-              "div",
-              null,
-              previewModal.subtitle &&
-                h("span", { className: "modal-subtitle" }, previewModal.subtitle),
-              h("h3", { className: "modal-title" }, previewModal.title)
+            { className: "modal-header" },
+            h("div", null,
+              modalPreview.subtitle &&
+                h("span", { className: "modal-sub" }, modalPreview.subtitle),
+              h("h3", { className: "modal-title" }, modalPreview.title)
             ),
             h(
               "button",
               {
                 type: "button",
-                className: "modal-close-btn",
-                onClick: () => setPreviewModal(null),
-                "aria-label": "Close preview"
+                className: "modal-close-x",
+                onClick: () => setModalPreview(null),
+                "aria-label": "Close modal"
               },
               "✕"
             )
           ),
           h(
             "div",
-            { className: "journey-modal-content" },
-            previewModal.type === "img" &&
-              h("div", { className: "modal-img-wrap" },
+            { className: "modal-body" },
+            modalPreview.type === "img" &&
+              h("div", { className: "modal-img-container" },
                 h("img", {
-                  src: previewModal.src,
-                  alt: previewModal.title,
-                  className: "modal-hero-img"
+                  src: modalPreview.src,
+                  alt: modalPreview.title,
+                  className: "modal-view-img"
                 })
               ),
-            previewModal.caption &&
-              h("p", { className: "modal-caption" }, previewModal.caption)
+            modalPreview.caption &&
+              h("p", { className: "modal-caption" }, modalPreview.caption)
           ),
           h(
             "div",
-            { className: "journey-modal-footer" },
-            previewModal.src &&
+            { className: "modal-footer" },
+            modalPreview.src &&
               h(
                 "a",
                 {
-                  href: previewModal.src,
+                  href: modalPreview.src,
                   target: "_blank",
                   rel: "noopener noreferrer",
-                  className: "journey-btn-secondary"
+                  className: "story-btn-secondary"
                 },
                 "Open Original File in New Tab ↗"
               ),
@@ -1858,8 +1745,8 @@ export function FlyRankJourneyView({ onBackHome, initialSection, onSelectCertMod
               "button",
               {
                 type: "button",
-                className: "journey-btn-primary",
-                onClick: () => setPreviewModal(null)
+                className: "story-btn-primary",
+                onClick: () => setModalPreview(null)
               },
               "Close"
             )

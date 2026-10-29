@@ -268,7 +268,7 @@ export const JOURNEY_LEADERBOARD = {
   movementLabel: "weekly baseline",
   nextMilestone: "2 pts to #22",
   leaderboardUrl: "https://internship.flyrank.ai/intern/leaderboard?scope=country&view=bangladesh",
-  verifiedBadge: "✓ Verified · D11 Certificate of Completion · Machine Learning · Issued October 16, 2026"
+  verifiedBadge: "✓ Verified · D11 Certificate of Completion · Machine Learning · Issued 31 October 2026"
 };
 
 // Exact 12-page illustrative ranking dataset from journey.html
@@ -651,7 +651,7 @@ export const VERIFIED_CERTIFICATIONS = [
     statusType: "verified",
     certificateImage: "assets/images/FlyRank_ML_Certificate_of_Completion.png",
     verifyUrl: "https://internship.flyrank.ai/verify/FR-D11-9E3D0-1FE2A?first_name=Md.",
-    description: "Certificate of Completion — Md. Fardin Hossain — Machine Learning Internship Program at FlyRank.ai from 01.07.2026. to 16.10.2026."
+    description: "Certificate of Completion — Md. Fardin Hossain — Machine Learning Internship Program at FlyRank.ai, July 1 – October 31, 2026."
   },
   {
     id: "datacamp-ai",
