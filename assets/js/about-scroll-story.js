@@ -1,29 +1,20 @@
 // ==========================================================================
 // FARDIN.AI — REDESIGNED ABOUT SECTION (#about)
 // Exactly matching the reference designs:
-// (media_1793296974908_45fbacfd.png, media_1793296978543_ad7d6824.png,
-//  media_1793296982203_baa85d4e.png, media_1793296984830_93437709.png)
+// (media_1793299782076_ed2d3379.png & media_1793299782087_64043c6d.jpg)
 //
-// 1. Full mountain background across the WHOLE about section:
-//    - Topographic mountain with orange contour lines, sun arc, and summit flag
-//    - Seamless dark vignette overlay allowing text to remain 100% readable
-// 2. Title: "About Me" (Me in coral orange #FF6E4A)
-// 3. Slogan: "“ I turn complex problems into practical digital experiences.”"
-//    (both "complex problems" and "digital experiences" highlighted in coral orange #FF6E4A)
-// 4. Two-Column Layout:
-//    - Left: Sticky Chapter Tracker (01 Who I Am, 02 What I Build, 03 Why Me, 04 How I Work)
-//      with glowing orange double-ring indicator & smooth scroll
-//    - Right: 4 Chapters with exact reference components:
-//      - Chapter 01 (Who I Am): Lead + body text, 4 pills (CSE Student,
-//        highlighted Full-Stack Developer, Problem Solver, Lifelong Learner),
-//        and the mountain peak with hovering robot mascot.
-//      - Chapter 02 (What I Build): Lead text + 4 distinct colored cards
-//        (Frontend [blue], Backend [green], Database [purple], Full-Stack Apps [orange])
-//      - Chapter 03 (Why Me): Lead text + 4 visual feature badges in a row
-//        (Problem Solving [amber], Clean Code [green], Thoughtful Architecture [purple],
-//        Continuous Learning [coral])
-//      - Chapter 04 (How I Work): 5-step connected workflow sequence with
-//        orange circular icon nodes & dashed arrow connectors (----->)
+// 1. Visible Mountain Background Artwork across the whole About section:
+//    - Real topographic mountain wallpaper with orange contour lines,
+//      summit path, red flag, cosmic sun arc, and dark sky
+//    - Sticky viewport layer so the mountain never zooms off-screen
+//    - Contrast gradient preserving 100% text readability
+// 2. Interactive Scroll-to-Appear for Each Chapter:
+//    - Real-time focal scroll-spy for accurate active chapter tracking
+//    - Smooth entrance transitions as each chapter scrolls into view
+//    - Staggered animations for capabilities, feature badges, and workflow steps
+// 3. Mobile Navigation & Responsiveness:
+//    - Horizontal progress rail: [01] ━━━━ 02 ━━━━ 03 ━━━━ 04 with active label
+//    - Tap any chapter to smoothly glide directly to it
 // ==========================================================================
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
@@ -92,12 +83,11 @@ export function ScrollWordReveal({
             className: "word-reveal-token",
             "aria-hidden": "true",
             style: {
-              transitionDelay: isRevealed ? `${delay + idx * 22}ms` : "0ms"
+              transitionDelay: isRevealed ? `${delay + idx * 20}ms` : "0ms"
             }
           },
           word
         ),
-        // Explicit whitespace text node between adjacent inline tokens
         idx < words.length - 1 ? " " : null
       )
     )
@@ -158,6 +148,7 @@ const CHAPTER_CONFIG = [
 // --------------------------------------------------------------------------
 export function AboutScrollStory() {
   const [activeChapter, setActiveChapter] = useState(0);
+  const [revealedSet, setRevealedSet] = useState(() => new Set([0]));
   const sectionRef = useRef(null);
   const chapterRefs = useRef([]);
 
@@ -167,39 +158,73 @@ export function AboutScrollStory() {
     }
   }, []);
 
-  // Track active chapter as user scrolls naturally
+  // Precise focal-center scroll calculation to track active chapter and reveal parts
   useEffect(() => {
-    const els = chapterRefs.current.filter(Boolean);
-    if (!els.length) return;
+    let ticking = false;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const idx = els.indexOf(entry.target);
-            if (idx !== -1) {
-              setActiveChapter(idx);
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        ticking = false;
+        const els = chapterRefs.current.filter(Boolean);
+        if (!els.length) return;
+
+        const viewportHeight = window.innerHeight;
+        const focalCenter = viewportHeight * 0.42;
+
+        let closestIdx = 0;
+        let minDistance = Infinity;
+
+        els.forEach((el, idx) => {
+          const rect = el.getBoundingClientRect();
+          // Distance from chapter center to focal center
+          const chapterCenter = rect.top + rect.height * 0.35;
+          const dist = Math.abs(chapterCenter - focalCenter);
+
+          // If chapter is within comfortable viewport visibility
+          if (rect.top <= viewportHeight * 0.75 && rect.bottom >= viewportHeight * 0.15) {
+            if (dist < minDistance) {
+              minDistance = dist;
+              closestIdx = idx;
             }
           }
-        });
-      },
-      {
-        threshold: 0.15,
-        rootMargin: "-10% 0px -40% 0px"
-      }
-    );
 
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+          // Mark as revealed when scrolled into view
+          if (rect.top < viewportHeight * 0.85) {
+            setRevealedSet((prev) => {
+              if (prev.has(idx)) return prev;
+              const next = new Set(prev);
+              next.add(idx);
+              return next;
+            });
+          }
+        });
+
+        setActiveChapter((prev) => (prev !== closestIdx ? closestIdx : prev));
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // Run once on mount to establish initial active chapter
+    onScroll();
+
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Smooth scroll to selected chapter
   const scrollToChapter = (idx) => {
     const targetEl = chapterRefs.current[idx];
     if (targetEl) {
+      const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+      const offset = isMobile ? -100 : -80;
+
       if (window.__lenis) {
-        window.__lenis.scrollTo(targetEl, { duration: 1.15, offset: -85 });
+        window.__lenis.scrollTo(targetEl, { duration: 1.0, offset });
       } else {
-        targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        const top = targetEl.getBoundingClientRect().top + window.scrollY + offset;
+        window.scrollTo({ top, behavior: "smooth" });
       }
       setActiveChapter(idx);
     }
@@ -214,16 +239,20 @@ export function AboutScrollStory() {
       "aria-label": "About Md. Fardin Hossain — Background & Engineering Philosophy"
     },
 
-    // 1. FULL-SECTION MOUNTAIN BACKGROUND ARTWORK LAYER
+    // 1. FULL-SECTION VISIBLE MOUNTAIN BACKGROUND ARTWORK LAYER
     h(
       "div",
       { className: "about-full-mountain-bg", "aria-hidden": "true" },
-      h("img", {
-        src: "/assets/images/about-mountain-bg.png",
-        alt: "",
-        className: "about-full-mountain-img"
-      }),
-      h("div", { className: "about-full-mountain-gradient-overlay" })
+      h(
+        "div",
+        { className: "about-full-mountain-sticky-layer" },
+        h("img", {
+          src: "/assets/images/about-mountain-bg.png",
+          alt: "Topographic mountain landscape with glowing orange contour lines, sun arc, and summit flag",
+          className: "about-full-mountain-img"
+        }),
+        h("div", { className: "about-full-mountain-gradient-overlay" })
+      )
     ),
 
     // Content Wrapper (Z-index 2 above background layer)
@@ -274,17 +303,23 @@ export function AboutScrollStory() {
         "div",
         { className: "about-nav-and-content-layout" },
 
-        // LEFT: Vertical Sticky Progress Tracker (matches Image 2, 3, 4)
+        // LEFT: Vertical Sticky Progress Tracker (Desktop) / Horizontal Progress Rail (Mobile)
         h(
           "aside",
           { className: "about-nav-sidebar", "aria-label": "About Chapter Navigation" },
           h(
             "div",
             { className: "about-sticky-sidebar-inner" },
+            // Mobile active chapter title label (matches crop_mobile_reference.png)
+            h(
+              "div",
+              { className: "mobile-active-chapter-pill-label", "aria-hidden": "true" },
+              CHAPTER_CONFIG[activeChapter]?.label || "Who I Am"
+            ),
             h(
               "div",
               { className: "about-chapter-tracker-nav" },
-              // Vertical connecting rail
+              // Vertical connecting rail for desktop
               h(
                 "div",
                 { className: "tracker-track-rail", "aria-hidden": "true" },
@@ -295,6 +330,8 @@ export function AboutScrollStory() {
                   }
                 })
               ),
+              // Mobile connecting line behind numbers
+              h("div", { className: "mobile-tracker-line", "aria-hidden": "true" }),
               // Chapter Selection Buttons
               CHAPTER_CONFIG.map((chap, idx) =>
                 h(
@@ -326,14 +363,14 @@ export function AboutScrollStory() {
           { className: "about-topics-stream" },
 
           // ====================================================================
-          // CHAPTER 01 — WHO I AM (Matches Image 2)
+          // CHAPTER 01 — WHO I AM (Matches Image 2 & Mobile Mockup)
           // ====================================================================
           h(
             "article",
             {
               id: "who-i-am",
               ref: (el) => setChapterRef(el, 0),
-              className: "about-chapter-section chapter-who",
+              className: `about-chapter-section chapter-who ${activeChapter === 0 ? "is-focused" : "is-unfocused"} ${revealedSet.has(0) ? "is-revealed" : ""}`,
               "aria-label": "Chapter 01: Who I Am"
             },
             h(
@@ -374,16 +411,10 @@ export function AboutScrollStory() {
                     h("span", { className: "who-pill-chip" }, "📈 Lifelong Learner")
                   )
                 ),
-                // Right mountain summit card with hovering robot mascot
+                // Right summit stage with hovering robot mascot over the mountain peak
                 h(
                   "div",
-                  { className: "chapter-summit-card" },
-                  h("img", {
-                    src: "/assets/images/about-mountain-bg.png",
-                    alt: "Topographic mountain peak with orange glowing contour lines, sun arc, and flag",
-                    className: "summit-card-bg-img",
-                    loading: "lazy"
-                  }),
+                  { className: "chapter-summit-stage", "aria-hidden": "true" },
                   h(AboutSummitRobot, null)
                 )
               )
@@ -398,7 +429,7 @@ export function AboutScrollStory() {
             {
               id: "what-i-build",
               ref: (el) => setChapterRef(el, 1),
-              className: "about-chapter-section chapter-build",
+              className: `about-chapter-section chapter-build ${activeChapter === 1 ? "is-focused" : "is-unfocused"} ${revealedSet.has(1) ? "is-revealed" : ""}`,
               "aria-label": "Chapter 02: What I Build"
             },
             h(
@@ -423,7 +454,7 @@ export function AboutScrollStory() {
                 // 1. Frontend (Blue)
                 h(
                   "div",
-                  { className: "capability-card-cell card-theme-blue" },
+                  { className: "capability-card-cell card-theme-blue", style: { transitionDelay: "60ms" } },
                   h(
                     "div",
                     { className: "cell-icon-box box-blue" },
@@ -441,7 +472,7 @@ export function AboutScrollStory() {
                 // 2. Backend (Green)
                 h(
                   "div",
-                  { className: "capability-card-cell card-theme-green" },
+                  { className: "capability-card-cell card-theme-green", style: { transitionDelay: "140ms" } },
                   h(
                     "div",
                     { className: "cell-icon-box box-green" },
@@ -458,7 +489,7 @@ export function AboutScrollStory() {
                 // 3. Database (Purple)
                 h(
                   "div",
-                  { className: "capability-card-cell card-theme-purple" },
+                  { className: "capability-card-cell card-theme-purple", style: { transitionDelay: "220ms" } },
                   h(
                     "div",
                     { className: "cell-icon-box box-purple" },
@@ -476,7 +507,7 @@ export function AboutScrollStory() {
                 // 4. Full-Stack Apps (Orange)
                 h(
                   "div",
-                  { className: "capability-card-cell card-theme-orange" },
+                  { className: "capability-card-cell card-theme-orange", style: { transitionDelay: "300ms" } },
                   h(
                     "div",
                     { className: "cell-icon-box box-orange" },
@@ -501,7 +532,7 @@ export function AboutScrollStory() {
             {
               id: "why-me",
               ref: (el) => setChapterRef(el, 2),
-              className: "about-chapter-section chapter-why",
+              className: `about-chapter-section chapter-why ${activeChapter === 2 ? "is-focused" : "is-unfocused"} ${revealedSet.has(2) ? "is-revealed" : ""}`,
               "aria-label": "Chapter 03: Why Me"
             },
             h(
@@ -526,7 +557,7 @@ export function AboutScrollStory() {
                 // 1. Problem Solving (Amber)
                 h(
                   "div",
-                  { className: "why-feature-badge badge-amber" },
+                  { className: "why-feature-badge badge-amber", style: { transitionDelay: "60ms" } },
                   h(
                     "div",
                     { className: "badge-icon" },
@@ -543,7 +574,7 @@ export function AboutScrollStory() {
                 // 2. Clean Code (Green)
                 h(
                   "div",
-                  { className: "why-feature-badge badge-green" },
+                  { className: "why-feature-badge badge-green", style: { transitionDelay: "140ms" } },
                   h(
                     "div",
                     { className: "badge-icon" },
@@ -559,7 +590,7 @@ export function AboutScrollStory() {
                 // 3. Thoughtful Architecture (Purple)
                 h(
                   "div",
-                  { className: "why-feature-badge badge-purple" },
+                  { className: "why-feature-badge badge-purple", style: { transitionDelay: "220ms" } },
                   h(
                     "div",
                     { className: "badge-icon" },
@@ -576,7 +607,7 @@ export function AboutScrollStory() {
                 // 4. Continuous Learning (Coral)
                 h(
                   "div",
-                  { className: "why-feature-badge badge-coral" },
+                  { className: "why-feature-badge badge-coral", style: { transitionDelay: "300ms" } },
                   h(
                     "div",
                     { className: "badge-icon" },
@@ -601,7 +632,7 @@ export function AboutScrollStory() {
             {
               id: "how-i-work",
               ref: (el) => setChapterRef(el, 3),
-              className: "about-chapter-section chapter-work",
+              className: `about-chapter-section chapter-work ${activeChapter === 3 ? "is-focused" : "is-unfocused"} ${revealedSet.has(3) ? "is-revealed" : ""}`,
               "aria-label": "Chapter 04: How I Work"
             },
             h(
@@ -621,7 +652,7 @@ export function AboutScrollStory() {
                 // Step 1: Understand
                 h(
                   "div",
-                  { className: "work-step-node" },
+                  { className: "work-step-node", style: { transitionDelay: "60ms" } },
                   h(
                     "div",
                     { className: "step-node-icon-circle" },
@@ -651,7 +682,7 @@ export function AboutScrollStory() {
                 // Step 2: Plan
                 h(
                   "div",
-                  { className: "work-step-node" },
+                  { className: "work-step-node", style: { transitionDelay: "140ms" } },
                   h(
                     "div",
                     { className: "step-node-icon-circle" },
@@ -682,7 +713,7 @@ export function AboutScrollStory() {
                 // Step 3: Build
                 h(
                   "div",
-                  { className: "work-step-node" },
+                  { className: "work-step-node", style: { transitionDelay: "220ms" } },
                   h(
                     "div",
                     { className: "step-node-icon-circle" },
@@ -712,7 +743,7 @@ export function AboutScrollStory() {
                 // Step 4: Test
                 h(
                   "div",
-                  { className: "work-step-node" },
+                  { className: "work-step-node", style: { transitionDelay: "300ms" } },
                   h(
                     "div",
                     { className: "step-node-icon-circle" },
@@ -741,7 +772,7 @@ export function AboutScrollStory() {
                 // Step 5: Improve
                 h(
                   "div",
-                  { className: "work-step-node" },
+                  { className: "work-step-node", style: { transitionDelay: "380ms" } },
                   h(
                     "div",
                     { className: "step-node-icon-circle" },

@@ -829,25 +829,26 @@ function PortfolioApp() {
               resumeUrl: PROFILE_DATA.resumeUrl
             }),
 
-            h(
-              "div",
-              { className: "page-shell" },
-
-                          // ================================================================
+            // ================================================================
             // 2. ABOUT ME & INTERACTIVE SCROLL STORY (#about)
             // Placed directly after Hero (Home -> About -> Experience -> Projects -> Certifications -> Contact)
+            // Full-width edge-to-edge section (100vw) with mountain wallpaper across entire section
             // 4 Chapters: Identity, Capabilities, Value, Delivery Roadmap
             // Guided by Bot F-01 Interactive Companion
             // ================================================================
             h(AboutScrollStory, null),
 
-// ================================================================
-            // 3. EXPERIENCE SECTION (#experience)
-            // Robot-Guided FlyRank AI Vertical Career Timeline
-            // ================================================================
-            h(ExperienceTimelineSection, {
-              onExploreInternship: () => openJourneyExperience()
-            }),
+            h(
+              "div",
+              { className: "page-shell" },
+
+              // ================================================================
+              // 3. EXPERIENCE SECTION (#experience)
+              // Robot-Guided FlyRank AI Vertical Career Timeline
+              // ================================================================
+              h(ExperienceTimelineSection, {
+                onExploreInternship: () => openJourneyExperience()
+              }),
 
             // ================================================================
             // 4. FEATURED PROJECTS SECTION (#projects)
