@@ -231,9 +231,6 @@ export function CinematicHeroSection() {
           "aria-hidden": "true"
         }),
 
-        // Flying Robot Mascot Orbiting Aura
-        h(HeroAuraFlyingRobot, null),
-
         // Real Portrait
         h(
           "div",
@@ -249,7 +246,10 @@ export function CinematicHeroSection() {
             decoding: "async",
             draggable: false
           })
-        )
+        ),
+
+        // Flying Robot Mascot Orbiting Aura in Front of Portrait
+        h(HeroAuraFlyingRobot, null)
       )
     )
   );
